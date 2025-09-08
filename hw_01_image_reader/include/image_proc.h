@@ -28,6 +28,9 @@ public:
 	const int& get_height() const { return _height; }
 	const int& get_channels() const { return _channels; }
 
+	// TO DO -> Deep copy methods. Also deep copy assignment 
+	ImageProc(const ImageProc& other);
+	ImageProc& operator=(const ImageProc& other);
 
 
 private:
