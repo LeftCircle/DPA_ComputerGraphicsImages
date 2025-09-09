@@ -6,6 +6,8 @@
 #include <vector>
 #include <stdexcept>
 
+#include <OpenImageIO/imageio.h>
+
 class ImageProc {
 public:
 	ImageProc();
@@ -20,6 +22,7 @@ public:
 	void get_pixel_values(int x, int y, std::vector<float>& values) const;
 
 	void set_pixel_values(int x, int y, const std::vector<float>& values);
+	void set_pixel_values(const std::vector<float>& values);
 
 	long get_index(int x, int y, int channel) const;
 	long get_index(int x, int y) const;
@@ -27,6 +30,9 @@ public:
 	const int& get_width() const { return _width; }
 	const int& get_height() const { return _height; }
 	const int& get_channels() const { return _channels; }
+
+	void oiio_read(const char* filename);
+	void oiio_write(const char* filename) const;
 
 	// TO DO -> Deep copy methods. Also deep copy assignment 
 	ImageProc(const ImageProc& other);

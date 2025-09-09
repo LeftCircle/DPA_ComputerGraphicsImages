@@ -1,5 +1,7 @@
 #include "image_proc.h"
 
+using namespace OIIO;
+
 ImageProc::ImageProc()
 	: _width(0), _height(0), _channels(0), _image_data_ptr(nullptr) {}
 
@@ -40,4 +42,37 @@ void ImageProc::set_pixel_values(int x, int y, const std::vector<float>& values)
 	for (int c = 0; c < _channels; ++c) {
 		_image_data_ptr[index + c] = values[c];
 	}
+}
+
+void ImageProc::set_pixel_values(const std::vector<float>& values) {
+	if (values.size() != static_cast<size_t>(get_data_len())) {
+		throw std::out_of_range("Invalid values size");
+	}
+	#pragma omp parallel for
+	for (int i = 0; i < get_data_len(); ++i) {
+		_image_data_ptr[i] = values[i];
+	}
+}
+
+/* from https://openimageio.readthedocs.io/en/latest/imageinput.html*/
+void ImageProc::oiio_read(const char* filename) {
+	 auto inp = ImageInput::open(filename);
+    if (!inp)
+        return;
+    const ImageSpec& spec = inp->spec();
+    int xres              = spec.width;
+    int yres              = spec.height;
+    int nchannels         = spec.nchannels;
+    std::vector<float> pixels(xres * yres * nchannels);
+    inp->read_image(0 /*subimage*/, 0 /*miplevel*/, 0 /*chbegin*/,
+                    nchannels /*chend*/, make_span(pixels));
+    inp->close();
+
+	set_dimensions(xres, yres, nchannels);
+	set_pixel_values(pixels);
+
+}
+
+void ImageProc::oiio_write(const char* filename) const {
+	
 }
