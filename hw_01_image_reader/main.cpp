@@ -22,19 +22,16 @@ int main(int argc, char** argv)
 		std::cerr << "No image file provided. Use -image <file_name>" << std::endl;
 		return 1;
 	}
-
-	View* view = View::Instance();
-	Controller* controller = Controller::instance();
-	
 	
 	ImageProc img;
+	View* view = View::instance();
+	Controller* controller = Controller::instance();
+	controller->set_image_proc(&img);
+
 	img.oiio_read(file_name.c_str());
 	
 	view->init(argc, argv, img.get_width(), img.get_height());
-	view->set_pixels(img.get_pixel_ptr());
-	
-	std::cout << "View reshaped to " << img.get_width() << "x" << img.get_height() << std::endl;
-	
+	view->set_pixels(img.get_pixel_ptr());	
 
 	view->main_loop();
 	return 0;

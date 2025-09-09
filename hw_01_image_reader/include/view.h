@@ -8,7 +8,7 @@ class View
 {
   public:
 
-    static View* Instance()
+    static View* instance()
     {
        if(pView==nullptr)
        {
@@ -36,7 +36,6 @@ private:
     
     float* pixels;
     int width, height;
-    float camera_aspect;
 };
 
 View* create_view();

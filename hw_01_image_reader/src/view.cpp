@@ -7,7 +7,6 @@ View::View() {
 	pixels = nullptr;
 	width = 0;
 	height = 0;
-	camera_aspect = 1.0f;
 }
 
 
@@ -23,7 +22,6 @@ void View::init( int argc, char** argv, int _width, int _height)
 {
 	width = _width;
 	height = _height;
-	camera_aspect = (float)width/(float)height;
 
 	glutInit( &argc, argv );
 	glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH );
@@ -34,9 +32,9 @@ void View::init( int argc, char** argv, int _width, int _height)
 	glEnable( GL_DEPTH_TEST );
 
 	glutKeyboardFunc([](unsigned char key, int x, int y) { Controller::instance()->keyboard(key, x, y); });
-	glutDisplayFunc( [](void){ View::Instance() -> display(); } );
-	glutReshapeFunc( [](int w, int h){ View::Instance() -> reshape(w,h); } );
-	glutIdleFunc( [](){ View::Instance() -> idle(); } );
+	glutDisplayFunc( [](void){ View::instance() -> display(); } );
+	glutReshapeFunc( [](int w, int h){ View::instance() -> reshape(w,h); } );
+	glutIdleFunc( [](){ View::instance() -> idle(); } );
 }
 
 void View::display()
@@ -60,7 +58,6 @@ void View::reshape( int w, int h )
 {
 	width = w;
 	height = h;
-	camera_aspect = (float)width/(float)height;
 
 	glViewport( 0, 0, (GLsizei) width, (GLsizei) height );
 	glMatrixMode( GL_PROJECTION );
@@ -75,5 +72,5 @@ void View::main_loop()
 
 View* create_view()
 {
-	return View::Instance();
+	return View::instance();
 }

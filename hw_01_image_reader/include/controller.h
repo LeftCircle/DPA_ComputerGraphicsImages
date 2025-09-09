@@ -5,35 +5,41 @@
 #include <iostream>
 #include <GL/glut.h>
 
+#include "image_proc.h"
+
 // A singleton controller class that will be used to drive GLUT inputs
 class Controller
 {
-  public:
+public:
 
-    static Controller* instance()
-    {
-       if(pController==nullptr)
-       {
-          pController = new Controller();
-       }
-       return pController;
-    }
+	static Controller* instance()
+	{
+	if(pController==nullptr)
+	{
+		pController = new Controller();
+	}
+	return pController;
+	}
 
-    ~Controller();
+	~Controller();
 
-    void keyboard( unsigned char key, int x, int y );
+	void keyboard( unsigned char key, int x, int y );
 
-  private:
+	void set_image_proc(ImageProc* img_proc) { _image_proc = img_proc; }
 
-    static Controller* pController;
+private:
 
-    Controller();
-    Controller( const Controller& );
-    Controller& operator= (const Controller&);
+	ImageProc* _image_proc;
+
+	static Controller* pController;
+
+	Controller();
+	Controller( const Controller& );
+	Controller& operator= (const Controller& );
 
 };
 
 
-Controller* create_controller();
+Controller* create_controller(ImageProc& img_proc);
 
 #endif
