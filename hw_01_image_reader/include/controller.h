@@ -21,8 +21,6 @@ class Controller
 
     ~Controller();
 
-    void init();
-
     void keyboard( unsigned char key, int x, int y );
 
   private:
@@ -35,5 +33,7 @@ class Controller
 
 };
 
+
+Controller* create_controller();
 
 #endif

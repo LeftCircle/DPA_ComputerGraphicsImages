@@ -1,13 +1,28 @@
 #include "view.h"
 
-
 View* View::pView = nullptr;
 
 
-void View::init( int argc, char** argv )
+View::View() {
+	pixels = nullptr;
+	width = 0;
+	height = 0;
+	camera_aspect = 1.0f;
+}
+
+
+View::~View() {
+	// Cleanup if needed
+	if (pixels) {
+		delete[] pixels;
+		pixels = nullptr;
+	}
+}
+
+void View::init( int argc, char** argv, int _width, int _height)
 {
-	width = 1024;
-	height = 768;
+	width = _width;
+	height = _height;
 	camera_aspect = (float)width/(float)height;
 
 	glutInit( &argc, argv );
@@ -18,6 +33,7 @@ void View::init( int argc, char** argv )
 	glClearColor( 0.0, 0.0, 0.0, 1.0 );
 	glEnable( GL_DEPTH_TEST );
 
+	glutKeyboardFunc([](unsigned char key, int x, int y) { Controller::instance()->keyboard(key, x, y); });
 	glutDisplayFunc( [](void){ View::Instance() -> display(); } );
 	glutReshapeFunc( [](int w, int h){ View::Instance() -> reshape(w,h); } );
 	glutIdleFunc( [](){ View::Instance() -> idle(); } );
@@ -29,6 +45,7 @@ void View::display()
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
 
+	glDrawPixels( width, height, GL_RGB, GL_FLOAT, pixels );
 
 	glutSwapBuffers();
 	glutPostRedisplay();
@@ -48,4 +65,15 @@ void View::reshape( int w, int h )
 	glViewport( 0, 0, (GLsizei) width, (GLsizei) height );
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();
+
+}
+
+void View::main_loop()
+{
+	glutMainLoop();
+}
+
+View* create_view()
+{
+	return View::Instance();
 }

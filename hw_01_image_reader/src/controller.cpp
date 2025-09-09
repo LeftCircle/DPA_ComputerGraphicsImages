@@ -3,6 +3,10 @@
 
 Controller* Controller::pController = nullptr;
 
+Controller::Controller() {}
+
+Controller::~Controller() {}
+
 void Controller::keyboard( unsigned char key, int x, int y )
 {
    switch (key)
@@ -15,4 +19,9 @@ void Controller::keyboard( unsigned char key, int x, int y )
          std::cout << "J key pressed\n";
          break;
    }
+}
+
+Controller* create_controller()
+{
+    return Controller::instance();
 }

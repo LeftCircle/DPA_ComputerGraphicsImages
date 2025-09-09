@@ -2,6 +2,7 @@
 #define VIEW_H
 
 #include <GL/glut.h>
+#include "controller.h"
 
 class View
 {
@@ -18,23 +19,26 @@ class View
 
     ~View();
 
-    void init( int argc, char** argv );
+    void init( int argc, char** argv, int _width, int _height);
     void display();
     void reshape( int w, int h );
     void idle();
     void main_loop();
+    void set_pixels( float* p ) { pixels = p; }
     
-  private:
-
+private:
+    
     static View* pView;
-
+    
     View();
     View( const View& );
     View& operator= (const View&);
-
+    
+    float* pixels;
     int width, height;
     float camera_aspect;
 };
 
+View* create_view();
 
 #endif
