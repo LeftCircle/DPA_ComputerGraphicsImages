@@ -19,7 +19,7 @@ public:
 	const std::vector<float> get_pixel_values(int x, int y) const;
 	
 	std::vector<float> get_pixel_values(int x, int y);
-	void get_pixel_values(int x, int y, std::vector<float>& values) const;
+	float* get_pixel_ptr() const { return _image_data_ptr.get(); }
 
 	void set_pixel_values(int x, int y, const std::vector<float>& values);
 	void set_pixel_values(const std::vector<float>& values);
@@ -34,7 +34,6 @@ public:
 	void oiio_read(const char* filename);
 	void oiio_write(const char* filename) const;
 
-	// TO DO -> Deep copy methods. Also deep copy assignment 
 	ImageProc(const ImageProc& other);
 	ImageProc& operator=(const ImageProc& other);
 

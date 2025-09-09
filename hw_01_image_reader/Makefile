@@ -1,8 +1,9 @@
 CC = g++
-CFLAGS = -Wall -Wextra -std=c++17 -Iinclude
-LDFLAGS = -lOpenImageIO
+CFLAGS = -Wall -g -O2 -fPIC -fopenmp -Wextra -std=c++17 -Iinclude -Iinclude/OpenImageIO -Iinclude/OpenEXR -Iinclude/starter_kit
+LDFLAGS = -lOpenImageIO -lOpenImageIO_Util -lGL -lGLU -lglut
 
-SRC = $(wildcard src/*.cpp)
+
+SRC = $(wildcard src/*.cpp) $(wildcard src/starter_kit/*.C)
 MAIN = main.cpp
 OBJDIR = obj
 OBJS = $(patsubst src/%.cpp,$(OBJDIR)/%.o,$(SRC)) $(OBJDIR)/main.o

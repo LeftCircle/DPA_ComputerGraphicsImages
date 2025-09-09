@@ -1,6 +1,8 @@
 #include "tests.h"
 
 
+const char* test_image_path = "/home/leftcircle/programming/clemson/DPA_ComputerGraphicsImages/hw_01_image_reader/images/test_image.jpeg";
+
 void test_command_line_parser(){
     const char* argv[] = {"program", "-flag", "value", "-t"};
     const int argc = 4;
@@ -68,11 +70,47 @@ void test_get_image_index(){
     std::cout << "test_get_image_index passed." << std::endl;
 }
 
+void test_read_image(){
+    // Reads an image file and verifies its dimensions and channels.
+    ImageProc img_proc;
+    const char* filename = "/home/leftcircle/programming/clemson/DPA_ComputerGraphicsImages/hw_01_image_reader/images/test_image.jpeg";
+    img_proc.oiio_read(filename);
+
+    // Assuming we know the expected dimensions and channels of the test image
+    int expected_width = 3296;  // Replace with actual expected width
+    int expected_height = 2472; // Replace with actual expected height
+    int expected_channels = 3; // Replace with actual expected channels
+
+    std::cout << "Read image: " << filename << std::endl;
+    std::cout << "Image dimensions: " << img_proc.get_width() << " x "
+              << img_proc.get_height() << " x " << img_proc.get_channels() << std::endl;
+
+    assert(img_proc.get_width() == expected_width);
+    assert(img_proc.get_height() == expected_height);
+    assert(img_proc.get_channels() == expected_channels);
+
+    std::cout << "test_read_image passed." << std::endl;
+}
+
+void test_write_image(){
+    // Writes an image to a file and incremenets the filename. 
+    ImageProc img_proc;
+    img_proc.oiio_read(test_image_path);
+    const char* out_filename = "output_image.png";
+    img_proc.oiio_write(out_filename);
+
+    // confirm that the file exists:
+    std::ifstream infile(out_filename);
+    assert(infile.good());
+    infile.close();
+}
+
 
 void Tests::run_tests() {
     test_get_image_length();
     test_command_line_parser();
     test_set_and_get_pixel_values();
     test_get_image_index();
+    test_read_image();
     std::cout << "All tests passed!" << std::endl;
 }

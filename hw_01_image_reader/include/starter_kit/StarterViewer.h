@@ -93,6 +93,8 @@ class StarterViewer
     //! Set the camera for 3D viewing.
     void SetCameraEyeViewUp( float eyex, float eyey, float eyez, float viewx, float viewy, float viewz, float upx, float upy, float upz ); 
 
+    float* pixels;
+
   private:
 
     bool initialized;

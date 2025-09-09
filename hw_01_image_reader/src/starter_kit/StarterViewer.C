@@ -75,7 +75,7 @@ StarterViewer* StarterViewer::pStarterViewer = nullptr;
 	
 StarterViewer::StarterViewer() : 
    initialized    ( false ),
-   width          ( 512 ), 
+   width          ( 1024 ), 
    height         ( 512 ),
    display_mode   ( GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH ),
    title          ( string("Starter Viewer") ),
@@ -154,6 +154,9 @@ void StarterViewer::Display()
 
    glEnable(GL_DEPTH_TEST);
    glDepthRange( camera_near, camera_far );
+
+   glDrawPixels( width, height, GL_RGB, GL_FLOAT, &pixels[0] );
+
 }
 
 

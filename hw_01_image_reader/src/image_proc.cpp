@@ -8,6 +8,26 @@ ImageProc::ImageProc()
 ImageProc::~ImageProc() {
 }
 
+// Deep copy constructor and assignement operator
+ImageProc::ImageProc(const ImageProc& other)
+	: _width(other._width), _height(other._height), _channels(other._channels) {
+	int data_len = other.get_data_len();
+	_image_data_ptr = std::make_unique<float[]>(data_len);
+	std::copy(other._image_data_ptr.get(), other._image_data_ptr.get() + data_len, _image_data_ptr.get());
+}
+
+ImageProc& ImageProc::operator=(const ImageProc& other) {
+	if (this != &other) {
+		_width = other._width;
+		_height = other._height;
+		_channels = other._channels;
+		int data_len = other.get_data_len();
+		_image_data_ptr = std::make_unique<float[]>(data_len);
+		std::copy(other._image_data_ptr.get(), other._image_data_ptr.get() + data_len, _image_data_ptr.get());
+	}
+	return *this;
+}
+
 void ImageProc::set_dimensions(int width, int height, int channels) {
 	_width = width;
 	_height = height;
@@ -56,23 +76,38 @@ void ImageProc::set_pixel_values(const std::vector<float>& values) {
 
 /* from https://openimageio.readthedocs.io/en/latest/imageinput.html*/
 void ImageProc::oiio_read(const char* filename) {
-	 auto inp = ImageInput::open(filename);
-    if (!inp)
+	auto inp = ImageInput::open(filename);
+    if (!inp) {
+        std::cerr << "Error opening image file: " << filename << std::endl;
         return;
+    }
     const ImageSpec& spec = inp->spec();
     int xres              = spec.width;
     int yres              = spec.height;
     int nchannels         = spec.nchannels;
     std::vector<float> pixels(xres * yres * nchannels);
-    inp->read_image(0 /*subimage*/, 0 /*miplevel*/, 0 /*chbegin*/,
-                    nchannels /*chend*/, make_span(pixels));
-    inp->close();
+    //inp->read_image(0 /*subimage*/, 0 /*miplevel*/, 0 /*chbegin*/,
+    //                nchannels /*chend*/, make_span(pixels));
+    inp->read_image(0, 0, 0, nchannels, TypeDesc::FLOAT, &pixels[0]);
+	inp->close();
 
 	set_dimensions(xres, yres, nchannels);
+	std::cout << "Image dimensions: " << _width << " x " << _height << " x " << _channels << std::endl;
 	set_pixel_values(pixels);
 
 }
 
 void ImageProc::oiio_write(const char* filename) const {
-	
+	std::unique_ptr<ImageOutput> out = ImageOutput::create(filename);
+	if (!out) {
+		std::cerr << "Error creating image file: " << filename << std::endl;
+		return;
+	}
+	ImageSpec spec(_width, _height, _channels, TypeDesc::FLOAT);
+	if (!out->open(filename, spec)) {
+		std::cerr << "Error opening image file for writing: " << filename << std::endl;
+		return;
+	}
+	out->write_image(TypeDesc::FLOAT, _image_data_ptr.get());
+	out->close();
 }
