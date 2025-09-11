@@ -11,23 +11,6 @@ void test_command_line_parser(){
     assert(parser.has_flag("-t"));
 }
 
-void test_set_and_get_pixel_values() {
-    // Sets and gets pixel values at specific coordinates.
-
-    int width = 4;
-    int height = 4;
-    int channels = 3;
-    ImageProc img_proc;
-    img_proc.set_dimensions(width, height, channels);
-
-    std::vector<float> expected_values = {0.1f, 0.2f, 0.3f};
-    std::vector<float> actual_values(channels, 0.0f);
-    //img_proc.set_pixel_values(1, 1, expected_values);
-    //img_proc.get_pixel_values(1, 1, actual_values);
-    //assert(actual_values == expected_values);
-    std::cout << "test_set_and_get_pixel_values passed." << std::endl;
-}
-
 
 void test_get_image_length() {
     // Returns the lenght of the data array based on the width, height, and channels.
@@ -149,8 +132,10 @@ void test_get_file_name(){
 void Tests::run_tests() {
     test_get_image_length();
     test_command_line_parser();
-    test_set_and_get_pixel_values();
     test_get_image_index();
     test_read_image();
+    test_get_file_name();
+    test_get_file_type();
+    test_write_image();
     std::cout << "All tests passed!" << std::endl;
 }
