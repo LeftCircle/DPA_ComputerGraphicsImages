@@ -9,17 +9,16 @@ Controller::~Controller() {}
 
 void Controller::keyboard( unsigned char key, int x, int y )
 {
-switch (key)
-{
-	case 27: // esc
-		exit(0);
-		break;
-	case 'j':
-		std::cout << "Key j pressed" << std::endl;
-		_image_proc->oiio_write("output_image.jpeg");
-		std::cout << "Image written to output_image.jpeg" << std::endl;
-		break;
-}
+	switch (key)
+	{
+		case 27: // esc
+			exit(0);
+			break;
+		case 'j':
+			std::cout << "Key j pressed" << std::endl;
+			_image_proc->oiio_write();
+			break;
+	}
 }
 
 Controller* create_controller()

@@ -81,6 +81,8 @@ void ImageProc::oiio_read(const char* filename) {
         std::cerr << "Error opening image file: " << filename << std::endl;
         return;
     }
+	_file_name = StringFuncs::get_file_name(std::string(filename));
+	_file_type = StringFuncs::get_file_type(std::string(filename));
     const ImageSpec& spec = inp->spec();
     int xres              = spec.width;
     int yres              = spec.height;
@@ -98,7 +100,7 @@ void ImageProc::oiio_read(const char* filename) {
 
 }
 
-void ImageProc::oiio_write(const char* filename) {
+void ImageProc::oiio_write() {
 	if (!_image_data_ptr) {
 		std::cerr << "No image data to write." << std::endl;
 		return;
@@ -107,6 +109,7 @@ void ImageProc::oiio_write(const char* filename) {
 	if (to_flip){
 		_vertical_flip();
 	}
+	std::string filename = get_output_file_name();
 	std::unique_ptr<ImageOutput> out = ImageOutput::create(filename);
 	if (!out) {
 		std::cerr << "Error creating image file: " << filename << std::endl;

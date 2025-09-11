@@ -96,14 +96,54 @@ void test_write_image(){
     // Writes an image to a file and incremenets the filename. 
     ImageProc img_proc;
     img_proc.oiio_read(test_image_path);
-    const char* out_filename = "output_image.png";
-    img_proc.oiio_write(out_filename);
+    std::string out_file = img_proc.get_output_file_name();
+    img_proc.oiio_write();
 
     // confirm that the file exists:
-    std::ifstream infile(out_filename);
+    std::ifstream infile(out_file);
     assert(infile.good());
     infile.close();
 }
+
+void test_get_file_type(){
+    const char* filename = "image.jpeg";
+    const char* filename2 = "image.png";
+    const char* filename3 = "image.tiff";
+
+    std::string expected_type1 = "jpeg";
+    std::string expected_type2 = "png";
+    std::string expected_type3 = "tiff";
+
+    std::string actual_type1 = StringFuncs::get_file_type(filename);
+    std::string actual_type2 = StringFuncs::get_file_type(filename2);
+    std::string actual_type3 = StringFuncs::get_file_type(filename3);
+
+    assert(actual_type1 == expected_type1);
+    assert(actual_type2 == expected_type2);
+    assert(actual_type3 == expected_type3);
+    std::cout << "test_get_file_type passed." << std::endl;
+}
+
+void test_get_file_name(){
+    const char* filepath = "/path/to/image.jpeg";
+    const char* filepath2 = "image.png";
+    const char* filepath3 = "/another/path/image.tiff";
+
+    std::string expected_name1 = "image";
+    std::string expected_name2 = "image";
+    std::string expected_name3 = "image";
+
+    std::string actual_name1 = StringFuncs::get_file_name(filepath);
+    std::string actual_name2 = StringFuncs::get_file_name(filepath2);
+    std::string actual_name3 = StringFuncs::get_file_name(filepath3);
+
+    assert(actual_name1 == expected_name1);
+    assert(actual_name2 == expected_name2);
+    assert(actual_name3 == expected_name3);
+    std::cout << "test_get_file_name passed." << std::endl;
+}
+
+
 
 
 void Tests::run_tests() {

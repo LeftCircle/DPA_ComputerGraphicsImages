@@ -5,8 +5,10 @@
 #include <memory>
 #include <vector>
 #include <stdexcept>
-
 #include <OpenImageIO/imageio.h>
+
+#include "string_funcs.h"
+
 
 class ImageProc {
 public:
@@ -32,19 +34,22 @@ public:
 	const int& get_channels() const { return _channels; }
 
 	void oiio_read(const char* filename);
-	void oiio_write(const char* filename);
+	void oiio_write();
 
 	void clear();
 
 	ImageProc(const ImageProc& other);
 	ImageProc& operator=(const ImageProc& other);
 
+	std::string get_output_file_name() const { return _file_name + "_out." + _file_type; }
 
 private:
 	int _width;
 	int _height;
 	int _channels;
 	bool _is_flipped = false;
+	std::string _file_type;
+	std::string _file_name;
 
 	std::unique_ptr<float[]> _image_data_ptr;
 

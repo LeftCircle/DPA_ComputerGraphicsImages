@@ -7,6 +7,7 @@
 
 #include "command_line_parser.h"
 #include "image_proc.h"
+#include "string_funcs.h"
 
 class Tests{
 public:
