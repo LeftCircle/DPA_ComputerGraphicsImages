@@ -27,11 +27,11 @@ int main(int argc, char** argv)
 	View* view = View::instance();
 	Controller* controller = Controller::instance();
 	controller->set_image_proc(&img);
+	view->set_image_proc(&img);
 
 	img.oiio_read(file_name.c_str());
 	
 	view->init(argc, argv, img.get_width(), img.get_height());
-	view->set_pixels(img.get_pixel_ptr());	
 
 	view->main_loop();
 	return 0;

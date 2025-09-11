@@ -4,7 +4,6 @@ View* View::pView = nullptr;
 
 
 View::View() {
-	pixels = nullptr;
 	width = 0;
 	height = 0;
 }
@@ -12,10 +11,6 @@ View::View() {
 
 View::~View() {
 	// Cleanup if needed
-	if (pixels) {
-		delete[] pixels;
-		pixels = nullptr;
-	}
 }
 
 void View::init( int argc, char** argv, int _width, int _height)
@@ -43,7 +38,18 @@ void View::display()
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
 
-	glDrawPixels( width, height, GL_RGB, GL_FLOAT, pixels );
+	if (_image_proc->get_channels() == 4){
+		glDrawPixels( width, height, GL_RGBA, GL_FLOAT, _image_proc->get_pixel_ptr() );
+	}
+	else if (_image_proc->get_channels() == 3){
+		glDrawPixels( width, height, GL_RGB, GL_FLOAT, _image_proc->get_pixel_ptr() );
+	}
+	else if (_image_proc->get_channels() == 1){
+		glDrawPixels( width, height, GL_LUMINANCE, GL_FLOAT, _image_proc->get_pixel_ptr() );
+	} else {
+		// Default to RGB if channels are unexpected
+		glDrawPixels( width, height, GL_RGB, GL_FLOAT, _image_proc->get_pixel_ptr() );
+	}
 
 	glutSwapBuffers();
 	glutPostRedisplay();

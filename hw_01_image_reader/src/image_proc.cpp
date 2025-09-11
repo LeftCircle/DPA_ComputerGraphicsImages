@@ -94,10 +94,19 @@ void ImageProc::oiio_read(const char* filename) {
 	set_dimensions(xres, yres, nchannels);
 	std::cout << "Image dimensions: " << _width << " x " << _height << " x " << _channels << std::endl;
 	set_pixel_values(pixels);
+	_vertical_flip(); // Flip the image vertically to match OpenGL's coordinate system
 
 }
 
-void ImageProc::oiio_write(const char* filename) const {
+void ImageProc::oiio_write(const char* filename) {
+	if (!_image_data_ptr) {
+		std::cerr << "No image data to write." << std::endl;
+		return;
+	}
+	bool to_flip = _is_flipped;
+	if (to_flip){
+		_vertical_flip();
+	}
 	std::unique_ptr<ImageOutput> out = ImageOutput::create(filename);
 	if (!out) {
 		std::cerr << "Error creating image file: " << filename << std::endl;
@@ -110,4 +119,33 @@ void ImageProc::oiio_write(const char* filename) const {
 	}
 	out->write_image(TypeDesc::FLOAT, _image_data_ptr.get());
 	out->close();
+	if (to_flip){
+		_vertical_flip();
+	}
+
+}
+
+void ImageProc::clear() {
+	_width = 0;
+	_height = 0;
+	_channels = 0;
+	_image_data_ptr.reset();
+}
+
+void ImageProc::_vertical_flip() {
+	if (!_image_data_ptr) return;
+
+	_is_flipped = !_is_flipped;
+
+	int row_size = _width * _channels;
+	std::vector<float> temp_row(row_size);
+
+	for (int y = 0; y < _height / 2; ++y) {
+		float* top_row    = _image_data_ptr.get() + y * row_size;
+		float* bottom_row = _image_data_ptr.get() + (_height - 1 - y) * row_size;
+
+		std::copy(top_row, top_row + row_size, temp_row.data());
+		std::copy(bottom_row, bottom_row + row_size, top_row);
+		std::copy(temp_row.data(), temp_row.data() + row_size, bottom_row);
+	}
 }
