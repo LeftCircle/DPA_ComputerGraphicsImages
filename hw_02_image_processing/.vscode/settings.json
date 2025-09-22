@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "StarterViewer.C": "cpp",
+        "simple_viewer.C": "cpp",
+        "vector": "cpp"
+    }
+}
