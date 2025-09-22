@@ -7,7 +7,7 @@ Controller::Controller() {}
 
 Controller::~Controller() {}
 
-void Controller::keyboard( unsigned char key, int x, int y )
+void Controller::keyboard( unsigned char key, int, int)
 {
 	switch (key)
 	{

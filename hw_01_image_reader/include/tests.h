@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <filesystem>
 
 #include "command_line_parser.h"
 #include "image_proc.h"

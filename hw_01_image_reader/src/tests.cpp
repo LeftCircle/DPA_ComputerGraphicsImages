@@ -1,7 +1,9 @@
 #include "tests.h"
 
 
-const char* test_image_path = "/home/leftcircle/programming/clemson/DPA_ComputerGraphicsImages/hw_01_image_reader/images/test_image.jpeg";
+const char* test_image_relative_path = "images/test_image.jpeg";
+const std::string test_image_path_str = (std::filesystem::current_path() / test_image_relative_path).string();
+const char* test_image_path = test_image_path_str.c_str();
 
 void test_command_line_parser(){
     const char* argv[] = {"program", "-flag", "value", "-t"};
@@ -56,7 +58,7 @@ void test_get_image_index(){
 void test_read_image(){
     // Reads an image file and verifies its dimensions and channels.
     ImageProc img_proc;
-    const char* filename = "/home/leftcircle/programming/clemson/DPA_ComputerGraphicsImages/hw_01_image_reader/images/test_image.jpeg";
+    const char* filename = test_image_path;
     img_proc.oiio_read(filename);
 
     // Assuming we know the expected dimensions and channels of the test image
