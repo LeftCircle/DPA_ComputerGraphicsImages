@@ -143,6 +143,8 @@ void test_image_editor_initialization(){
 void test_test_image(){
     // The test image is a 10x10 image where the first pixels are
     // (255, 0, 0), (0, 255, 0), (0, 0, 255), (1, 1, 1), (2, 2, 2),
+    ImageProc img_proc;
+    
 }
 
 void test_gamma_filter(){
