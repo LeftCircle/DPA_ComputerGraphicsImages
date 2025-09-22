@@ -13,6 +13,7 @@
 class ImageProc {
 public:
 	ImageProc();
+	ImageProc(const char* filename) { oiio_read(filename); }
 	~ImageProc();
 
 	void set_dimensions(int width, int height, int channels);	

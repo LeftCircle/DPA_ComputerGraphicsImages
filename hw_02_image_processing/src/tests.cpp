@@ -2,6 +2,7 @@
 
 
 const char* test_image_path = "/home/leftcircle/programming/clemson/DPA_ComputerGraphicsImages/hw_01_image_reader/images/test_image.jpeg";
+const char* test_rgb_1_2_image_path = "/home/leftcircle/programming/clemson/DPA_ComputerGraphicsImages/hw_02_image_processing/test_images/rgb_1_2.png";
 
 void test_command_line_parser(){
     const char* argv[] = {"program", "-flag", "value", "-t"};
@@ -126,8 +127,27 @@ void test_get_file_name(){
     std::cout << "test_get_file_name passed." << std::endl;
 }
 
+void test_image_editor_initialization(){
+    ImageProc img_proc;
+    img_proc.oiio_read(test_rgb_1_2_image_path);
+    ImageEditor editor(img_proc);
+
+    // Confirm that the pointers to the image and edited image are not null
+    assert(editor.get_starting_image() != nullptr);
+    assert(editor.get_edited_image() != nullptr);
+
+    std::cout << "test_image_editor_initialization passed." << std::endl;
+
+}
+
+void test_test_image(){
+    // The test image is a 10x10 image where the first pixels are
+    // (255, 0, 0), (0, 255, 0), (0, 0, 255), (1, 1, 1), (2, 2, 2),
+}
+
 void test_gamma_filter(){
-    
+
+
 }
 
 
@@ -139,5 +159,7 @@ void Tests::run_tests() {
     test_get_file_name();
     test_get_file_type();
     test_write_image();
+    test_image_editor_initialization();
+    test_gamma_filter();
     std::cout << "All tests passed!" << std::endl;
 }
