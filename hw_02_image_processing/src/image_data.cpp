@@ -130,18 +130,27 @@ void ImageData::oiio_write() {
 
 std::vector<float> ImageData::get_pixel_values(int x, int y) {
 	std::vector<float> pixel_data(_channels);
+	int start_index = get_index(x, y);
 	for (int c = 0; c < _channels; c++) {
-		pixel_data[c] = _image_data_ptr[get_index(x, y, c)];
+		pixel_data[c] = _image_data_ptr[start_index + c];
 	}
 	return pixel_data;
 }
 
 const std::vector<float> ImageData::get_pixel_values(int x, int y) const {
 	std::vector<float> pixel_data(_channels);
+	int start_index = get_index(x, y);
 	for (int c = 0; c < _channels; c++) {
-		pixel_data[c] = _image_data_ptr[get_index(x, y, c)];
+		pixel_data[c] = _image_data_ptr[start_index + c];
 	}
 	return pixel_data;
+}
+
+void ImageData::get_pixel_values(int x, int y, std::vector<float>& values) const {
+	int start_index = get_index(x, y);
+	for (int c = 0; c < _channels; c++) {
+		values[c] = _image_data_ptr[start_index + c];
+	}
 }
 
 void ImageData::clear() {

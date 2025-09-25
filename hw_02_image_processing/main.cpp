@@ -29,8 +29,6 @@ int main(int argc, char** argv)
 	Controller* controller = Controller::instance();
 	controller->set_image_data(&img);
 	view->set_image_data(controller->get_modified_image_ptr());
-
-	
 	view->init(argc, argv, img.get_width(), img.get_height());
 
 	view->main_loop();
