@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "command_line_parser.h"
-#include "image_proc.h"
+#include "image_data.h"
 #include "tests.h"
 #include "controller.h"
 #include "view.h"
@@ -23,11 +23,11 @@ int main(int argc, char** argv)
 		return 1;
 	}
 	
-	ImageProc img;
+	ImageData img;
 	View* view = View::instance();
 	Controller* controller = Controller::instance();
-	controller->set_image_proc(&img);
-	view->set_image_proc(&img);
+	controller->set_image_data(&img);
+	view->set_image_data(&img);
 
 	img.oiio_read(file_name.c_str());
 	

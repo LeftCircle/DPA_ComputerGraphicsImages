@@ -2,7 +2,7 @@
 
 
 const char* test_image_path = "/home/leftcircle/programming/clemson/DPA_ComputerGraphicsImages/hw_01_image_reader/images/test_image.jpeg";
-const char* test_rgb_1_2_image_path = "/home/leftcircle/programming/clemson/DPA_ComputerGraphicsImages/hw_02_image_processing/test_images/rgb_1_2.png";
+const char* test_rgb_1_2_image_path = "/home/leftcircle/programming/clemson/DPA_ComputerGraphicsImages/hw_02_image_dataessing/test_images/rgb_1_2.png";
 
 void test_command_line_parser(){
     const char* argv[] = {"program", "-flag", "value", "-t"};
@@ -21,9 +21,9 @@ void test_get_image_length() {
     int channels = 3;
     int expected_length = width * height * channels;
 
-    ImageProc img_proc;
-    img_proc.set_dimensions(width, height, channels);
-    int length = img_proc.get_data_len();
+    ImageData image_data;
+    image_data.set_dimensions(width, height, channels);
+    int length = image_data.get_data_len();
     assert(length == expected_length);
     std::cout << "test_get_image_length passed." << std::endl;
 }
@@ -34,8 +34,8 @@ void test_get_image_index(){
     int width = 4;
     int height = 4;
     int channels = 3;
-    ImageProc img_proc;
-    img_proc.set_dimensions(width, height, channels);
+    ImageData image_data;
+    image_data.set_dimensions(width, height, channels);
 
     //expected is channel + n_channels * (x + y * width)
     int x = 2;
@@ -43,12 +43,12 @@ void test_get_image_index(){
     int c = 2;
     int expected_index = c + channels * (x + y * width);
 
-    int index = img_proc.get_index(x, y, c);
+    int index = image_data.get_index(x, y, c);
     assert(index == expected_index);
 
     // Now test non interleaved
     expected_index = channels * (x + y * width);
-    index = img_proc.get_index(x, y);
+    index = image_data.get_index(x, y);
     assert(index == expected_index);
 
     std::cout << "test_get_image_index passed." << std::endl;
@@ -56,9 +56,9 @@ void test_get_image_index(){
 
 void test_read_image(){
     // Reads an image file and verifies its dimensions and channels.
-    ImageProc img_proc;
+    ImageData image_data;
     const char* filename = "/home/leftcircle/programming/clemson/DPA_ComputerGraphicsImages/hw_01_image_reader/images/test_image.jpeg";
-    img_proc.oiio_read(filename);
+    image_data.oiio_read(filename);
 
     // Assuming we know the expected dimensions and channels of the test image
     int expected_width = 3296;  // Replace with actual expected width
@@ -66,22 +66,22 @@ void test_read_image(){
     int expected_channels = 3; // Replace with actual expected channels
 
     std::cout << "Read image: " << filename << std::endl;
-    std::cout << "Image dimensions: " << img_proc.get_width() << " x "
-              << img_proc.get_height() << " x " << img_proc.get_channels() << std::endl;
+    std::cout << "Image dimensions: " << image_data.get_width() << " x "
+              << image_data.get_height() << " x " << image_data.get_channels() << std::endl;
 
-    assert(img_proc.get_width() == expected_width);
-    assert(img_proc.get_height() == expected_height);
-    assert(img_proc.get_channels() == expected_channels);
+    assert(image_data.get_width() == expected_width);
+    assert(image_data.get_height() == expected_height);
+    assert(image_data.get_channels() == expected_channels);
 
     std::cout << "test_read_image passed." << std::endl;
 }
 
 void test_write_image(){
     // Writes an image to a file and incremenets the filename. 
-    ImageProc img_proc;
-    img_proc.oiio_read(test_image_path);
-    std::string out_file = img_proc.get_output_file_name();
-    img_proc.oiio_write();
+    ImageData image_data;
+    image_data.oiio_read(test_image_path);
+    std::string out_file = image_data.get_output_file_name();
+    image_data.oiio_write();
 
     // confirm that the file exists:
     std::ifstream infile(out_file);
@@ -128,9 +128,9 @@ void test_get_file_name(){
 }
 
 void test_image_editor_initialization(){
-    ImageProc img_proc;
-    img_proc.oiio_read(test_rgb_1_2_image_path);
-    ImageEditor editor(img_proc);
+    ImageData image_data;
+    image_data.oiio_read(test_rgb_1_2_image_path);
+    ImageEditor editor(image_data);
 
     // Confirm that the pointers to the image and edited image are not null
     assert(editor.get_starting_image() != nullptr);
@@ -143,18 +143,18 @@ void test_image_editor_initialization(){
 void test_test_image(){
     // The test image is a 10x10 image where the first pixels are
     // (255, 0, 0), (0, 255, 0), (0, 0, 255), (1, 1, 1), (2, 2, 2),
-    ImageProc img_proc;
-    img_proc.oiio_read(test_rgb_1_2_image_path);
+    ImageData image_data;
+    image_data.oiio_read(test_rgb_1_2_image_path);
     std::vector<float> expected_pixel1 = {255.0f, 0.0f, 0.0f};
     std::vector<float> expected_pixel2 = {0.0f, 255.0f, 0.0f};
     std::vector<float> expected_pixel3 = {0.0f, 0.0f, 255.0f};
     std::vector<float> expected_pixel4 = {1.0f, 1.0f, 1.0f};
     std::vector<float> expected_pixel5 = {2.0f, 2.0f, 2.0f};
-    std::vector<float> actual_pixel1 = img_proc.get_pixel_values(0, 0);
-    std::vector<float> actual_pixel2 = img_proc.get_pixel_values(1, 0);
-    std::vector<float> actual_pixel3 = img_proc.get_pixel_values(2, 0);
-    std::vector<float> actual_pixel4 = img_proc.get_pixel_values(3, 0);
-    std::vector<float> actual_pixel5 = img_proc.get_pixel_values(4, 0);
+    std::vector<float> actual_pixel1 = image_data.get_pixel_values(0, 0);
+    std::vector<float> actual_pixel2 = image_data.get_pixel_values(1, 0);
+    std::vector<float> actual_pixel3 = image_data.get_pixel_values(2, 0);
+    std::vector<float> actual_pixel4 = image_data.get_pixel_values(3, 0);
+    std::vector<float> actual_pixel5 = image_data.get_pixel_values(4, 0);
     assert(actual_pixel1 == expected_pixel1);
     assert(actual_pixel2 == expected_pixel2);
     assert(actual_pixel3 == expected_pixel3);

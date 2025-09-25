@@ -1,22 +1,22 @@
-#include "image_proc.h"
+#include "image_data.h"
 
 using namespace OIIO;
 
-ImageProc::ImageProc()
+ImageData::ImageData()
 	: _width(0), _height(0), _channels(0), _image_data_ptr(nullptr) {}
 
-ImageProc::~ImageProc() {
+ImageData::~ImageData() {
 }
 
 // Deep copy constructor and assignement operator
-ImageProc::ImageProc(const ImageProc& other)
+ImageData::ImageData(const ImageData& other)
 	: _width(other._width), _height(other._height), _channels(other._channels) {
 	int data_len = other.get_data_len();
 	_image_data_ptr = std::make_unique<float[]>(data_len);
 	std::copy(other._image_data_ptr.get(), other._image_data_ptr.get() + data_len, _image_data_ptr.get());
 }
 
-ImageProc& ImageProc::operator=(const ImageProc& other) {
+ImageData& ImageData::operator=(const ImageData& other) {
 	if (this != &other) {
 		_width = other._width;
 		_height = other._height;
@@ -28,7 +28,7 @@ ImageProc& ImageProc::operator=(const ImageProc& other) {
 	return *this;
 }
 
-void ImageProc::set_dimensions(int width, int height, int channels) {
+void ImageData::set_dimensions(int width, int height, int channels) {
 	_width = width;
 	_height = height;
 	_channels = channels;
@@ -36,25 +36,25 @@ void ImageProc::set_dimensions(int width, int height, int channels) {
 	_image_data_ptr = std::make_unique<float[]>(data_len);
 }
 
-int ImageProc::get_data_len() const {
+int ImageData::get_data_len() const {
 	return _width * _height * _channels;
 }
 
-long ImageProc::get_index(int x, int y, int channel) const {
+long ImageData::get_index(int x, int y, int channel) const {
 	if (x < 0 || x >= _width || y < 0 || y >= _height || channel < 0 || channel >= _channels) {
 		throw std::out_of_range("Invalid coordinates or channel");
 	}
 	return channel + _channels * (x + y * _width);
 }
 
-long ImageProc::get_index(int x, int y) const {
+long ImageData::get_index(int x, int y) const {
 	if (x < 0 || x >= _width || y < 0 || y >= _height) {
 		throw std::out_of_range("Invalid coordinates");
 	}
 	return _channels * (x + y * _width);
 }
 
-void ImageProc::set_pixel_values(int x, int y, const std::vector<float>& values) {
+void ImageData::set_pixel_values(int x, int y, const std::vector<float>& values) {
 	if (x < 0 || x >= _width || y < 0 || y >= _height || values.size() != static_cast<size_t>(_channels)) {
 		throw std::out_of_range("Invalid coordinates or values size");
 	}
@@ -64,7 +64,7 @@ void ImageProc::set_pixel_values(int x, int y, const std::vector<float>& values)
 	}
 }
 
-void ImageProc::set_pixel_values(const std::vector<float>& values) {
+void ImageData::set_pixel_values(const std::vector<float>& values) {
 	if (values.size() != static_cast<size_t>(get_data_len())) {
 		throw std::out_of_range("Invalid values size");
 	}
@@ -75,7 +75,7 @@ void ImageProc::set_pixel_values(const std::vector<float>& values) {
 }
 
 /* from https://openimageio.readthedocs.io/en/latest/imageinput.html*/
-void ImageProc::oiio_read(const char* filename) {
+void ImageData::oiio_read(const char* filename) {
 	auto inp = ImageInput::open(filename);
     if (!inp) {
         std::cerr << "Error opening image file: " << filename << std::endl;
@@ -100,7 +100,7 @@ void ImageProc::oiio_read(const char* filename) {
 
 }
 
-void ImageProc::oiio_write() {
+void ImageData::oiio_write() {
 	if (!_image_data_ptr) {
 		std::cerr << "No image data to write." << std::endl;
 		return;
@@ -128,14 +128,14 @@ void ImageProc::oiio_write() {
 
 }
 
-void ImageProc::clear() {
+void ImageData::clear() {
 	_width = 0;
 	_height = 0;
 	_channels = 0;
 	_image_data_ptr.reset();
 }
 
-void ImageProc::_vertical_flip() {
+void ImageData::_vertical_flip() {
 	if (!_image_data_ptr) return;
 
 	_is_flipped = !_is_flipped;

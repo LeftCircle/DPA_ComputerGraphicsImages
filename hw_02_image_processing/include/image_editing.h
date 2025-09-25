@@ -3,22 +3,24 @@
 
 #include <vector>
 
-#include <image_proc.h>
+#include <image_data.h>
 
-class ImageEditor  {
+class ImageEditor {
 public:
-	ImageEditor(ImageProc& img_proc)
-		: _starting_image(&img_proc), _edited_image(new ImageProc(img_proc)) {}
+	ImageEditor(ImageData& image_data)
+		: _starting_image(&image_data), _edited_image(new ImageData(image_data)) {}
 	~ImageEditor();
-	ImageProc* get_starting_image() const { return _starting_image; }
-	ImageProc* get_edited_image() const { return _edited_image; }
+	ImageData* get_starting_image() const { return _starting_image; }
+	ImageData* get_edited_image() const { return _edited_image; }
+
+	void 
 
 	// Image editing functions
 	void gamma_filter(float gamma);
 
 private:
-	ImageProc* _starting_image;
-	ImageProc* _edited_image;
+	ImageData* _starting_image;
+	ImageData* _edited_image;
 
 
 	// Possibly save a list of operations that have been applied. Could require a mapping of

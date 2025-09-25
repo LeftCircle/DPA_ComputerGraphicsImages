@@ -1,5 +1,5 @@
-#ifndef IMAGE_PROC_H
-#define IMAGE_PROC_H
+#ifndef image_data_H
+#define image_data_H
 
 
 #include <memory>
@@ -10,12 +10,12 @@
 #include "string_funcs.h"
 
 
-class ImageProc {
+class ImageData {
 public:
-	ImageProc();
-	ImageProc(const char* filename) { oiio_read(filename); }
-	ImageProc(const ImageProc& other);
-	~ImageProc();
+	ImageData();
+	ImageData(const char* filename) { oiio_read(filename); }
+	ImageData(const ImageData& other);
+	~ImageData();
 
 	void oiio_read(const char* filename);
 	void oiio_write();
@@ -44,19 +44,19 @@ public:
 	
 	std::string get_output_file_name() const { return _file_name + "_out." + _file_type; }
 	
-	ImageProc& operator=(const ImageProc& other);
+	ImageData& operator=(const ImageData& other);
 
-private:
+protected:
 	int _width;
 	int _height;
 	int _channels;
-	bool _is_flipped = false;
+	
+	std::unique_ptr<float[]> _image_data_ptr;
+	
+private:
 	std::string _file_type;
 	std::string _file_name;
-
-	std::unique_ptr<float[]> _image_data_ptr;
-
-
+	bool _is_flipped = false;
 	void _vertical_flip();
 };
 

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <GL/glut.h>
 
-#include "image_proc.h"
+#include "image_data.h"
 #include "image_editing.h"
 
 // A singleton controller class that will be used to drive GLUT inputs
@@ -15,22 +15,23 @@ public:
 
 	static Controller* instance()
 	{
-	if(pController==nullptr)
-	{
-		pController = new Controller();
-	}
-	return pController;
+		if(pController==nullptr)
+		{
+			pController = new Controller();
+		}
+		return pController;
 	}
 
 	~Controller();
 
 	void keyboard( unsigned char key, int x, int y );
 
-	void set_image_proc(ImageProc* img_proc) { _image_proc = img_proc; }
+	void set_image_data(ImageData* image_data);
 
 private:
 
-	ImageProc* _image_proc;
+	ImageData* _image_data;
+	ImageEditor* _image_editor;
 
 	static Controller* pController;
 
@@ -41,6 +42,6 @@ private:
 };
 
 
-Controller* create_controller(ImageProc& img_proc);
+Controller* create_controller(ImageData& image_data);
 
 #endif

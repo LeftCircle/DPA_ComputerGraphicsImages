@@ -38,17 +38,17 @@ void View::display()
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
 
-	if (_image_proc->get_channels() == 4){
-		glDrawPixels( width, height, GL_RGBA, GL_FLOAT, _image_proc->get_pixel_ptr() );
+	if (_image_data->get_channels() == 4){
+		glDrawPixels( width, height, GL_RGBA, GL_FLOAT, _image_data->get_pixel_ptr() );
 	}
-	else if (_image_proc->get_channels() == 3){
-		glDrawPixels( width, height, GL_RGB, GL_FLOAT, _image_proc->get_pixel_ptr() );
+	else if (_image_data->get_channels() == 3){
+		glDrawPixels( width, height, GL_RGB, GL_FLOAT, _image_data->get_pixel_ptr() );
 	}
-	else if (_image_proc->get_channels() == 1){
-		glDrawPixels( width, height, GL_LUMINANCE, GL_FLOAT, _image_proc->get_pixel_ptr() );
+	else if (_image_data->get_channels() == 1){
+		glDrawPixels( width, height, GL_LUMINANCE, GL_FLOAT, _image_data->get_pixel_ptr() );
 	} else {
 		// Default to RGB if channels are unexpected
-		glDrawPixels( width, height, GL_RGB, GL_FLOAT, _image_proc->get_pixel_ptr() );
+		glDrawPixels( width, height, GL_RGB, GL_FLOAT, _image_data->get_pixel_ptr() );
 	}
 
 	glutSwapBuffers();
