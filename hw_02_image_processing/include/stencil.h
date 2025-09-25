@@ -2,22 +2,28 @@
 #define STENCIL_H
 
 #include <memory>
+#include <random> 
 
 class Stencil {
 public:
-    Stencil(int half_width=1);
+    Stencil(int half_width = 1);
     ~Stencil();
 
     void resize(int new_half_width);
+    void randomize_values(float lower_bound = -0.1f, float upper_bound = 0.1f);
 
     int get_halfwidth() const { return _half_width; };
+    int get_n_elements() const { return (2 * _half_width + 1) * (2 * _half_width + 1); };
+
     float& operator() (int i, int j);
     const float& operator() (int i, int j) const;
     
 
+
 private:
     int _half_width;
     std::unique_ptr<float[]> _stencil_values;
+
 
 };
 

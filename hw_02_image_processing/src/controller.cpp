@@ -7,14 +7,9 @@ Controller::Controller() {}
 
 Controller::~Controller() {}
 
-void Controller::set_image_data(ImageData* image_data) {
-	_image_data = image_data;
-	_image_editor = new ImageEditor(*_image_data);
-	
-}
-
 void Controller::keyboard( unsigned char key, int x, int y )
 {
+	ImageEditor* _image_editor = Model::instance()->image_editor;
 	switch (key)
 	{
 		case 27: // esc
@@ -23,6 +18,9 @@ void Controller::keyboard( unsigned char key, int x, int y )
 		case 'j':
 			std::cout << "Key j pressed" << std::endl;
 			_image_editor->save_edited_image();
+			break;
+		case 'f':
+			std::cout << "f key pressed! Should flip" << std::endl;
 			break;
 		case 'g':
 			std::cout << "Key g pressed" << std::endl;

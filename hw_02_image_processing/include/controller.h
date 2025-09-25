@@ -7,6 +7,7 @@
 
 #include "image_data.h"
 #include "image_editing.h"
+#include "model.h"
 
 // A singleton controller class that will be used to drive GLUT inputs
 class Controller
@@ -26,13 +27,7 @@ public:
 
 	void keyboard( unsigned char key, int x, int y );
 
-	void set_image_data(ImageData* image_data);
-	const ImageData* get_modified_image_ptr() const { return _image_editor->get_edited_image(); }
-
 private:
-
-	ImageData* _image_data;
-	ImageEditor* _image_editor;
 
 	static Controller* pController;
 
@@ -43,6 +38,6 @@ private:
 };
 
 
-Controller* create_controller(ImageData& image_data);
+Controller* create_controller();
 
 #endif

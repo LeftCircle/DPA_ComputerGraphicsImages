@@ -38,6 +38,8 @@ void View::display()
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
 
+	const ImageData* _image_data = Model::instance()->get_modified_image_ptr();
+
 	if (_image_data->get_channels() == 4){
 		glDrawPixels( width, height, GL_RGBA, GL_FLOAT, _image_data->get_pixel_ptr() );
 	}
