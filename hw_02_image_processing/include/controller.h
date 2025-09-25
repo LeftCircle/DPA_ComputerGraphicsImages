@@ -6,6 +6,7 @@
 #include <GL/glut.h>
 
 #include "image_proc.h"
+#include "image_editing.h"
 
 // A singleton controller class that will be used to drive GLUT inputs
 class Controller

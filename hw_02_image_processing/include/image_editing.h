@@ -5,14 +5,16 @@
 
 #include <image_proc.h>
 
-class ImageEditor {
+class ImageEditor  {
 public:
 	ImageEditor(ImageProc& img_proc)
 		: _starting_image(&img_proc), _edited_image(new ImageProc(img_proc)) {}
-
+	~ImageEditor();
 	ImageProc* get_starting_image() const { return _starting_image; }
 	ImageProc* get_edited_image() const { return _edited_image; }
 
+	// Image editing functions
+	void gamma_filter(float gamma);
 
 private:
 	ImageProc* _starting_image;

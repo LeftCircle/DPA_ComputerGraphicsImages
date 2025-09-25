@@ -144,6 +144,23 @@ void test_test_image(){
     // The test image is a 10x10 image where the first pixels are
     // (255, 0, 0), (0, 255, 0), (0, 0, 255), (1, 1, 1), (2, 2, 2),
     ImageProc img_proc;
+    img_proc.oiio_read(test_rgb_1_2_image_path);
+    std::vector<float> expected_pixel1 = {255.0f, 0.0f, 0.0f};
+    std::vector<float> expected_pixel2 = {0.0f, 255.0f, 0.0f};
+    std::vector<float> expected_pixel3 = {0.0f, 0.0f, 255.0f};
+    std::vector<float> expected_pixel4 = {1.0f, 1.0f, 1.0f};
+    std::vector<float> expected_pixel5 = {2.0f, 2.0f, 2.0f};
+    std::vector<float> actual_pixel1 = img_proc.get_pixel_values(0, 0);
+    std::vector<float> actual_pixel2 = img_proc.get_pixel_values(1, 0);
+    std::vector<float> actual_pixel3 = img_proc.get_pixel_values(2, 0);
+    std::vector<float> actual_pixel4 = img_proc.get_pixel_values(3, 0);
+    std::vector<float> actual_pixel5 = img_proc.get_pixel_values(4, 0);
+    assert(actual_pixel1 == expected_pixel1);
+    assert(actual_pixel2 == expected_pixel2);
+    assert(actual_pixel3 == expected_pixel3);
+    assert(actual_pixel4 == expected_pixel4);
+    assert(actual_pixel5 == expected_pixel5);
+    std::cout << "test_test_image passed." << std::endl;
     
 }
 

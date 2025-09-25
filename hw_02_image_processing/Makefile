@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -Wall -g -O2 -fPIC -fopenmp -Wextra -std=c++17 \
+CFLAGS = -Wall -g -O2 -fPIC -fopenmp -std=c++17 \
 -Iinclude \
 -I/home/leftcircle/programming/include/ 
 
