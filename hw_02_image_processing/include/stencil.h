@@ -5,8 +5,10 @@
 
 class Stencil {
 public:
-    Stencil(int _half_width=1);
+    Stencil(int half_width=1);
     ~Stencil();
+
+    void resize(int new_half_width);
 
     int get_halfwidth() const { return _half_width; };
     float& operator() (int i, int j);
