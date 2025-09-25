@@ -27,6 +27,7 @@ public:
 	void keyboard( unsigned char key, int x, int y );
 
 	void set_image_data(ImageData* image_data);
+	const ImageData* get_modified_image_ptr() const { return _image_editor->get_edited_image(); }
 
 private:
 

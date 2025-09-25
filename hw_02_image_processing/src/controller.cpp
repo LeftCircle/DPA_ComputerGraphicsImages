@@ -10,6 +10,7 @@ Controller::~Controller() {}
 void Controller::set_image_data(ImageData* image_data) {
 	_image_data = image_data;
 	_image_editor = new ImageEditor(*_image_data);
+	
 }
 
 void Controller::keyboard( unsigned char key, int x, int y )

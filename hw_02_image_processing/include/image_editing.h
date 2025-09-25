@@ -10,10 +10,10 @@ public:
 	ImageEditor(ImageData& image_data)
 		: _starting_image(&image_data), _edited_image(new ImageData(image_data)) {}
 	~ImageEditor();
-	ImageData* get_starting_image() const { return _starting_image; }
-	ImageData* get_edited_image() const { return _edited_image; }
+	const ImageData* get_starting_image() const { return _starting_image; }
+	const ImageData* get_edited_image() const { return _edited_image; }
 
-	void 
+	void save_edited_image();
 
 	// Image editing functions
 	void gamma_filter(float gamma);

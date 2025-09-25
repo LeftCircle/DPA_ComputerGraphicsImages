@@ -24,12 +24,12 @@ int main(int argc, char** argv)
 	}
 	
 	ImageData img;
+	img.oiio_read(file_name.c_str());
 	View* view = View::instance();
 	Controller* controller = Controller::instance();
 	controller->set_image_data(&img);
-	view->set_image_data(&img);
+	view->set_image_data(controller->get_modified_image_ptr());
 
-	img.oiio_read(file_name.c_str());
 	
 	view->init(argc, argv, img.get_width(), img.get_height());
 
