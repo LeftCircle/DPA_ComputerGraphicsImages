@@ -24,7 +24,7 @@ public:
     
 	~Model();
     
-	void set_image_data(ImageData* image_data);
+	//void set_image_data(ImageData* image_data);
 	const ImageData* get_modified_image_ptr() const { return image_editor->get_edited_image(); }
     
     // Public variables
