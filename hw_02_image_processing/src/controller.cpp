@@ -3,6 +3,12 @@
 
 Controller* Controller::pController = nullptr;
 
+Controller* create_controller()
+{
+	Controller* ctrl = Controller::instance();
+	return ctrl;
+}
+
 Controller::Controller() {}
 
 Controller::~Controller() {}
@@ -33,8 +39,3 @@ void Controller::keyboard( unsigned char key, int x, int y )
 	}
 }
 
-Controller* create_controller()
-{
-	Controller* ctrl = Controller::instance();
-	return ctrl;
-}

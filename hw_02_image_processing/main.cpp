@@ -27,7 +27,6 @@ int main(int argc, char** argv)
 	img.oiio_read(file_name.c_str());
 	View* view = View::instance();
 	Controller* controller = Controller::instance();
-	ImageData* img_ptr = &img;
 	Model* model = create_model(img);
 	
 	view->init(argc, argv, img.get_width(), img.get_height());

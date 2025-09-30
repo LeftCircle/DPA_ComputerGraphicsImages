@@ -2,6 +2,10 @@
 
 View* View::pView = nullptr;
 
+View* create_view()
+{
+	return View::instance();
+}
 
 View::View() {
 	width = 0;
@@ -76,9 +80,4 @@ void View::reshape( int w, int h )
 void View::main_loop()
 {
 	glutMainLoop();
-}
-
-View* create_view()
-{
-	return View::instance();
 }

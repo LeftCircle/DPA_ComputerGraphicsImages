@@ -17,7 +17,7 @@ void Stencil::resize(int new_half_width){
 void Stencil::randomize_values(float lower_bound, float upper_bound) {
 	int n_elements = get_n_elements();
 	std::default_random_engine generator;
-	std::uniform_int_distribution<float> distribution(lower_bound, upper_bound);
+	std::uniform_real_distribution<float> distribution(lower_bound, upper_bound);
 
 	float sum_of_all_but_center = 0.0f;
 	for (int i = 0; i < n_elements; i++) {
