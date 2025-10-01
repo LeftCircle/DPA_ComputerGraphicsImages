@@ -11,6 +11,7 @@ void Stencil::resize(int new_half_width){
 	int stencil_width = 2 * new_half_width + 1;
 	int stencil_size = stencil_width * stencil_width;
 	_stencil_values = std::make_unique<float[]>(stencil_size);
+	_two_half_width_plus_one = 2 * new_half_width + 1; 
 	randomize_values();
 }
 
@@ -30,4 +31,22 @@ void Stencil::randomize_values(float lower_bound, float upper_bound) {
 		sum_of_all_but_center += rand_val;
 	}
 	_stencil_values[n_elements / 2] = 1.0f - sum_of_all_but_center;
+	print_stencil();
+}
+
+float& Stencil::operator() (int i, int j) {
+	return _stencil_values[i + j * _two_half_width_plus_one];
+}
+
+const float& Stencil::operator() (int i, int j) const {
+	return _stencil_values[i + j * _two_half_width_plus_one];
+}
+
+void Stencil::print_stencil() const {
+	for (int j = 0; j < _two_half_width_plus_one; ++j) {
+		for (int i = 0; i < _two_half_width_plus_one; ++i) {
+			std::cout << (*this)(i, j) << " ";
+		}
+		std::cout << std::endl;
+	}
 }

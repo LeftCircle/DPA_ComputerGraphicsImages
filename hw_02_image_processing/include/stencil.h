@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <random> 
+#include <iostream>
 
 class Stencil {
 public:
@@ -17,12 +18,13 @@ public:
 
     float& operator() (int i, int j);
     const float& operator() (int i, int j) const;
-    
+    void print_stencil() const;
 
 
 private:
     int _half_width;
-    std::unique_ptr<float[]> _stencil_values;
+    int _two_half_width_plus_one;
+	std::unique_ptr<float[]> _stencil_values;
 
 
 };

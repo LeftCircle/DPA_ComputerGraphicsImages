@@ -21,10 +21,6 @@ void Controller::keyboard( unsigned char key, int x, int y )
 		case 27: // esc
 			exit(0);
 			break;
-		case 'j':
-			std::cout << "Key j pressed" << std::endl;
-			_image_editor->save_edited_image();
-			break;
 		case 'f':
 			std::cout << "f key pressed! Should flip" << std::endl;
 			break;
@@ -35,6 +31,15 @@ void Controller::keyboard( unsigned char key, int x, int y )
 		case 'G':
 			std::cout << "Key G pressed" << std::endl;
 			_image_editor->gamma_filter(1.0f + 1.0f / 9.0f);
+			break;
+		case 'j':
+			std::cout << "Key j pressed" << std::endl;
+			_image_editor->save_edited_image();
+			break;
+		case 's':
+			std::cout << "Applying stencil" << std::endl;
+			_image_editor->bounded_linear_convolution(Model::instance()->stencil);
+			std::cout << "Stencil applied" << std::endl;
 			break;
 	}
 }

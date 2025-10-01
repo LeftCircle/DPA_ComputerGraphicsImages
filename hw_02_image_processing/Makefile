@@ -3,7 +3,9 @@ CFLAGS = -Wall -g -O2 -fPIC -fopenmp -std=c++17 \
 -Iinclude \
 -I/home/leftcircle/programming/include/ 
 
-LDFLAGS = -lOpenImageIO -lOpenImageIO_Util -lGL -lGLU -lglut
+# Had some problems on the desktop. Not sure if L/home/leftcircle/programming/lib -wl -rpath stuff is needed
+LDFLAGS = -L/home/leftcircle/programming/lib -Wl,-rpath,/home/leftcircle/programming/lib -lOpenImageIO -lOpenImageIO_Util -lGL -lGLU -lglut \
+
 
 
 SRC = $(wildcard src/*.cpp)
