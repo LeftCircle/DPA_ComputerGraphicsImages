@@ -29,6 +29,8 @@ public:
 
 private:
 
+	void _apply_stencil();
+
 	static Controller* pController;
 
 	Controller();

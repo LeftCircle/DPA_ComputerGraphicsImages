@@ -27,18 +27,10 @@ void Stencil::randomize_values(float lower_bound, float upper_bound) {
 			continue;
 		} 
 		float rand_val = distribution(generator);
-		_stencil_values[i] = 0.0f;
-		sum_of_all_but_center += 0.0f;
+		_stencil_values[i] = rand_val;
+		sum_of_all_but_center += rand_val;
 	}
 	_stencil_values[n_elements / 2] = 1.0f - sum_of_all_but_center;
-	std::cout << "Lower bound: " << lower_bound << ", Upper bound: " << upper_bound << std::endl;
-	std::cout << "Center value adjusted to: " << _stencil_values[n_elements / 2] << std::endl;
-	print_stencil();
-	int sum_check = 0;
-	for (int i = 0; i < n_elements; i++) {
-		sum_check += _stencil_values[i];
-	}
-	std::cout << "Sum check (should be 0.0): " << sum_check << std::endl;
 }
 
 float& Stencil::get_value_offset_from_center(int x_offset, int y_offset) {

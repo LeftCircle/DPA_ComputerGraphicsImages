@@ -20,6 +20,7 @@ public:
 	void gamma_filter(float gamma);
 	void bounded_linear_convolution(const Stencil& stencil);
 	void bounded_linear_convolution(const Stencil& stencil, const ImageData& input_image, ImageData& output_image);
+	void flip();
 
 private:
 	ImageData* _starting_image;

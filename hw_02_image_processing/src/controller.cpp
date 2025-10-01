@@ -23,13 +23,14 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			break;
 		case 'f':
 			std::cout << "f key pressed! Should flip" << std::endl;
+			_image_editor->flip();
 			break;
 		case 'g':
-			std::cout << "Key g pressed" << std::endl;
+			std::cout << "gamma of 0.9" << std::endl;
 			_image_editor->gamma_filter(0.9f);
 			break;
 		case 'G':
-			std::cout << "Key G pressed" << std::endl;
+			std::cout << "gamma of 1.1111" << std::endl;
 			_image_editor->gamma_filter(1.0f + 1.0f / 9.0f);
 			break;
 		case 'j':
@@ -38,6 +39,12 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			break;
 		case 's':
 			std::cout << "Applying stencil" << std::endl;
+			
+			// Stencil could be resized here with
+			// Model::instance()->stencil.resize(int new_half_width);
+			
+			Model::instance()->stencil.randomize_values();
+			
 			_image_editor->bounded_linear_convolution(Model::instance()->stencil);
 			std::cout << "Stencil applied" << std::endl;
 			break;

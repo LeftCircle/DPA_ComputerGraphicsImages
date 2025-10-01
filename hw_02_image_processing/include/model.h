@@ -8,7 +8,7 @@
 #include "image_data.h"
 #include "image_editing.h"
 
-const int DEFAULT_STENCIL_HALF_WIDTH = 1;
+const int DEFAULT_STENCIL_HALF_WIDTH = 5;
 
 // A singleton model class that will be used to drive GLUT inputs
 class Model

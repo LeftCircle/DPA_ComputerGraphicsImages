@@ -56,12 +56,10 @@ protected:
 	int _channels;
 	
 	std::unique_ptr<float[]> _image_data_ptr;
-	
+
 private:
 	std::string _file_type;
 	std::string _file_name;
-	bool _is_flipped = false;
-	void _vertical_flip();
 };
 
 

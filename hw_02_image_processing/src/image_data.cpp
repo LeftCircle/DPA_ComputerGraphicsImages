@@ -11,6 +11,8 @@ ImageData::~ImageData() {
 // Deep copy constructor and assignement operator
 ImageData::ImageData(const ImageData& other)
 	: _width(other._width), _height(other._height), _channels(other._channels) {
+	_file_name = other._file_name;
+	_file_type = other._file_type;
 	int data_len = other.get_data_len();
 	_image_data_ptr = std::make_unique<float[]>(data_len);
 	std::copy(other._image_data_ptr.get(), other._image_data_ptr.get() + data_len, _image_data_ptr.get());
@@ -25,6 +27,8 @@ ImageData& ImageData::operator=(const ImageData& other) {
 		_width = other._width;
 		_height = other._height;
 		_channels = other._channels;
+		_file_name = other._file_name;
+		_file_type = other._file_type;
 		int data_len = other.get_data_len();
 		_image_data_ptr = std::make_unique<float[]>(data_len);
 		std::copy(other._image_data_ptr.get(), other._image_data_ptr.get() + data_len, _image_data_ptr.get());
@@ -100,7 +104,6 @@ void ImageData::oiio_read(const char* filename) {
 	set_dimensions(xres, yres, nchannels);
 	std::cout << "Image dimensions: " << _width << " x " << _height << " x " << _channels << std::endl;
 	set_pixel_values(pixels);
-	_vertical_flip(); // Flip the image vertically to match OpenGL's coordinate system
 
 }
 
@@ -108,10 +111,6 @@ void ImageData::oiio_write() {
 	if (!_image_data_ptr) {
 		std::cerr << "No image data to write." << std::endl;
 		return;
-	}
-	bool to_flip = _is_flipped;
-	if (to_flip){
-		_vertical_flip();
 	}
 	std::string filename = get_output_file_name();
 	std::unique_ptr<ImageOutput> out = ImageOutput::create(filename);
@@ -126,10 +125,6 @@ void ImageData::oiio_write() {
 	}
 	out->write_image(TypeDesc::FLOAT, _image_data_ptr.get());
 	out->close();
-	if (to_flip){
-		_vertical_flip();
-	}
-
 }
 
 std::vector<float> ImageData::get_pixel_values(int x, int y) {
@@ -162,22 +157,4 @@ void ImageData::clear() {
 	_height = 0;
 	_channels = 0;
 	_image_data_ptr.reset();
-}
-
-void ImageData::_vertical_flip() {
-	if (!_image_data_ptr) return;
-
-	_is_flipped = !_is_flipped;
-
-	int row_size = _width * _channels;
-	std::vector<float> temp_row(row_size);
-
-	for (int y = 0; y < _height / 2; ++y) {
-		float* top_row    = _image_data_ptr.get() + y * row_size;
-		float* bottom_row = _image_data_ptr.get() + (_height - 1 - y) * row_size;
-
-		std::copy(top_row, top_row + row_size, temp_row.data());
-		std::copy(bottom_row, bottom_row + row_size, top_row);
-		std::copy(temp_row.data(), temp_row.data() + row_size, bottom_row);
-	}
 }
