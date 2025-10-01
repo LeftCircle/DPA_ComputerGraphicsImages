@@ -16,6 +16,10 @@ ImageData::ImageData(const ImageData& other)
 	std::copy(other._image_data_ptr.get(), other._image_data_ptr.get() + data_len, _image_data_ptr.get());
 }
 
+ImageData ImageData::duplicate() const {
+	return ImageData(*this);
+}
+
 ImageData& ImageData::operator=(const ImageData& other) {
 	if (this != &other) {
 		_width = other._width;

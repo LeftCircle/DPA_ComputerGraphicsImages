@@ -16,6 +16,7 @@ public:
     int get_halfwidth() const { return _half_width; };
     int get_n_elements() const { return (2 * _half_width + 1) * (2 * _half_width + 1); };
 
+    float& get_value_offset_from_center(int x_offset, int y_offset);
     float& operator() (int i, int j);
     const float& operator() (int i, int j) const;
     void print_stencil() const;

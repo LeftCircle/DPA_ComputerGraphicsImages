@@ -79,6 +79,7 @@
         "__mutex_base": "cpp",
         "__node_handle": "cpp",
         "__tree": "cpp",
-        "__tuple": "cpp"
+        "__tuple": "cpp",
+        "ios": "cpp"
     }
 }

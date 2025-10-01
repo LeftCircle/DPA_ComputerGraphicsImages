@@ -44,7 +44,10 @@ public:
 	
 	std::string get_output_file_name() const { return _file_name + "_out." + _file_type; }
 	
+	ImageData duplicate() const;
+
 	ImageData& operator=(const ImageData& other);
+	
 	
 
 protected:
