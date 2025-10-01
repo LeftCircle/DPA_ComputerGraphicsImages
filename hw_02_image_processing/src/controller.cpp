@@ -38,16 +38,20 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			_image_editor->save_edited_image();
 			break;
 		case 's':
-			std::cout << "Applying stencil" << std::endl;
-			
-			// Stencil could be resized here with
-			// Model::instance()->stencil.resize(int new_half_width);
-			
-			Model::instance()->stencil.randomize_values();
-			
-			_image_editor->bounded_linear_convolution(Model::instance()->stencil);
-			std::cout << "Stencil applied" << std::endl;
+			_apply_stencil();
 			break;
 	}
 }
 
+void Controller::_apply_stencil() {
+	ImageEditor* _image_editor = Model::instance()->image_editor;
+	std::cout << "Applying stencil" << std::endl;
+			
+	// Stencil could be resized here with
+	// Model::instance()->stencil.resize(int new_half_width);
+	
+	Model::instance()->stencil.randomize_values();
+	
+	_image_editor->bounded_linear_convolution(Model::instance()->stencil);
+	std::cout << "Stencil applied" << std::endl;
+}
