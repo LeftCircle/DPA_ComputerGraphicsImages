@@ -5,6 +5,8 @@
 
 #include <image_data.h>
 #include <stencil.h>
+#include "simd_funcs.h"
+
 
 class ImageEditor {
 public:
@@ -26,6 +28,7 @@ private:
 	ImageData* _starting_image;
 	ImageData* _edited_image;
 
+	void _stencil_simd_convolution(const float* __restrict__ stencil, const int half_width, const float* __restrict__ input_pixels, ImageData& output_image);
 
 	// Possibly save a list of operations that have been applied. Could require a mapping of
 	// inputs to operations and how to reverse them.
