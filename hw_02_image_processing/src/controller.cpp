@@ -44,12 +44,13 @@ void Controller::keyboard( unsigned char key, int x, int y )
 }
 
 void Controller::_apply_stencil() {
+	// Stencil could be resized here with
+	// Model::instance()->stencil.resize(int new_half_width);
+	// or by changing the default stencil size in Model.h
+	
 	ImageEditor* _image_editor = Model::instance()->image_editor;
 	std::cout << "Applying stencil" << std::endl;
 			
-	// Stencil could be resized here with
-	// Model::instance()->stencil.resize(int new_half_width);
-	
 	Model::instance()->stencil.randomize_values();
 	
 	_image_editor->bounded_linear_convolution(Model::instance()->stencil);
