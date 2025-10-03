@@ -22,13 +22,13 @@ public:
 	void gamma_filter(float gamma);
 	void bounded_linear_convolution(const Stencil& stencil);
 	void bounded_linear_convolution(const Stencil& stencil, const ImageData& input_image, ImageData& output_image);
+	void bounded_linear_convolution_simple(const Stencil& stencil, const ImageData& input_image, ImageData& output_image);
 	void flip();
 
 private:
 	ImageData* _starting_image;
 	ImageData* _edited_image;
 
-	void _stencil_simd_convolution(const float* __restrict__ stencil, const int half_width, const float* __restrict__ input_pixels, ImageData& output_image);
 	void _stencil_linear_convolution_horizontal_boundary(const Stencil& stencil, const ImageData& input_image, ImageData& output_image, bool bottom);
 	void _stencil_linear_convolution_vertical_boundary(const Stencil& stencil, const ImageData& input_image, ImageData& output_image, bool left);
 	// Possibly save a list of operations that have been applied. Could require a mapping of
