@@ -37,6 +37,33 @@ float simd_accumulate_m128_unaligned(const float* __restrict__ vec, int start, i
 	return scalar_sum;
 }
 
+float simd_dot_m128_unaligned(const float* __restrict__ vec_0, const float* __restrict__ vec_1, int start, int end){
+	int n_standard_iters = (end - start) % 4;
+	int simd_end = end - n_standard_iters;
+	__m128 dot_product = _mm_setzero_ps();
+	for (int i = start; i < simd_end; i+=4){
+		__m128 v0 = _mm_loadu_ps(&vec_0[i]);
+		__m128 v1 = _mm_loadu_ps(&vec_1[i]);
+		__m128 prod = _mm_mul_ps(v0, v1);
+		dot_product = _mm_add_ps(dot_product, prod);
+	}
+	__m128 edge_case_0, edge_case_1;
+	load_partial(&edge_case_0, n_standard_iters, &vec_0[simd_end]);
+	load_partial(&edge_case_1, n_standard_iters, &vec_1[simd_end]);
+	__m128 edge_prod = _mm_mul_ps(edge_case_0, edge_case_1);
+	dot_product = _mm_add_ps(dot_product, edge_prod);
+	float scalar_dot;
+	#ifdef __mm_hadd_ps
+	dot_product = _mm_hadd_ps(dot_product, dot_product);
+	dot_product = _mm_hadd_ps(dot_product, dot_product);
+	_mm_store_ss(&scalar_dot, dot_product);
+	#else
+	float* dot_ptr = (float*)&dot_product;
+	scalar_dot = dot_ptr[0] + dot_ptr[1] + dot_ptr[2] + dot_ptr[3];
+	#endif
+	return scalar_dot;
+}
+
 float simd_accumulate_m128(const float* __restrict__ vec, int start, int end){
 	assert((reinterpret_cast<uintptr_t>(vec) % 64) == 0);
 	// Handle initial unaligned elements
