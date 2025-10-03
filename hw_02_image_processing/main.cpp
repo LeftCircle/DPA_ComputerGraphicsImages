@@ -4,7 +4,6 @@
 
 #include "command_line_parser.h"
 #include "image_data.h"
-#include "tests.h"
 #include "controller.h"
 #include "view.h"
 
@@ -12,10 +11,6 @@
 int main(int argc, char** argv)
 {
 	CommandLineParser parser(argc, argv);
-	if (parser.has_flag("-t")){
-		Tests tests;
-		tests.run_tests();
-	}
 
 	const std::string file_name = parser.find_val_for_flag("-image");
 	if (file_name.empty()){

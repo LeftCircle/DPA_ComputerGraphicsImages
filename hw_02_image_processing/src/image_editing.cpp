@@ -64,9 +64,6 @@ void ImageEditor::bounded_linear_convolution(const Stencil& stencil, const Image
 	int channels = input_image.get_channels();
 	int half_width = stencil.get_halfwidth();
 
-	const float* input_data = input_image.get_pixel_ptr();
-	float* output_data = output_image.get_pixel_ptr();
-
 	for (int y = 0; y < height; y++) {
 		int y_reference_min = y - half_width;
 		int y_reference_max = y + half_width;
