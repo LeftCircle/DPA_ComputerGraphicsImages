@@ -38,6 +38,6 @@ void Model::fractal_flames() {
 	};
 
 	image_editor->clear();
-	image_editor->fractal_flame(10, ifs_functions, colors);
+	image_editor->fractal_flame(10000, ifs_functions, colors);
 
 }

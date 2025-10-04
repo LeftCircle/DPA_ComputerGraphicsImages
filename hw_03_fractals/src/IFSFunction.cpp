@@ -5,11 +5,12 @@
 Point Spherical::operator()(const Point& P) const {
 	float rsq = P.x * P.x + P.y * P.y;
 	if (abs(rsq) < EPSILON){
+		std::cout << "Epsilon" << std::endl;
 		return P;
 	}
 	Point result(P.x / rsq, P.y / rsq);
-	std::cout << "rsq = " << rsq << " ";
-	std::cout << "result = " << result.x << ", " << result.y << std::endl;
+	//std::cout << "rsq = " << rsq << " ";
+	//std::cout << "result = " << result.x << ", " << result.y << std::endl;
 	return result;
 }
 

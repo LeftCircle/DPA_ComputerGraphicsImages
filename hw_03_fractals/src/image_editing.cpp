@@ -166,6 +166,7 @@ void ImageEditor::fractal_flame(
 								std::vector<IFSFunction*>& function_ptrs,
 								std::vector<Color>& colors)
 	{
+	srand48(time(nullptr));
 	if (function_ptrs.empty() || colors.empty() || !_edited_image) {
 		throw std::runtime_error("Null or empty input to fractal_flame");
 	}
@@ -178,6 +179,7 @@ void ImageEditor::fractal_flame(
 	int height = _edited_image->get_height();
 	std::vector<float> rgb(3, 0.0f);
 	int updated_pixels = 0;
+	p = Point(2 * drand48() - 1, 2 * drand48() - 1);
 	for (int i = 1; i <= iters; i++){
 		IFSFunction* rand_func = function_ptrs[lrand48() % n_funcs];
 		Color rand_color = colors[lrand48() % n_colors];
@@ -188,7 +190,7 @@ void ImageEditor::fractal_flame(
 		if (xp < 0 || xp >= width || yp < 0 || yp >= height){
 			continue;
 		} else {
-			std::cout << "updating pixel " << p.x << ", " << p.y << std::endl;
+			//std::cout << "updating pixel " << p.x << ", " << p.y << std::endl;
 			rgb[0] = color.r; rgb[1] = color.g; rgb[2] = color.b;
 			_edited_image->set_first_three_channels(xp, yp, rgb);
 			updated_pixels++;
