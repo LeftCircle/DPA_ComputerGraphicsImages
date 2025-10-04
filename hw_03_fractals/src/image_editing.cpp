@@ -153,11 +153,22 @@ void ImageEditor::wrapping_linear_convolution(const Stencil& stencil, const Imag
 }
 
 
+void ImageEditor::clear(){
+	_edited_image->set_pixel_values(0.0f);
+}
+
 // ------------------------------------------------------------------------------------------
 // fractal things!
 // ------------------------------------------------------------------------------------------
 
-void ImageEditor::fractal_flame(int iters, std::vector<IFSFunction*>& function_ptrs, std::vector<Color>& colors){
+void ImageEditor::fractal_flame(
+								int iters,
+								std::vector<IFSFunction*>& function_ptrs,
+								std::vector<Color>& colors)
+	{
+	if (function_ptrs.empty() || colors.empty() || !_edited_image) {
+		throw std::runtime_error("Null or empty input to fractal_flame");
+	}
 	_edited_image->set_pixel_values(0.0f);
 	int n_colors = colors.size();
 	int n_funcs = function_ptrs.size();
@@ -165,19 +176,23 @@ void ImageEditor::fractal_flame(int iters, std::vector<IFSFunction*>& function_p
 	Color color(0.0f, 0.0f, 0.0f);
 	int width = _edited_image->get_width();
 	int height = _edited_image->get_height();
-	std::vector<float> rgb(0.0f, 3);
+	std::vector<float> rgb(3, 0.0f);
+	int updated_pixels = 0;
 	for (int i = 1; i <= iters; i++){
 		IFSFunction* rand_func = function_ptrs[lrand48() % n_funcs];
 		Color rand_color = colors[lrand48() % n_colors];
 		p = (*rand_func)(p);
 		color = (color + rand_color) / 2.0f;
-		int xp = int((p.x + 1) / 2.0f);
-		int yp = int((p.y + 1) / 2.0f);
+		int xp = int((p.x + 1.0f) / 2.0f * width);
+		int yp = int((p.y + 1.0f) / 2.0f * height);
 		if (xp < 0 || xp >= width || yp < 0 || yp >= height){
 			continue;
 		} else {
+			std::cout << "updating pixel " << p.x << ", " << p.y << std::endl;
 			rgb[0] = color.r; rgb[1] = color.g; rgb[2] = color.b;
-			_edited_image->set_pixel_values(xp, yp, rgb);
+			_edited_image->set_first_three_channels(xp, yp, rgb);
+			updated_pixels++;
 		}
 	}
+	std::cout << "Updated " << updated_pixels << " pixels" << std::endl;
 }

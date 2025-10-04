@@ -15,15 +15,24 @@ Controller::~Controller() {}
 
 void Controller::keyboard( unsigned char key, int x, int y )
 {
+	Model* model = Model::instance();
 	ImageEditor* _image_editor = Model::instance()->image_editor;
 	switch (key)
 	{
 		case 27: // esc
 			exit(0);
 			break;
+		case 'c':
+			std::cout << "Clearing Image" << std::endl;
+			_image_editor->clear();
 		case 'f':
 			std::cout << "f key pressed! Should flip" << std::endl;
 			_image_editor->flip();
+			break;
+		case 'F':
+			std::cout << "Fractal Flame!" << std::endl;
+			model->fractal_flames();
+			std::cout << "Done" << std::endl; 
 			break;
 		case 'g':
 			std::cout << "gamma of 0.9" << std::endl;

@@ -24,6 +24,7 @@ public:
 	void wrapping_linear_convolution(const Stencil& stencil);
 	void wrapping_linear_convolution(const Stencil& stencil, const ImageData& input_image, ImageData& output_image);
 	void flip();
+	void clear();
 	void fractal_flame(int iters, std::vector<IFSFunction*>& function_ptrs, std::vector<Color>& colors);
 
 private:

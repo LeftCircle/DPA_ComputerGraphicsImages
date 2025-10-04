@@ -32,7 +32,8 @@ public:
 	void set_pixel_values(int x, int y, const std::vector<float>& values);
 	void set_pixel_values(const std::vector<float>& values);
 	void set_pixel_values(const float val);
-	
+	void set_first_three_channels(int x, int y, const std::vector<float>& values);
+
 	long get_index(int x, int y, int channel) const;
 	long get_index(int x, int y) const;
 	

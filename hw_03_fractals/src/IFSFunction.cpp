@@ -7,13 +7,11 @@ Point Spherical::operator()(const Point& P) const {
 	if (abs(rsq) < EPSILON){
 		return P;
 	}
-	return Point(P.x / rsq, P.y / rsq);
+	Point result(P.x / rsq, P.y / rsq);
+	std::cout << "rsq = " << rsq << " ";
+	std::cout << "result = " << result.x << ", " << result.y << std::endl;
+	return result;
 }
-
-
-
-
-
 
 
 void apply_random_func(int iters, std::vector<IFSFunction*>& function_ptrs, std::vector<Color>& colors,
@@ -24,7 +22,5 @@ void apply_random_func(int iters, std::vector<IFSFunction*>& function_ptrs, std:
 		IFSFunction* rand_func = function_ptrs[lrand48() % n_funcs];
 		Color rand_color = colors[lrand48() % n_colors];
 		color = (color + rand_color) / 2.0f;
-		
-
 	}
 }

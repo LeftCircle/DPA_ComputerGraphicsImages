@@ -89,6 +89,13 @@ void ImageData::set_pixel_values(const float val){
 	}
 }
 
+void ImageData::set_first_three_channels(int x, int y, const std::vector<float>& values){
+	int index = (y * _width + x) * _channels;
+	for (int c = 0; c < 3; ++c) {
+		_image_data_ptr[index + c] = values[c];
+	}
+}
+
 /* from https://openimageio.readthedocs.io/en/latest/imageinput.html*/
 void ImageData::oiio_read(const char* filename) {
 	auto inp = ImageInput::open(filename);

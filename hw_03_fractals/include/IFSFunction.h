@@ -4,8 +4,9 @@
 #include <vector>
 #include <cmath>
 #include <stdlib.h>
+#include <iostream>
 
-const float EPSILON = 0.0001;
+const float EPSILON = 0.000001;
 
 struct Point{
 	float x, y;
@@ -16,7 +17,7 @@ struct Point{
 struct Color{
 	float r, g, b = 0.0f;
 	Color(float r_, float g_, float b_) {r = r_; g = g_; b = b_; }
-	Color();
+	Color() {r = 0.0f; g = 0.0f; b = 0.0f; };
 
 	// overload the plus operator
 	Color operator+(const Color& other) const {
@@ -50,7 +51,7 @@ protected:
 class Spherical : public IFSFunction {
 public:
 	Spherical() {};
-	~Spherical();
+	~Spherical() {};
 
 	Point operator()(const Point&P) const;
 };

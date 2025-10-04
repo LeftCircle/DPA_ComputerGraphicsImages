@@ -31,6 +31,9 @@ public:
     ImageEditor* image_editor;
     Stencil stencil = Stencil(DEFAULT_STENCIL_HALF_WIDTH);
 
+	// Image Modification functions and setup
+	void fractal_flames();
+
 private:
 	ImageData* _image_data;
 
