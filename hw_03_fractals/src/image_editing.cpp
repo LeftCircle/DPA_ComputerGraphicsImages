@@ -179,8 +179,10 @@ void ImageEditor::fractal_flame(
 	int height = _edited_image->get_height();
 	std::vector<float> rgb(3, 0.0f);
 	int updated_pixels = 0;
-	p = Point(2 * drand48() - 1, 2 * drand48() - 1);
+	// TO DO -> Iterate over each function a certain number of times? instead
+	// of just setting the point to a random value only once. 
 	for (int i = 1; i <= iters; i++){
+		p = Point(2 * drand48() - 1, 2 * drand48() - 1);
 		IFSFunction* rand_func = function_ptrs[lrand48() % n_funcs];
 		Color rand_color = colors[lrand48() % n_colors];
 		p = (*rand_func)(p);
