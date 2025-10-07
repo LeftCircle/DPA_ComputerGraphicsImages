@@ -96,6 +96,30 @@ void ImageData::set_first_three_channels(int x, int y, const std::vector<float>&
 	}
 }
 
+void ImageData::add_values(int x, int y, float r, float g, float b, float a){
+	assert(_channels >= 4);
+	int start_index = (y * _width + x) * _channels;
+	_image_data_ptr[start_index] += r;
+	_image_data_ptr[start_index + 1] += g;
+	_image_data_ptr[start_index + 2] += b;
+	_image_data_ptr[start_index + 3] += a;
+}
+
+void ImageData::scale_values(float scale_factor){
+	const int len = get_data_len();
+	#pragma omp parallel for
+	for (int i = 0; i < get_data_len(); i++){
+		_image_data_ptr[i] *= scale_factor;
+	}
+}
+
+void ImageData::scale_pixel_values(const int x, const int y, const float scale_factor){
+	int index = get_index(x, y);
+	for (int c = 0; c < _channels; c++){
+		_image_data_ptr[index + c] *= scale_factor;
+	}
+}
+
 /* from https://openimageio.readthedocs.io/en/latest/imageinput.html*/
 void ImageData::oiio_read(const char* filename) {
 	auto inp = ImageInput::open(filename);

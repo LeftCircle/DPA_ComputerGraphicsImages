@@ -177,26 +177,28 @@ void ImageEditor::fractal_flame(
 	ff.set_pixel_values(0.0f);
 	int n_colors = colors.size();
 	int n_funcs = function_ptrs.size();
-	Point p(2 * drand48() - 1, 2 * drand48() - 1);
+	Point p(double(2 * drand48() - 1), double(2 * drand48() - 1));
 	Color color(0.0f, 0.0f, 0.0f);
 	int width = _edited_image->get_width();
 	int height = _edited_image->get_height();
 	std::vector<float> rgb(3, 0.0f);
 	int updated_pixels = 0;
-	// TO DO -> Iterate over each function a certain number of times? instead
-	// of just setting the point to a random value only once. 
+	
 	for (int i = 1; i <= iters; i++){
-		p = Point(2 * drand48() - 1, 2 * drand48() - 1);
+		//p = Point(2 * drand48() - 1, 2 * drand48() - 1);
 		IFSFunction* rand_func = function_ptrs[lrand48() % n_funcs];
 		Color rand_color = colors[lrand48() % n_colors];
+		std::cout << "Points = ";
+		std::cout << p.x << " " << p.y << std::endl;
 		p = (*rand_func)(p);
+		
 		color = (color + rand_color) / 2.0f;
-		int xp = int((p.x + 1.0f) / 2.0f * width);
-		int yp = int((p.y + 1.0f) / 2.0f * height);
+		int xp = int(((p.x + 1.0f) / 2.0f) * width);
+		int yp = int(((p.y + 1.0f) / 2.0f) * height);
 		if (xp < 0 || xp >= width || yp < 0 || yp >= height){
 			continue;
 		} else {
-			//std::cout << "updating pixel " << p.x << ", " << p.y << std::endl;
+			std::cout << "updating pixel " << p.x << ", " << p.y << std::endl;
 			rgb[0] = color.r; rgb[1] = color.g; rgb[2] = color.b;
 			_edited_image->set_first_three_channels(xp, yp, rgb);
 			updated_pixels++;

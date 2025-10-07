@@ -6,11 +6,13 @@
 #include <stdlib.h>
 #include <iostream>
 
+#include <image_data.h>
+
 const float EPSILON = 0.000001;
 
 struct Point{
-	float x, y;
-	Point(float new_x, float new_y) { x = new_x; y = new_y; } 
+	double x, y;
+	Point(double new_x, double new_y) { x = new_x; y = new_y; } 
 	Point();
 };
 
@@ -77,22 +79,37 @@ public:
 	IFSFunctionSystem() {}
 	IFSFunctionSystem(
 		const std::vector<IFSFunction*>& functions,
+		std::vector<float>& weights,
 		const std::vector<Color>& colors,
-		std::vector<float>& weights
+		const std::vector<SymmetryIFS*>& symmetry_functions,
+		std::vector<float>& symmetry_weights,
+		int width,
+		int height
 	);
 
 	~IFSFunctionSystem() {};
+	void fractal_frame(int iter);
 
-	int get_random_weighted_index();
-	const IFSFunction* get_ifs_function(int index) const { return _ifs_functions[index]; }
+	int get_random_weighted_index(const std::vector<float>& weights);
+	IFSFunction* get_ifs_function(int index) const { return _ifs_functions[index]; }
+	SymmetryIFS* get_symmetry_function(int index) const { return _symmetry_functions[index]; }
 	const Color& get_color(int index) const { return _colors[index]; }
 
 	void normalize(std::vector<float>& vec);
 
+	// for RGBA
+	const int N_CHANNELS = 4;
+
 private:
+
+	ImageData img;
+
 	std::vector<IFSFunction*> _ifs_functions;
+	IFSFunction* _final_function;
+	std::vector<SymmetryIFS*> _symmetry_functions;
 	std::vector<Color> _colors;
 	std::vector<float> _weights;
+	std::vector<float> _symmetry_weights;
 };
 
 

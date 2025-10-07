@@ -28,11 +28,17 @@ public:
 	const std::vector<float> get_pixel_values(int x, int y) const;
 	std::vector<float> get_pixel_values(int x, int y);
 	void get_pixel_values(int x, int y, std::vector<float>& values) const;
-	
+	const float& get_pixel_value(int x, int y, int c) const { return _image_data_ptr[(y * _width + x) * _channels + c]; }
+
 	void set_pixel_values(int x, int y, const std::vector<float>& values);
 	void set_pixel_values(const std::vector<float>& values);
 	void set_pixel_values(const float val);
 	void set_first_three_channels(int x, int y, const std::vector<float>& values);
+
+	void add_values(int x, int y, float r, float g, float b, float a);
+	
+	void scale_pixel_values(const int x, const int y, const float scale_factor);
+	void scale_values(float scale_factor);
 
 	long get_index(int x, int y, int channel) const;
 	long get_index(int x, int y) const;
