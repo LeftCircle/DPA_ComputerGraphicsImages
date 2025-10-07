@@ -16,8 +16,9 @@ struct Point{
 
 struct Color{
 	float r, g, b = 0.0f;
-	Color(float r_, float g_, float b_) {r = r_; g = g_; b = b_; }
 	Color() {r = 0.0f; g = 0.0f; b = 0.0f; };
+	Color(float r_, float g_, float b_) {r = r_; g = g_; b = b_; }
+	Color(float val) {r = val; g = val; b = val; }
 
 	// overload the plus operator
 	Color operator+(const Color& other) const {
@@ -41,23 +42,59 @@ public:
 	virtual ~IFSFunction() = default;
 
 	virtual Point operator()(const Point& P) const = 0;
-	Color get_color() const {return _color; }
-	void set_color(Color color) {_color = color; }
-
-protected:
-	Color _color;
 };
 
 class Spherical : public IFSFunction {
 public:
-	Spherical() {};
-	~Spherical() {};
+	Spherical() {}
+	~Spherical() {}
 
 	Point operator()(const Point&P) const;
 };
 
+// Symmetry IFS functions are different so we can skip adding the color when a 
+// symmetry operation is performed. 
+class SymmetryIFS : public IFSFunction {
+public:
+	SymmetryIFS() {}
+	~SymmetryIFS() {}
+};
 
-void apply_random_func(int iters, std::vector<IFSFunction*>& function_ptrs, Point& point, Color& color);
-void apply_random_func(int iters, std::vector<IFSFunction*>& function_ptrs, std::vector<Color>& colors, Point& point, Color& color);
+class Rotation : public SymmetryIFS{
+public:
+	Rotation(float radians) {_radians = radians; }
+	~Rotation() {}
+
+	float get_radians() const { return _radians; }
+
+private:
+	float _radians;
+
+};
+
+class IFSFunctionSystem{
+public:
+	IFSFunctionSystem() {}
+	IFSFunctionSystem(
+		const std::vector<IFSFunction*>& functions,
+		const std::vector<Color>& colors,
+		std::vector<float>& weights
+	);
+
+	~IFSFunctionSystem() {};
+
+	int get_random_weighted_index();
+	const IFSFunction* get_ifs_function(int index) const { return _ifs_functions[index]; }
+	const Color& get_color(int index) const { return _colors[index]; }
+
+	void normalize(std::vector<float>& vec);
+
+private:
+	std::vector<IFSFunction*> _ifs_functions;
+	std::vector<Color> _colors;
+	std::vector<float> _weights;
+};
+
+
 
 #endif

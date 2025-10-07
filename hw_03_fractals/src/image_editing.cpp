@@ -170,7 +170,11 @@ void ImageEditor::fractal_flame(
 	if (function_ptrs.empty() || colors.empty() || !_edited_image) {
 		throw std::runtime_error("Null or empty input to fractal_flame");
 	}
-	_edited_image->set_pixel_values(0.0f);
+
+	// Create an rgba image to store things into. Need RGBA channels 
+	ImageData ff = ImageData();
+	ff.set_dimensions(_edited_image->get_width(), _edited_image->get_height(), 4);
+	ff.set_pixel_values(0.0f);
 	int n_colors = colors.size();
 	int n_funcs = function_ptrs.size();
 	Point p(2 * drand48() - 1, 2 * drand48() - 1);

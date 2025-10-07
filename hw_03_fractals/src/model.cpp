@@ -29,12 +29,12 @@ void Model::fractal_flames() {
 
 	// Color palette 258
 	std::vector<Color> colors = {
-		Color(255, 1275, 186),
-		Color(204, 171, 214),
-		Color(242, 251, 122),
-		Color(0, 251, 122),
-		Color(0, 1298, 227),
-		Color(1, 98, 115)
+		Color(1.0f, 175.0f, 186.0f) / 255.0f,
+		Color(204.0f, 171.0f, 214.0f) / 255.0f,
+		Color(242.0f, 251.0f, 122.0f) / 255.0f,
+		Color(0.0f, 251.0f, 122.0f) / 255.0f,
+		Color(0.0f, 1298.0f, 227.0f) / 255.0f,
+		Color(1.0f, 98.0f, 115.0f) / 255.0f
 	};
 
 	image_editor->clear();
