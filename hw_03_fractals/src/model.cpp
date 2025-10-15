@@ -21,23 +21,58 @@ Model* create_model(ImageData& image_data) {
 void Model::fractal_flames() {
 
 	Spherical ifs_spherical;
+	Sinusoidal ifs_sin;
+	
+	Rotation flip(PI);
+	Rotation small_rot(PI / 10.0);
 
+	Scale skew(1.0, 1.0);
 
 	std::vector<IFSFunction*> ifs_functions = {
-		&ifs_spherical
+		&ifs_spherical,
+		&ifs_sin
+	};
+
+	std::vector<float> ifs_weights = {
+		1.0,
+		1.0
+	};
+
+	std::vector<SymmetryIFS*> rotation_functions = {
+		&flip,
+		&small_rot
+	};
+
+	std::vector<float> rotation_weights = {
+		1.0,
+		1.0
 	};
 
 	// Color palette 258
 	std::vector<Color> colors = {
 		Color(1.0f, 175.0f, 186.0f) / 255.0f,
-		Color(204.0f, 171.0f, 214.0f) / 255.0f,
-		Color(242.0f, 251.0f, 122.0f) / 255.0f,
-		Color(0.0f, 251.0f, 122.0f) / 255.0f,
-		Color(0.0f, 1298.0f, 227.0f) / 255.0f,
-		Color(1.0f, 98.0f, 115.0f) / 255.0f
+		Color(204.0f, 171.0f, 214.0f) / 255.0f
+		//Color(242.0f, 251.0f, 122.0f) / 255.0f,
+		//Color(0.0f, 251.0f, 122.0f) / 255.0f,
+		//Color(0.0f, 1298.0f, 227.0f) / 255.0f,
+		//Color(1.0f, 98.0f, 115.0f) / 255.0f
 	};
 
-	image_editor->clear();
-	image_editor->fractal_flame(10, ifs_functions, colors);
+	IFSFunctionSystem ff_system(
+		ifs_functions,
+		ifs_weights,
+		colors,
+		rotation_functions,
+		rotation_weights,
+		&skew,
+		image_editor->get_edited_image()->get_width(),
+		image_editor->get_edited_image()->get_height()
+	);
+
+	int iters = 10000;
+
+	ff_system.fractal_frame(iters);
+
+	image_editor->set_edited_image_to(ff_system.get_image());
 
 }

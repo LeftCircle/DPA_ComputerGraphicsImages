@@ -9,9 +9,16 @@ Point Spherical::operator()(const Point& P) const {
 		return P;
 	}
 	Point result(P.x / rsq, P.y / rsq);
-	std::cout << "rsq = " << rsq << " ";
-	std::cout << "result = " << result.x << ", " << result.y << std::endl;
+	//std::cout << "rsq = " << rsq << " ";
+	//std::cout << "result = " << result.x << ", " << result.y << std::endl;
 	return result;
+}
+
+Point Scale::operator()(const Point& P) const {
+	Point new_p(0.0, 0.0);
+	new_p.x = P.x * _x_scale;
+	new_p.y = P.x * _y_scale;
+	return new_p;
 }
 
 Rotation::Rotation(float radians){
@@ -24,9 +31,19 @@ Rotation::Rotation(float radians){
 	_rotation_matrix_2D[3] = cos_r;
 }
 
-Point Rotation::operator()(const Point&P) const {
+Point Rotation::operator()(const Point& P) const {
 	// Rotates the point by _radians.
-	 
+	Point new_p(0.0, 0.0);
+	new_p.x = _rotation_matrix_2D[0] * P.x + _rotation_matrix_2D[1] * P.y;
+	new_p.y = _rotation_matrix_2D[2] * P.x + _rotation_matrix_2D[3] * P.y;
+	return new_p;
+}
+
+Point Sinusoidal::operator()(const Point& P) const {
+	Point new_p(0.0, 0.0);
+	new_p.x = sin(P.x);
+	new_p.y = sin(P.y);
+	return new_p;
 }
 
 IFSFunctionSystem::IFSFunctionSystem(
@@ -35,6 +52,7 @@ IFSFunctionSystem::IFSFunctionSystem(
 		const std::vector<Color>& colors,
 		const std::vector<SymmetryIFS*>& symmetry_functions,
 		std::vector<float>& symmetry_weights,
+		IFSFunction* final_function,
 		int width,
 		int height
 	) {
@@ -44,6 +62,7 @@ IFSFunctionSystem::IFSFunctionSystem(
 	_weights = weights;
 	_symmetry_functions = symmetry_functions;
 	_symmetry_weights = symmetry_weights;
+	_final_function = final_function;
 	normalize(_symmetry_weights);
 	normalize(_weights);
 	img.set_dimensions(width, height, N_CHANNELS);
@@ -80,13 +99,11 @@ void IFSFunctionSystem::fractal_frame(int iters){
 	// for each iteration, roll a random check to see if we pull a 
 	// IF or a Symmetry function. Then apply to the rand point
 	img.set_pixel_values(0.0f);
-	int n_colors = _colors.size();
 	Point p(double(2 * drand48() - 1), double(2 * drand48() - 1));
-	Color color(0.0f, 0.0f, 0.0f);
 	int width = img.get_width();
 	int height = img.get_height();
 	std::vector<float> rgb(3, 0.0f);
-	
+
 	// Alpha channel will contain hit count for now
 	int rand_index;
 	IFSFunction* ifs;
@@ -106,6 +123,9 @@ void IFSFunctionSystem::fractal_frame(int iters){
 			const Color& c = get_color(rand_index);
 			p = (*ifs)(p);
 
+			// TO DO -> Add a final function that is the same every time?
+			p = (*_final_function)(p);
+
 			// Now add values to the img
 			int xp = int(((p.x + 1.0f) / 2.0f) * width);
 			int yp = int(((p.y + 1.0f) / 2.0f) * height);
@@ -114,19 +134,24 @@ void IFSFunctionSystem::fractal_frame(int iters){
 			} else {
 				// add values to the pixel
 				// TO DO -> Apply less value at the start? 
-				img.add_values(xp, yp, color.r, color.g, color.b, 1.0f);
+				img.add_values(xp, yp, c.r, c.g, c.b, 1.0f);
+				//std::cout << "Drawing to pixel " << xp << " " << yp << " " << color.r << " " << color.g << " " << color.b <<  std::endl;
 			}	
 		}
 
 		// Now we have to do our post processing and adjust the color and alpha parameters
 		// based off of log(alpha) / alpha
-		for (int j = 0; j < img.get_height(); j++){
-			#pragma omp parallel for
-			for (int i = 0; i < img.get_width(); i++){
-				float a = img.get_pixel_value(i, j, 3);
-				float loga_over_a = log(a) / a;
-				img.scale_pixel_values(i, j, loga_over_a);
-			}
-		}
+		// #pragma omp parallel for
+		// for (int j = 0; j < img.get_height(); j++){
+		// 	for (int i = 0; i < img.get_width(); i++){
+		// 		float a = img.get_pixel_value(i, j, 3);
+		// 		if (a == 0){
+		// 			continue;
+		// 		}
+		// 		float loga_over_a = log(a) / a;
+		// 		std::cout << "log a over a = " << loga_over_a << " a = " << a << std::endl;
+		// 		img.scale_pixel_values(i, j, loga_over_a);
+		// 	}
+		// }
 	}
 }

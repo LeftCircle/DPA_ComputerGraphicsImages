@@ -26,6 +26,7 @@ public:
 	void flip();
 	void clear();
 	void fractal_flame(int iters, std::vector<IFSFunction*>& function_ptrs, std::vector<Color>& colors);
+	void set_edited_image_to(const ImageData& other_image)  {*_edited_image = other_image; }
 
 private:
 	ImageData* _starting_image;

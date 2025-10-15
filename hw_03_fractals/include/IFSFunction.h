@@ -9,6 +9,8 @@
 #include <image_data.h>
 
 const float EPSILON = 0.000001;
+const float PI = 3.14159265358979;
+const float PI_OVER_TWO = PI / 2;
 
 struct Point{
 	double x, y;
@@ -54,6 +56,26 @@ public:
 	Point operator()(const Point& P) const;
 };
 
+class Sinusoidal : public IFSFunction {
+public:
+	Sinusoidal() {}
+	~Sinusoidal() {}
+
+	Point operator()(const Point& P) const;
+};
+
+class Scale : public IFSFunction {
+public:
+	Scale(float x_scale, float y_scale) { _x_scale = x_scale, _y_scale = y_scale ; }
+	~Scale() {}
+
+	Point operator()(const Point& P) const;
+
+private:
+	float _x_scale;
+	float _y_scale;
+};
+
 // Symmetry IFS functions are different so we can skip adding the color when a 
 // symmetry operation is performed. 
 class SymmetryIFS : public IFSFunction {
@@ -88,6 +110,7 @@ public:
 		const std::vector<Color>& colors,
 		const std::vector<SymmetryIFS*>& symmetry_functions,
 		std::vector<float>& symmetry_weights,
+		IFSFunction* final_function,
 		int width,
 		int height
 	);
@@ -99,6 +122,7 @@ public:
 	IFSFunction* get_ifs_function(int index) const { return _ifs_functions[index]; }
 	SymmetryIFS* get_symmetry_function(int index) const { return _symmetry_functions[index]; }
 	const Color& get_color(int index) const { return _colors[index]; }
+	const ImageData& get_image() const {return img; }
 
 	void normalize(std::vector<float>& vec);
 
