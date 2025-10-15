@@ -9,6 +9,7 @@
 
 
 #include <image_data.h>
+#include <color.h>
 
 const float EPSILON = 0.000001;
 const float PI = 3.14159265358979;
@@ -20,24 +21,6 @@ struct Point{
 	Point() {x = 0.0, y = 0.0; };
 };
 
-struct Color{
-	float r, g, b = 0.0f;
-	Color() {r = 0.0f; g = 0.0f; b = 0.0f; };
-	Color(float r_, float g_, float b_) {r = r_; g = g_; b = b_; }
-	Color(float val) {r = val; g = val; b = val; }
-
-	// overload the plus operator
-	Color operator+(const Color& other) const {
-		return Color(r + other.r, g + other.g, b + other.b);
-	}
-	Color operator/(const Color& other) const {
-		return Color(r / other.r, g / other.g, b / other.b);
-	}
-
-	Color operator/(const float f) const {
-		return Color(r / f, g / f, b / f);
-	}
-};
 
 class IFSFunction {
 public:
