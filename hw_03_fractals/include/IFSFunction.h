@@ -51,7 +51,7 @@ public:
 	Spherical() {}
 	~Spherical() {}
 
-	Point operator()(const Point&P) const;
+	Point operator()(const Point& P) const;
 };
 
 // Symmetry IFS functions are different so we can skip adding the color when a 
@@ -64,12 +64,17 @@ public:
 
 class Rotation : public SymmetryIFS{
 public:
-	Rotation(float radians) {_radians = radians; }
+	Rotation(float radians);
 	~Rotation() {}
 
 	float get_radians() const { return _radians; }
 
+	Point operator()(const Point& P) const;
+
 private:
+	// TO DO -> Cache the rotation matrix when the radians are set
+	// Might be a good time to include a matrix class?
+	float _rotation_matrix_2D[4];
 	float _radians;
 
 };

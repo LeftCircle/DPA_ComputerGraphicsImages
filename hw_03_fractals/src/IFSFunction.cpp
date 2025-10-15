@@ -14,6 +14,21 @@ Point Spherical::operator()(const Point& P) const {
 	return result;
 }
 
+Rotation::Rotation(float radians){
+	_radians = radians;
+	float cos_r = cos(radians);
+	float sin_r = sin(radians);
+	_rotation_matrix_2D[0] = cos_r;
+	_rotation_matrix_2D[1] = -sin_r;
+	_rotation_matrix_2D[2] = sin_r;
+	_rotation_matrix_2D[3] = cos_r;
+}
+
+Point Rotation::operator()(const Point&P) const {
+	// Rotates the point by _radians.
+	 
+}
+
 IFSFunctionSystem::IFSFunctionSystem(
 		const std::vector<IFSFunction*>& functions,
 		std::vector<float>& weights,
@@ -98,19 +113,18 @@ void IFSFunctionSystem::fractal_frame(int iters){
 				continue;
 			} else {
 				// add values to the pixel
+				// TO DO -> Apply less value at the start? 
 				img.add_values(xp, yp, color.r, color.g, color.b, 1.0f);
 			}	
 		}
 
 		// Now we have to do our post processing and adjust the color and alpha parameters
 		// based off of log(alpha) / alpha
-		#pragma omp parallel for
 		for (int j = 0; j < img.get_height(); j++){
-			float loga_over_a = 0.0f;
-			float a;
+			#pragma omp parallel for
 			for (int i = 0; i < img.get_width(); i++){
 				float a = img.get_pixel_value(i, j, 3);
-				loga_over_a = log(a) / a;
+				float loga_over_a = log(a) / a;
 				img.scale_pixel_values(i, j, loga_over_a);
 			}
 		}
