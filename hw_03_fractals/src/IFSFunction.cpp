@@ -21,6 +21,28 @@ Point Scale::operator()(const Point& P) const {
 	return new_p;
 }
 
+JuliaSet::JuliaSet(const Point& center, int iters, int cycles){
+	 _iterations = iters, _cycles = std::max(cycles, 2);
+	 _center.x = center.x;
+	 _center.y = center.y; 
+}
+
+Point JuliaSet::operator()(const Point& P) const {
+	std::complex<double> Pc(P.x, P.y);
+	std::complex<double> cc(_center.x, _center.y);
+
+	for (int i = 0; i < _iterations; i++){
+		std::complex<double> temp = Pc;
+		for (int c = 1; c < _cycles; c++){
+			temp = temp * Pc;
+		}
+		Pc = temp + cc;
+	}
+
+	Point p_out(Pc.real(), Pc.imag());
+	return p_out;
+}
+
 Rotation::Rotation(float radians){
 	_radians = radians;
 	float cos_r = cos(radians);

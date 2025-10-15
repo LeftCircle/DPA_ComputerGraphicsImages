@@ -4,7 +4,9 @@
 #include <vector>
 #include <cmath>
 #include <stdlib.h>
+#include <complex>
 #include <iostream>
+
 
 #include <image_data.h>
 
@@ -15,7 +17,7 @@ const float PI_OVER_TWO = PI / 2;
 struct Point{
 	double x, y;
 	Point(double new_x, double new_y) { x = new_x; y = new_y; } 
-	Point();
+	Point() {x = 0.0, y = 0.0; };
 };
 
 struct Color{
@@ -36,9 +38,6 @@ struct Color{
 		return Color(r / f, g / f, b / f);
 	}
 };
-
-
-// TO DO -> add a center or x/y translations along with a time??
 
 class IFSFunction {
 public:
@@ -74,6 +73,19 @@ public:
 private:
 	float _x_scale;
 	float _y_scale;
+};
+
+class JuliaSet : public IFSFunction {
+public:	
+	JuliaSet(const Point& center, int iters, int cycles);
+	~JuliaSet() {}
+
+	Point operator()(const Point& P) const;
+
+private:
+	Point _center;
+	int _iterations;
+	int _cycles;
 };
 
 // Symmetry IFS functions are different so we can skip adding the color when a 
