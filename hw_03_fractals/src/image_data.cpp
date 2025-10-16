@@ -108,7 +108,7 @@ void ImageData::add_values(int x, int y, float r, float g, float b, float a){
 void ImageData::scale_values(float scale_factor){
 	const int len = get_data_len();
 	#pragma omp parallel for
-	for (int i = 0; i < get_data_len(); i++){
+	for (int i = 0; i < len; i++){
 		_image_data_ptr[i] *= scale_factor;
 	}
 }

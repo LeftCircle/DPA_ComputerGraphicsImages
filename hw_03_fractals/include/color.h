@@ -18,6 +18,14 @@ struct Color{
 	Color operator/(const float f) const {
 		return Color(r / f, g / f, b / f);
 	}
+
+	bool operator==(const Color& other) const {
+		return (r == other.r && g == other.g && b == other.b);
+	}
+
+	Color operator*(const float t) {
+		r *= t; g *= t, b *= t;
+	}
 };
 
 

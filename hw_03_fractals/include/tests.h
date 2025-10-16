@@ -11,6 +11,9 @@
 #include "image_data.h"
 #include "string_funcs.h"
 #include "image_editing.h"
+#include "lut.h"
+#include "color.h"
+
 
 class Tests{
 public:

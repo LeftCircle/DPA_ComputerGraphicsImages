@@ -164,9 +164,11 @@ void test_test_image(){
     
 }
 
-void test_gamma_filter(){
-
-
+void test_lut() {
+    LUT<Color> color_lut{Color(0.0f), Color(1.0f)};
+    Color return_val = color_lut.lerp(0.5);
+    assert(return_val == Color(0.5));
+    std::cout << "LUT passed!" << std::endl;
 }
 
 
@@ -179,6 +181,11 @@ void Tests::run_tests() {
     test_get_file_type();
     test_write_image();
     test_image_editor_initialization();
-    test_gamma_filter();
+    test_lut();
     std::cout << "All tests passed!" << std::endl;
+}
+
+int main(int argc, char** argv){
+    Tests tests;
+    tests.run_tests();
 }
