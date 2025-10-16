@@ -7,6 +7,7 @@
 #include "stencil.h"
 #include "image_data.h"
 #include "image_editing.h"
+#include "lut.h"
 
 const int DEFAULT_STENCIL_HALF_WIDTH = 5;
 
@@ -38,6 +39,7 @@ private:
 	ImageData* _image_data;
 
 	static Model* pModel;
+
 
 	Model();
 	Model( const Model& );

@@ -6,6 +6,7 @@
 #include <image_data.h>
 #include <stencil.h>
 #include <IFSFunction.h>
+#include <lut.h>
 
 class ImageEditor {
 public:
@@ -26,7 +27,7 @@ public:
 	void flip();
 	void clear();
 	
-	void julia_set();
+	void julia_set(const Point& center, const double range, const IFSFunction& fract, const LUT<Color>& color_lut);
 	//void fractal_flame(int iters, std::vector<IFSFunction*>& function_ptrs, std::vector<Color>& colors);
 	void set_edited_image_to(const ImageData& other_image)  {*_edited_image = other_image; }
 

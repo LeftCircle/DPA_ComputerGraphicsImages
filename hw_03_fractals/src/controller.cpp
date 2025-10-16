@@ -42,6 +42,11 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			std::cout << "gamma of 1.1111" << std::endl;
 			_image_editor->gamma_filter(1.0f + 1.0f / 9.0f);
 			break;
+		case 'J':
+			std::cout << "Applying Julia fractal!" << std::endl;
+			
+			
+			break;
 		case 'j':
 			std::cout << "Key j pressed" << std::endl;
 			_image_editor->save_edited_image();

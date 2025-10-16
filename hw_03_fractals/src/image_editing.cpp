@@ -161,6 +161,34 @@ void ImageEditor::clear(){
 // fractal things!
 // ------------------------------------------------------------------------------------------
 
+
+void ImageEditor::julia_set(const Point& center, const double range, const IFSFunction& fract, const LUT<Color>& color_lut){
+	_edited_image->clear();
+	double w = (double)_edited_image->get_width();
+	double h = (double)_edited_image->get_height();
+	float R = 2.0; // b/c bounds are -1, 1
+	for (int j = 0; j < _edited_image->get_height(); j++){
+		#pragma omp parallel for
+		std::vector<float> color_vec(3, 0.0);
+		for (int i = 0; i < _edited_image->get_width(); i++){
+			Point P;
+			P.x = 2.0 * (double)i / w - 1.0;
+			P.y = 2.0 * (double)j / h - 1.0;
+			P *= range;
+			P += center;
+			Point fractal_point = fract(P);
+			// Check to see if rate is off the image??
+			double rate = std::sqrt(fractal_point.magnitude_sq() / R);
+			Color frac_col = color_lut.lerp((float)rate);
+			color_vec[0] = frac_col.r;
+			color_vec[1] = frac_col.g;
+			color_vec[2] = frac_col.b;
+			_edited_image->set_first_three_channels(i, j, color_vec);
+		}
+	}
+}
+
+
 // void ImageEditor::fractal_flame(
 // 								int iters,
 // 								std::vector<IFSFunction*>& function_ptrs,
