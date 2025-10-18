@@ -27,6 +27,17 @@ public:
 		return _table[index] * (1.0f - t) + _table[next_index] * t;
 	}
 
+	T lerp(double val) const {
+		val = std::max(0.0, std::min(1.0, val));
+
+		double scaled = val * (_table.size() - 1);
+		int index = static_cast<int>(scaled);
+		double t = scaled - index;
+		int next_index = index == _table.size() - 1 ? 0 : index + 1;
+
+		return _table[index] * (1.0f - t) + _table[next_index] * t;
+	}
+
 
 
 private:

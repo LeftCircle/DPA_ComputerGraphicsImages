@@ -163,7 +163,6 @@ void ImageEditor::clear(){
 
 
 void ImageEditor::julia_set(const Point& center, const double range, const IFSFunction& fract, const LUT<Color>& color_lut){
-	_edited_image->set_pixel_values(0.0f);
 	double w = (double)_edited_image->get_width();
 	double h = (double)_edited_image->get_height();
 	double R = 2.0; // b/c bounds are -1, 1
@@ -178,17 +177,15 @@ void ImageEditor::julia_set(const Point& center, const double range, const IFSFu
 			Point fractal_point = fract(P);
 			
 			double rate = fractal_point.magnitude() / R;
-			//std::cout << "rate = " << rate << std::endl;
 			Color frac_col(0.0, 0.0, 0.0);
 			if (rate <= 1.0){
-				Color frac_col = color_lut.lerp((float)rate);
+				frac_col = color_lut.lerp(rate);
 			}
 			std::vector<float> color_vec(3, 0.0);
 			color_vec[0] = frac_col.r;
 			color_vec[1] = frac_col.g;
 			color_vec[2] = frac_col.b;
 			_edited_image->set_first_three_channels(i, j, color_vec);
-			//std::cout << "Setting pixel " << i << " " << j << " to r " << color_vec[0] << std::endl;
 		}
 	}
 }

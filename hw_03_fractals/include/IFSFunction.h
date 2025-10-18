@@ -24,7 +24,7 @@ struct Point{
 	void operator+=(const Point& other) { x += other.x, y += other.y; }
 
 	double magnitude_sq() {return x*x + y*y; }
-	double magnitude() {return std::sqrt(magnitude_sq()); }
+	double magnitude() {return std::sqrt(x*x + y*y); }
 
 };
 
