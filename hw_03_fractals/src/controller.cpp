@@ -54,6 +54,10 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			std::cout << "Key j pressed" << std::endl;
 			_image_editor->save_edited_image();
 			break;
+		case 'm': {
+			std::cout << "max pixel value is " << _image_editor->get_edited_image()->get_max() << std::endl;
+			break;
+		}
 		case 's':
 			_apply_stencil();
 			break;
@@ -84,10 +88,6 @@ std::pair<int, double> Controller::_get_julia_set_paramters(){
 }
 
 void Controller::_apply_stencil() {
-	// Stencil could be resized here with
-	// Model::instance()->stencil.resize(int new_half_width);
-	// or by changing the default stencil size in Model.h
-	
 	ImageEditor* _image_editor = Model::instance()->image_editor;
 	std::cout << "Applying stencil" << std::endl;
 			

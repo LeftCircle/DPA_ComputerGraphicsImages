@@ -48,6 +48,9 @@ public:
 	const int& get_channels() const { return _channels; }
 	int get_data_len() const;
 	
+	float get_max() const;
+
+
 	void clear();
 	
 	std::string get_output_file_name() const { return _file_name + "_out." + _file_type; }

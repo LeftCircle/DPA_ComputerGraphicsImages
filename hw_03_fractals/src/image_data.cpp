@@ -190,6 +190,14 @@ void ImageData::get_pixel_values(int x, int y, std::vector<float>& values) const
 	}
 }
 
+float ImageData::get_max() const {
+	float max_val = -INFINITY;
+	for(int i = 0; i < get_data_len(); i++){
+		max_val = std::max(_image_data_ptr[i], max_val);
+	}
+	return max_val;
+}
+
 void ImageData::clear() {
 	_width = 0;
 	_height = 0;
