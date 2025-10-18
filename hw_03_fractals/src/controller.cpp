@@ -25,6 +25,7 @@ void Controller::keyboard( unsigned char key, int x, int y )
 		case 'c':
 			std::cout << "Clearing Image" << std::endl;
 			_image_editor->clear();
+			break;
 		case 'f':
 			std::cout << "f key pressed! Should flip" << std::endl;
 			_image_editor->flip();
@@ -42,11 +43,13 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			std::cout << "gamma of 1.1111" << std::endl;
 			_image_editor->gamma_filter(1.0f + 1.0f / 9.0f);
 			break;
-		case 'J':
+		case 'J': {
 			std::cout << "Applying Julia fractal!" << std::endl;
-			model->apply_julia_set();
+			std::pair<int, double> iters_and_range = _get_julia_set_paramters();
+			model->apply_julia_set(iters_and_range.first, iters_and_range.second);
 			std::cout << "Julia fractal finished!" << std::endl;
 			break;
+		}
 		case 'j':
 			std::cout << "Key j pressed" << std::endl;
 			_image_editor->save_edited_image();
@@ -55,6 +58,29 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			_apply_stencil();
 			break;
 	}
+}
+
+std::pair<int, double> Controller::_get_julia_set_paramters(){
+	int iters;
+	double range;
+
+	std::cout << "Enter the number of iterations: (int) " << std::flush;
+	if (!(std::cin >> iters)){
+		std::cin.clear();
+		std::string discard;
+		std::getline(std::cin, discard);
+		std::cout << "Invalid parameters. Just using defaults" << "std::endl";
+		return {100, 1.0};
+	}
+	std:: cout << "Enter a range can be of format ie 1.0 or 1.0e-6: (double)" << std::flush;
+	if (!(std::cin >> range)) {
+		std::cin.clear();
+		std::string discard;
+		std::getline(std::cin, discard);
+		std::cout << "Invalid parameters. Just using defaults" << "std::endl";
+		return {100, 1.0};
+	}
+	return {iters, range};
 }
 
 void Controller::_apply_stencil() {

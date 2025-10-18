@@ -29,6 +29,7 @@ public:
 
 private:
 
+	std::pair<int, double> _get_julia_set_paramters();
 	void _apply_stencil();
 
 	static Controller* pController;

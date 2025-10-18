@@ -34,7 +34,7 @@ public:
 
 	// Image Modification functions and setup
 	void fractal_flames();
-	void apply_julia_set();
+	void apply_julia_set(const int iterations = 100, const double range = 1.0);
 
 private:
 	ImageData* _image_data;
