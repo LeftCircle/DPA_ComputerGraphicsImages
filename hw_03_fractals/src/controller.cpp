@@ -44,8 +44,8 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			break;
 		case 'J':
 			std::cout << "Applying Julia fractal!" << std::endl;
-			
-			
+			model->apply_julia_set();
+			std::cout << "Julia fractal finished!" << std::endl;
 			break;
 		case 'j':
 			std::cout << "Key j pressed" << std::endl;

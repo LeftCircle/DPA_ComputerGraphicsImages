@@ -169,7 +169,6 @@ void ImageEditor::julia_set(const Point& center, const double range, const IFSFu
 	float R = 2.0; // b/c bounds are -1, 1
 	for (int j = 0; j < _edited_image->get_height(); j++){
 		#pragma omp parallel for
-		std::vector<float> color_vec(3, 0.0);
 		for (int i = 0; i < _edited_image->get_width(); i++){
 			Point P;
 			P.x = 2.0 * (double)i / w - 1.0;
@@ -180,6 +179,7 @@ void ImageEditor::julia_set(const Point& center, const double range, const IFSFu
 			// Check to see if rate is off the image??
 			double rate = std::sqrt(fractal_point.magnitude_sq() / R);
 			Color frac_col = color_lut.lerp((float)rate);
+			std::vector<float> color_vec(3, 0.0);
 			color_vec[0] = frac_col.r;
 			color_vec[1] = frac_col.g;
 			color_vec[2] = frac_col.b;

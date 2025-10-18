@@ -23,8 +23,8 @@ struct Color{
 		return (r == other.r && g == other.g && b == other.b);
 	}
 
-	Color operator*(const float t) {
-		r *= t; g *= t, b *= t;
+	Color operator*(const float t) const {
+		return Color(r * t, g * t, b * t);
 	}
 };
 

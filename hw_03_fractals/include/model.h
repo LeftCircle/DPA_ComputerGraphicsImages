@@ -34,10 +34,11 @@ public:
 
 	// Image Modification functions and setup
 	void fractal_flames();
+	void apply_julia_set();
 
 private:
 	ImageData* _image_data;
-
+	
 	static Model* pModel;
 
 

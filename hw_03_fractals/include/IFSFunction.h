@@ -64,15 +64,15 @@ private:
 	float _y_scale;
 };
 
-class JuliaSet : public IFSFunction {
+class JuliaIterations : public IFSFunction {
 public:	
-	JuliaSet(const Point& center, int iters, int cycles);
-	~JuliaSet() {}
+	JuliaIterations(const Point& complex_center, int iters, int cycles);
+	~JuliaIterations() {}
 
 	Point operator()(const Point& P) const;
 
 private:
-	Point _center;
+	Point _complex_center;
 	int _iterations;
 	int _cycles;
 };

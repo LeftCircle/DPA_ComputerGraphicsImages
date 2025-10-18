@@ -76,3 +76,23 @@ void Model::fractal_flames() {
 	image_editor->set_edited_image_to(ff_system.get_image());
 
 }
+
+void Model::apply_julia_set(){
+
+	// Initial parameters are fixed at the moment
+	Point center(0.03811, 0.01329);
+	Point complex_center(0.8*cos(254.3 * 3.14159265/180.0), 0.8*sin(254.3 * 3.14159265/180.0));
+	int iters = 100;
+	const double range = 1.0;
+
+	JuliaIterations jul(complex_center, 100, 2);
+	LUT<Color> color_lut{
+		Color(1.0f, 175.0f, 186.0f) / 255.0f,
+		Color(204.0f, 171.0f, 214.0f) / 255.0f,
+		Color(242.0f, 251.0f, 122.0f) / 255.0f,
+		Color(0.0f, 251.0f, 122.0f) / 255.0f,
+		Color(0.0f, 1298.0f, 227.0f) / 255.0f,
+		Color(1.0f, 98.0f, 115.0f) / 255.0f
+	};
+	image_editor->julia_set(center, range, jul, color_lut);
+}

@@ -21,15 +21,15 @@ Point Scale::operator()(const Point& P) const {
 	return new_p;
 }
 
-JuliaSet::JuliaSet(const Point& center, int iters, int cycles){
+JuliaIterations::JuliaIterations(const Point& complex_center, int iters, int cycles){
 	 _iterations = iters, _cycles = std::max(cycles, 2);
-	 _center.x = center.x;
-	 _center.y = center.y; 
+	 _complex_center.x = complex_center.x;
+	 _complex_center.y = complex_center.y; 
 }
 
-Point JuliaSet::operator()(const Point& P) const {
+Point JuliaIterations::operator()(const Point& P) const {
 	std::complex<double> Pc(P.x, P.y);
-	std::complex<double> cc(_center.x, _center.y);
+	std::complex<double> cc(_complex_center.x, _complex_center.y);
 
 	for (int i = 0; i < _iterations; i++){
 		std::complex<double> temp = Pc;
