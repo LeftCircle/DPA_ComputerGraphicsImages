@@ -96,6 +96,13 @@ void ImageData::set_first_three_channels(int x, int y, const std::vector<float>&
 	}
 }
 
+void ImageData::set_first_three_channels(int x, int y, float r, float g, float b){
+	int index = (y * _width + x) * _channels;
+	_image_data_ptr[index] = r;
+	_image_data_ptr[index + 1] = g;
+	_image_data_ptr[index + 2] = b;
+}
+
 void ImageData::add_values(int x, int y, float r, float g, float b, float a){
 	assert(_channels >= 4);
 	int start_index = (y * _width + x) * _channels;
@@ -103,6 +110,26 @@ void ImageData::add_values(int x, int y, float r, float g, float b, float a){
 	_image_data_ptr[start_index + 1] += g;
 	_image_data_ptr[start_index + 2] += b;
 	_image_data_ptr[start_index + 3] += a;
+}
+
+void ImageData::add_value(int x, int y, int channel, float val){
+	assert(channel < _channels);
+	int index = (y * _width + x) * _channels + channel;
+	_image_data_ptr[index] += val;
+}
+
+void ImageData::mix_rgb_values(int x, int y, float r, float g, float b){
+	int index = (y * _width + x) * _channels;
+	_image_data_ptr[index] = (_image_data_ptr[index] + r) / 2.0f;
+	_image_data_ptr[index + 1] = (_image_data_ptr[index + 1] + g) / 2.0f;
+	_image_data_ptr[index + 2] = (_image_data_ptr[index + 2] + b) / 2.0f;
+}
+
+void ImageData::mix_rgb_values(int x, int y, float r, float g, float b, float weight){
+	int index = (y * _width + x) * _channels;
+	_image_data_ptr[index] = (_image_data_ptr[index] * (1.0f - weight)) + (r * weight);
+	_image_data_ptr[index + 1] = (_image_data_ptr[index + 1] * (1.0f - weight)) + (g * weight);
+	_image_data_ptr[index + 2] = (_image_data_ptr[index + 2] * (1.0f - weight)) + (b * weight);
 }
 
 void ImageData::scale_values(float scale_factor){

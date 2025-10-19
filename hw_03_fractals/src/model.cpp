@@ -56,40 +56,47 @@ void Model::on_down_arrow_pressed() {
 
 void Model::fractal_flames() {
 
-	Spherical ifs_spherical;
+	Spherical ifs_spherical(0.5, 0.0, 1.0, 1.0);
+	Spherical ifs_spherical2(-0.5, 0.0, 0.1, 0.1);
+	Spherical ifs_spherical3(0.0, 0.5, 0.5, 0.5);
+	Spherical ifs_spherical4(0.0, -0.5, 0.3, 0.3);
 	Sinusoidal ifs_sin;
 	
 	Rotation flip(PI);
-	Rotation small_rot(PI / 10.0);
+	Rotation small_rot(PI / 75.0);
 
 	Scale skew(1.0, 1.0);
 
 	std::vector<IFSFunction*> ifs_functions = {
 		&ifs_spherical,
-		&ifs_sin
+		&ifs_spherical2,
+		&ifs_spherical3,
+		&ifs_spherical4
 	};
 
 	std::vector<float> ifs_weights = {
+		1.0,
+		1.0,
 		1.0,
 		1.0
 	};
 
 	std::vector<SymmetryIFS*> rotation_functions = {
-		&flip,
+		//&flip,
 		&small_rot
 	};
 
 	std::vector<float> rotation_weights = {
-		1.0,
 		1.0
+		//0.1
 	};
 
 	// Color palette 258
 	std::vector<Color> colors = {
 		Color(1.0f, 175.0f, 186.0f) / 255.0f,
-		Color(204.0f, 171.0f, 214.0f) / 255.0f
-		//Color(242.0f, 251.0f, 122.0f) / 255.0f,
-		//Color(0.0f, 251.0f, 122.0f) / 255.0f,
+		Color(204.0f, 171.0f, 214.0f) / 255.0f,
+		Color(242.0f, 251.0f, 122.0f) / 255.0f,
+		Color(0.0f, 251.0f, 122.0f) / 255.0f
 		//Color(0.0f, 1298.0f, 227.0f) / 255.0f,
 		//Color(1.0f, 98.0f, 115.0f) / 255.0f
 	};
@@ -105,7 +112,7 @@ void Model::fractal_flames() {
 		image_editor->get_edited_image()->get_height()
 	);
 
-	int iters = 10000;
+	int iters = 50000000;
 
 	ff_system.fractal_frame(iters);
 

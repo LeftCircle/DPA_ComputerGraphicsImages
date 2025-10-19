@@ -3,21 +3,23 @@
 
 
 Point Spherical::operator()(const Point& P) const {
-	double rsq = P.x * P.x + P.y * P.y;
+	Point shifted_p = P;
+	shifted_p -= _center;
+	shifted_p *= _scale;
+	double rsq = shifted_p.magnitude_sq();
 	if (abs(rsq) < EPSILON){
-		std::cout << "Epsilon" << std::endl;
+		//std::cout << "Epsilon" << std::endl;
 		return P;
 	}
-	Point result(P.x / rsq, P.y / rsq);
-	//std::cout << "rsq = " << rsq << " ";
-	//std::cout << "result = " << result.x << ", " << result.y << std::endl;
-	return result;
+	shifted_p /= rsq;
+	shifted_p += _center;
+	return shifted_p;
 }
 
 Point Scale::operator()(const Point& P) const {
 	Point new_p(0.0, 0.0);
 	new_p.x = P.x * _x_scale;
-	new_p.y = P.x * _y_scale;
+	new_p.y = P.y * _y_scale;
 	return new_p;
 }
 
@@ -85,6 +87,11 @@ IFSFunctionSystem::IFSFunctionSystem(
 	_symmetry_functions = symmetry_functions;
 	_symmetry_weights = symmetry_weights;
 	_final_function = final_function;
+	bool _inputs_correct = _are_inputs_correct();
+	if (!_inputs_correct){
+		throw std::invalid_argument("IFSFunctionSystem inputs are not correct. See error messages above.");
+	}
+
 	normalize(_symmetry_weights);
 	normalize(_weights);
 	img.set_dimensions(width, height, N_CHANNELS);
@@ -130,6 +137,8 @@ void IFSFunctionSystem::fractal_frame(int iters){
 	int rand_index;
 	IFSFunction* ifs;
 	SymmetryIFS* sym;
+	float itersf = static_cast<float>(iters);
+	float one_over_itersf = 1.0f / itersf;
 
 	for (int i = 1; i <= iters; i++){
 		// Roll for symmetry func
@@ -138,42 +147,57 @@ void IFSFunctionSystem::fractal_frame(int iters){
 			rand_index = get_random_weighted_index(_symmetry_weights);
 			sym = get_symmetry_function(rand_index);
 			p = (*sym)(p);
-		} else{
-			// Update p and also adjust the color
-			rand_index = get_random_weighted_index(_weights);
-			ifs = get_ifs_function(rand_index);
-			const Color& c = get_color(rand_index);
-			p = (*ifs)(p);
-
-			// TO DO -> Add a final function that is the same every time?
-			p = (*_final_function)(p);
-
-			// Now add values to the img
-			int xp = int(((p.x + 1.0f) / 2.0f) * width);
-			int yp = int(((p.y + 1.0f) / 2.0f) * height);
-			if (xp < 0 || xp >= width || yp < 0 || yp >= height){
-				continue;
-			} else {
-				// add values to the pixel
-				// TO DO -> Apply less value at the start? 
-				img.add_values(xp, yp, c.r, c.g, c.b, 1.0f);
-				//std::cout << "Drawing to pixel " << xp << " " << yp << " " << color.r << " " << color.g << " " << color.b <<  std::endl;
-			}	
 		}
+		// Update p and also adjust the color
+		rand_index = get_random_weighted_index(_weights);
+		ifs = get_ifs_function(rand_index);
+		const Color& c = get_color(rand_index);
+		p = (*ifs)(p);
 
-		// Now we have to do our post processing and adjust the color and alpha parameters
-		// based off of log(alpha) / alpha
-		// #pragma omp parallel for
-		// for (int j = 0; j < img.get_height(); j++){
-		// 	for (int i = 0; i < img.get_width(); i++){
-		// 		float a = img.get_pixel_value(i, j, 3);
-		// 		if (a == 0){
-		// 			continue;
-		// 		}
-		// 		float loga_over_a = log(a) / a;
-		// 		std::cout << "log a over a = " << loga_over_a << " a = " << a << std::endl;
-		// 		img.scale_pixel_values(i, j, loga_over_a);
-		// 	}
-		// }
+		p = (*_final_function)(p);
+
+		// Now add values to the img
+		int xp = int(((p.x + 1.0f) / 2.0f) * width);
+		int yp = int(((p.y + 1.0f) / 2.0f) * height);
+		if (xp < 0 || xp >= width || yp < 0 || yp >= height){
+			continue;
+		} else {
+			// add values to the pixel
+			img.mix_rgb_values(xp, yp, c.r, c.g, c.b);
+			img.add_value(xp, yp, 3, (float)i / itersf);
+
+			//std::cout << "Drawing to pixel " << xp << " " << yp << " " << color.r << " " << color.g << " " << color.b <<  std::endl;
+		}
 	}
+	// Now we have to do our post processing and adjust the color and alpha parameters
+	// based off of log(alpha) / alpha
+	for (int j = 0; j < img.get_height(); j++){
+		#pragma omp parallel for
+		for (int i = 0; i < img.get_width(); i++){
+			float a = img.get_pixel_value(i, j, 3);
+			if (a == 0){
+				continue;
+			}
+			float loga_over_a = log(a) / a;
+			//std::cout << "log a over a = " << loga_over_a << " a = " << a << std::endl;
+			img.scale_pixel_values(i, j, loga_over_a);
+		}
+	}
+}
+
+bool IFSFunctionSystem::_are_inputs_correct() const {
+	bool correct = true;
+	if (_ifs_functions.size() != _weights.size()) {
+		std::cerr << "Error: Number of IFS functions does not match number of weights." << std::endl;
+		correct = false;
+	}
+	if (_ifs_functions.size() != _colors.size()) {
+		std::cerr << "Error: Number of IFS functions does not match number of colors." << std::endl;
+		correct = false;
+	}
+	if (_symmetry_functions.size() != _symmetry_weights.size()) {
+		std::cerr << "Error: Number of symmetry functions does not match number of symmetry weights." << std::endl;
+		correct = false;
+	}
+	return correct;
 }

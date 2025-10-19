@@ -21,7 +21,16 @@ struct Point{
 	Point() {x = 0.0, y = 0.0; };
 
 	void operator*=(double val) { x *= val, y *= val; }
+	void operator*=(const Point& other) { x *= other.x, y *= other.y; }
+	
+	void operator/=(double val) { x /= val, y /= val; }
+	void operator/=(const Point& other) { x /= other.x, y /= other.y; }
+
 	void operator+=(const Point& other) { x += other.x, y += other.y; }
+	void operator-=(const Point& other) { x -= other.x, y -= other.y; }
+
+	Point operator+(const Point& other) const { return Point(x + other.x, y + other.y); }
+	Point operator-(const Point& other) const { return Point(x - other.x, y - other.y); }
 
 	double magnitude_sq() {return x*x + y*y; }
 	double magnitude() {return std::sqrt(x*x + y*y); }
@@ -31,7 +40,7 @@ struct Point{
 
 class IFSFunction {
 public:
-	IFSFunction(){};
+	IFSFunction() {}
 	virtual ~IFSFunction() = default;
 
 	virtual Point operator()(const Point& P) const = 0;
@@ -39,10 +48,17 @@ public:
 
 class Spherical : public IFSFunction {
 public:
-	Spherical() {}
+	Spherical() : _center(0.0, 0.0), _scale(1.0, 1.0) {}
+	Spherical(const Point& center, const Point& scale) : _center(center), _scale(scale) {}
+	Spherical(double center_x, double center_y, double scale_x, double scale_y) 
+		: _center(Point(center_x, center_y)), _scale(Point(scale_x, scale_y)) {}
 	~Spherical() {}
 
 	Point operator()(const Point& P) const;
+
+private:
+	Point _center;
+	Point _scale;
 };
 
 class Sinusoidal : public IFSFunction {
@@ -141,6 +157,8 @@ private:
 	std::vector<Color> _colors;
 	std::vector<float> _weights;
 	std::vector<float> _symmetry_weights;
+
+	bool _are_inputs_correct() const;
 };
 
 

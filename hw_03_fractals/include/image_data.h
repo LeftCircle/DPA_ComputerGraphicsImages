@@ -34,9 +34,14 @@ public:
 	void set_pixel_values(const std::vector<float>& values);
 	void set_pixel_values(const float val);
 	void set_first_three_channels(int x, int y, const std::vector<float>& values);
+	void set_first_three_channels(int x, int y, float r, float g, float b);
+
 
 	void add_values(int x, int y, float r, float g, float b, float a);
-	
+	void add_value(int x, int y, int channel, float val);
+	void mix_rgb_values(int x, int y, float r, float g, float b);
+	void mix_rgb_values(int x, int y, float r, float g, float b, float weight);
+
 	void scale_pixel_values(const int x, const int y, const float scale_factor);
 	void scale_values(float scale_factor);
 
