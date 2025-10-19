@@ -44,10 +44,11 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			_image_editor->gamma_filter(1.0f + 1.0f / 9.0f);
 			break;
 		case 'J': {
-			std::cout << "Applying Julia fractal!" << std::endl;
-			std::pair<int, double> iters_and_range = _get_julia_set_paramters();
-			model->apply_julia_set(iters_and_range.first, iters_and_range.second);
-			std::cout << "Julia fractal finished!" << std::endl;
+			//std::cout << "Applying Julia fractal!" << std::endl;
+			//std::pair<int, double> iters_and_range = _get_julia_set_paramters();
+			//model->apply_julia_set(iters_and_range.first, iters_and_range.second);
+			//std::cout << "Julia fractal finished!" << std::endl;
+			model->on_J_pressed();
 			break;
 		}
 		case 'j':
@@ -60,6 +61,28 @@ void Controller::keyboard( unsigned char key, int x, int y )
 		}
 		case 's':
 			_apply_stencil();
+			break;
+	}
+}
+
+void Controller::special_keys(int key, int x, int y){
+	Model* model = Model::instance();
+	switch (key){
+		case GLUT_KEY_UP:
+			std::cout << "Up arrow pressed" << std::endl;
+			model->on_up_arrow_pressed();
+			break;
+		case GLUT_KEY_DOWN:
+			std::cout << "Down arrow pressed" << std::endl;
+			model->on_down_arrow_pressed();
+			break;
+		case GLUT_KEY_RIGHT:
+			std::cout << "Right arrow pressed" << std::endl;
+			model->on_right_arrow_pressed();
+			break;
+		case GLUT_KEY_LEFT:
+			std::cout << "Left arrow pressed" << std::endl;	
+			model->on_left_arrow_pressed();
 			break;
 	}
 }

@@ -26,6 +26,7 @@ public:
 	~Controller();
 
 	void keyboard( unsigned char key, int x, int y );
+	void special_keys(int key, int x, int y);
 
 private:
 
