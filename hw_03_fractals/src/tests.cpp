@@ -172,6 +172,15 @@ void test_lut() {
 }
 
 void test_eigen_2x3_inverse(){
+    // Test taking a 2D point from one coordinate space to another and back
+    Eigen::Matrix<float, 2, 3> transform;
+    transform << 0.5, 0.0, -1.0,
+                 0.0, 0.5, -1.0;
+    // The OG coordinate system is just the standard one with origin at (0,0)
+    Eigen::Vector3f point_og(0.5f, 1.5f, 1.0f); // Homogeneous coordinates
+    Eigen::Vector2f transformed_point = transform * point_og;
+
+    // Now invert the transform
     
 }
 
