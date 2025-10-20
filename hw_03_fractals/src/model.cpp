@@ -56,11 +56,16 @@ void Model::on_down_arrow_pressed() {
 
 void Model::fractal_flames() {
 
-	Spherical ifs_spherical(0.5, 0.0, 1.0, 1.0);
+	Spherical ifs_spherical(0.0, 0.0, 1.0, 1.0);
 	Spherical ifs_spherical2(-0.5, 0.0, 0.1, 0.1);
 	Spherical ifs_spherical3(0.0, 0.5, 0.5, 0.5);
 	Spherical ifs_spherical4(0.0, -0.5, 0.3, 0.3);
 	Sinusoidal ifs_sin;
+	Sinusoidal ifs_sin_1;
+	ifs_sin.set_trans_matrix(0.1, 0.0, 0.5, 0.0, 0.1, -0.5);
+	ifs_sin_1.set_trans_matrix(0.1, 0.0, -0.5, 0.0, 0.1, 0.5);
+	
+
 	Linear ifs_linear(1.0, 1.0);
 	Linear ifs_linear_grow_x(1.1, 1.0);
 	Linear ifs_linear_grow_y(1.0, 1.1);
@@ -79,38 +84,18 @@ void Model::fractal_flames() {
 
 	Linear skew(1.0, 1.0);
 
-	std::vector<IFSFunction*> ifs_functions = {
+	std::vector<FlameIFSFunction*> ifs_functions = {
 		&ifs_linear,
-		&ifs_linear_grow_x,
-		&ifs_linear_grow_y,
-		&ifs_linear_shrink_x,
-		&ifs_linear_shrink_y,
-		&ifs_truncate
+		&ifs_sin,
+		&ifs_sin_1,
+		//&ifs_spherical
 	};
 
 	std::vector<float> ifs_weights = {
 		1.0,
 		1.0,
 		1.0,
-		1.0,
-		1.0,
-		0.1
-	};
-
-	std::vector<SymmetryIFS*> rotation_functions = {
-		&neg_x,
-		&three_way_symmetry_0,
-		&three_way_symmetry_1,
-		&three_way_symmetry_2
-	};
-
-		std::vector
-	
-	<float> rotation_weights = {
-		1.0,
-		1.0,
-		1.0,
-		1.0
+		//1.0
 	};
 
 	// Color palette 258
@@ -118,10 +103,25 @@ void Model::fractal_flames() {
 		Color(1.0f, 175.0f, 186.0f) / 255.0f,
 		Color(204.0f, 171.0f, 214.0f) / 255.0f,
 		Color(242.0f, 251.0f, 122.0f) / 255.0f,
-		Color(0.0f, 251.0f, 122.0f) / 255.0f,
-		Color(0.0f, 129.0f, 227.0f) / 255.0f,
-		Color(1.0f, 98.0f, 115.0f) / 255.0f
+		//Color(0.0f, 251.0f, 122.0f) / 255.0f,
+		//Color(0.0f, 129.0f, 227.0f) / 255.0f,
+		//Color(1.0f, 98.0f, 115.0f) / 255.0f
 	};
+	
+	std::vector<SymmetryIFS*> rotation_functions = {
+		// &neg_x,
+		// &three_way_symmetry_0,
+		// &three_way_symmetry_1,
+		// &three_way_symmetry_2
+	};
+	
+	std::vector<float> rotation_weights = {
+		// 1.0,
+		// 1.0,
+		// 1.0,
+		// 1.0
+	};
+
 
 	IFSFunctionSystem ff_system(
 		ifs_functions,

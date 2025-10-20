@@ -72,12 +72,12 @@ Point Sinusoidal::operator()(const Point& P) const {
 }
 
 IFSFunctionSystem::IFSFunctionSystem(
-		const std::vector<IFSFunction*>& functions,
+		const std::vector<FlameIFSFunction*>& functions,
 		std::vector<float>& weights,
 		const std::vector<Color>& colors,
 		const std::vector<SymmetryIFS*>& symmetry_functions,
 		std::vector<float>& symmetry_weights,
-		IFSFunction* final_function,
+		FlameIFSFunction* final_function,
 		int width,
 		int height
 	) {
@@ -134,14 +134,15 @@ void IFSFunctionSystem::fractal_frame(int iters){
 
 	// Alpha channel will contain hit count for now
 	int rand_index;
-	IFSFunction* ifs;
+	FlameIFSFunction* ifs;
 	SymmetryIFS* sym;
 	float itersf = static_cast<float>(iters);
 	float one_over_itersf = 1.0f / itersf;
+	bool has_sym = has_symmetry();
 
 	for (int i = 1; i <= iters; i++){
 		// Roll for symmetry func
-		if (drand48() < 0.5){
+		if (drand48() < 0.5 && has_sym){
 			// symmetry!
 			rand_index = get_random_weighted_index(_symmetry_weights);
 			sym = get_symmetry_function(rand_index);
@@ -151,8 +152,15 @@ void IFSFunctionSystem::fractal_frame(int iters){
 		rand_index = get_random_weighted_index(_weights);
 		ifs = get_ifs_function(rand_index);
 		const Color& c = get_color(rand_index);
-		p = (*ifs)(p);
+		// First apply the affine transform from the FlameIFSFunction
+		const float* affine_t = (*ifs).get_trans_matrix();
+		Point pt(
+			affine_t[0] * p.x + affine_t[1] * p.y + affine_t[2],
+			affine_t[3] * p.x + affine_t[4] * p.y + affine_t[5]
+		);
+		p = (*ifs)(pt);
 
+		// Remove affine transformation?
 		p = (*_final_function)(p);
 
 		// Now add values to the img

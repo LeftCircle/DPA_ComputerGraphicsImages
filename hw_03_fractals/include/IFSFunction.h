@@ -6,10 +6,13 @@
 #include <stdlib.h>
 #include <complex>
 #include <iostream>
+#include <Eigen/Core>
+#include <Eigen/Dense>
 
 
 #include <image_data.h>
 #include <color.h>
+#include <point.h>
 
 const float EPSILON = 0.000001;
 const float PI = 3.14159265358979;
@@ -26,32 +29,6 @@ inline float trunc(float x) { return (x >= 0.0f) ? std::floor(x) : std::ceil(x);
 inline float decimal_part(float x) { return x - trunc(x); }
 
 
-struct Point{
-	double x, y;
-	Point(double new_x, double new_y) { x = new_x; y = new_y; } 
-	Point() {x = 0.0, y = 0.0; };
-
-	void operator*=(double val) { x *= val, y *= val; }
-	void operator*=(const Point& other) { x *= other.x, y *= other.y; }
-
-	void operator/=(double val) { x /= val, y /= val; }
-	void operator/=(const Point& other) { x /= other.x, y /= other.y; }
-
-	void operator+=(const Point& other) { x += other.x, y += other.y; }
-	void operator-=(const Point& other) { x -= other.x, y -= other.y; }
-
-	Point operator+(const Point& other) const { return Point(x + other.x, y + other.y); }
-	Point operator-(const Point& other) const { return Point(x - other.x, y - other.y); }
-
-	Point operator*(const Point& other) const { return Point(x * other.x, y * other.y); }
-	Point operator/(const Point& other) const { return Point(x / other.x, y / other.y); }
-
-	double magnitude_sq() {return x*x + y*y; }
-	double magnitude() {return std::sqrt(x*x + y*y); }
-
-};
-
-
 class IFSFunction {
 public:
 	IFSFunction() {}
@@ -60,7 +37,37 @@ public:
 	virtual Point operator()(const Point& P) const = 0;
 };
 
-class Linear : public IFSFunction {
+class FlameIFSFunction : public IFSFunction {
+public:
+	FlameIFSFunction() : _transform_matrix{1.0, 0.0, 0.0, 0.0, 1.0, 0.0} {}
+	FlameIFSFunction(float m00, float m01, float m02, float m10, float m11, float m12) : _transform_matrix{
+		m00, m01, m02, m10, m11, m12} {}
+	~FlameIFSFunction() {}
+
+	virtual Point operator()(const Point& P) const = 0;
+	const float* get_trans_matrix() const { return _transform_matrix; }
+	void set_trans_matrix(float m00, float m01, float m02, float m10, float m11, float m12){
+		_transform_matrix[0] = m00;
+		_transform_matrix[1] = m01;
+		_transform_matrix[2] = m02;
+		_transform_matrix[3] = m10;
+		_transform_matrix[4] = m11;
+		_transform_matrix[5] = m12;
+	}
+
+protected:
+	float _transform_matrix[6];
+};
+
+class Sinusoidal : public FlameIFSFunction {
+public:
+	Sinusoidal() {}
+	~Sinusoidal() {}
+
+	Point operator()(const Point& P) const;
+};
+
+class Linear : public FlameIFSFunction {
 public:
 	Linear() : _scale(1.0, 1.0) {}
 	Linear(float x_scale = 1.0, float y_scale = 1.0) : _scale(x_scale, y_scale) {}
@@ -70,7 +77,7 @@ private:
 	Point _scale;
 };
 
-class Truncate : public IFSFunction {
+class Truncate : public FlameIFSFunction {
 public:
 	Truncate() {}
 	~Truncate() {}
@@ -78,7 +85,7 @@ public:
 	Point operator()(const Point& P) const { return Point(decimal_part(P.x), decimal_part(P.y)); };
 };
 
-class Spherical : public IFSFunction {
+class Spherical : public FlameIFSFunction {
 public:
 	Spherical() : _center(0.0, 0.0), _scale(1.0, 1.0) {}
 	Spherical(const Point& center, const Point& scale) : _center(center), _scale(scale) {}
@@ -93,15 +100,8 @@ private:
 	Point _scale;
 };
 
-class Sinusoidal : public IFSFunction {
-public:
-	Sinusoidal() {}
-	~Sinusoidal() {}
 
-	Point operator()(const Point& P) const;
-};
-
-class JuliaIterations : public IFSFunction {
+class JuliaIterations : public FlameIFSFunction {
 public:	
 	JuliaIterations(const Point& complex_center, int iters, int cycles);
 	~JuliaIterations() {}
@@ -151,12 +151,12 @@ class IFSFunctionSystem{
 public:
 	IFSFunctionSystem() {}
 	IFSFunctionSystem(
-		const std::vector<IFSFunction*>& functions,
+		const std::vector<FlameIFSFunction*>& functions,
 		std::vector<float>& weights,
 		const std::vector<Color>& colors,
 		const std::vector<SymmetryIFS*>& symmetry_functions,
 		std::vector<float>& symmetry_weights,
-		IFSFunction* final_function,
+		FlameIFSFunction* final_function,
 		int width,
 		int height
 	);
@@ -165,7 +165,7 @@ public:
 	void fractal_frame(int iter);
 
 	int get_random_weighted_index(const std::vector<float>& weights);
-	IFSFunction* get_ifs_function(int index) const { return _ifs_functions[index]; }
+	FlameIFSFunction* get_ifs_function(int index) const { return _ifs_functions[index]; }
 	SymmetryIFS* get_symmetry_function(int index) const { return _symmetry_functions[index]; }
 	const Color& get_color(int index) const { return _colors[index]; }
 	const ImageData& get_image() const {return img; }
@@ -174,13 +174,14 @@ public:
 
 	// for RGBA
 	const int N_CHANNELS = 4;
+	bool has_symmetry() { return _symmetry_functions.size() > 0; }
 
 private:
 
 	ImageData img;
 
-	std::vector<IFSFunction*> _ifs_functions;
-	IFSFunction* _final_function;
+	std::vector<FlameIFSFunction*>_ifs_functions;
+	FlameIFSFunction* _final_function;
 	std::vector<SymmetryIFS*> _symmetry_functions;
 	std::vector<Color> _colors;
 	std::vector<float> _weights;

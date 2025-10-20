@@ -39,7 +39,7 @@ CFLAGS = -Wall -g -O2 -fPIC -fopenmp -std=c++17 \
 -I/home/leftcircle/programming/include/ 
 
 # Had some problems on the desktop. Not sure if L/home/leftcircle/programming/lib -wl -rpath stuff is needed
-LDFLAGS = -lOpenImageIO -lOpenImageIO_Util -lGL -lGLU -lglut -L/home/leftcircle/programming/lib -Wl,-rpath,/home/leftcircle/programming/lib
+LDFLAGS = -lOpenImageIO -lOpenImageIO_Util -lGL -lGLU -lglut #-L/home/leftcircle/programming/lib -Wl,-rpath,/home/leftcircle/programming/lib
 
 SRC = $(wildcard src/*.cpp)
 # Filter out tests.cpp from the main build

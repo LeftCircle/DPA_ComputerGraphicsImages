@@ -171,6 +171,9 @@ void test_lut() {
     std::cout << "LUT passed!" << std::endl;
 }
 
+void test_eigen_2x3_inverse(){
+    
+}
 
 void Tests::run_tests() {
     test_get_image_length();
@@ -182,6 +185,7 @@ void Tests::run_tests() {
     test_write_image();
     //test_image_editor_initialization();
     test_lut();
+    test_eigen_2x3_inverse();
     std::cout << "All tests passed!" << std::endl;
 }
 
