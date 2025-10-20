@@ -61,34 +61,56 @@ void Model::fractal_flames() {
 	Spherical ifs_spherical3(0.0, 0.5, 0.5, 0.5);
 	Spherical ifs_spherical4(0.0, -0.5, 0.3, 0.3);
 	Sinusoidal ifs_sin;
-	
+	Linear ifs_linear(1.0, 1.0);
+	Linear ifs_linear_grow_x(1.1, 1.0);
+	Linear ifs_linear_grow_y(1.0, 1.1);
+	Linear ifs_linear_shrink_x(1.0 / 1.1, 1.0);
+	Linear ifs_linear_shrink_y(1.0, 1.0 / 1.1);
+	Truncate ifs_truncate;
+
+	negate_x neg_x;
 	Rotation flip(PI);
 	Rotation small_rot(PI / 75.0);
+	Rotation three_way_symmetry_0(2.0 * PI / 3.0);
+	Rotation three_way_symmetry_1(4.0 * PI / 3.0);
+	Rotation three_way_symmetry_2(0.0);
 
-	Scale skew(1.0, 1.0);
+
+
+	Linear skew(1.0, 1.0);
 
 	std::vector<IFSFunction*> ifs_functions = {
-		&ifs_spherical,
-		&ifs_spherical2,
-		&ifs_spherical3,
-		&ifs_spherical4
+		&ifs_linear,
+		&ifs_linear_grow_x,
+		&ifs_linear_grow_y,
+		&ifs_linear_shrink_x,
+		&ifs_linear_shrink_y,
+		&ifs_truncate
 	};
 
 	std::vector<float> ifs_weights = {
 		1.0,
 		1.0,
 		1.0,
-		1.0
+		1.0,
+		1.0,
+		0.1
 	};
 
 	std::vector<SymmetryIFS*> rotation_functions = {
-		//&flip,
-		&small_rot
+		&neg_x,
+		&three_way_symmetry_0,
+		&three_way_symmetry_1,
+		&three_way_symmetry_2
 	};
 
-	std::vector<float> rotation_weights = {
+		std::vector
+	
+	<float> rotation_weights = {
+		1.0,
+		1.0,
+		1.0,
 		1.0
-		//0.1
 	};
 
 	// Color palette 258
@@ -96,9 +118,9 @@ void Model::fractal_flames() {
 		Color(1.0f, 175.0f, 186.0f) / 255.0f,
 		Color(204.0f, 171.0f, 214.0f) / 255.0f,
 		Color(242.0f, 251.0f, 122.0f) / 255.0f,
-		Color(0.0f, 251.0f, 122.0f) / 255.0f
-		//Color(0.0f, 1298.0f, 227.0f) / 255.0f,
-		//Color(1.0f, 98.0f, 115.0f) / 255.0f
+		Color(0.0f, 251.0f, 122.0f) / 255.0f,
+		Color(0.0f, 129.0f, 227.0f) / 255.0f,
+		Color(1.0f, 98.0f, 115.0f) / 255.0f
 	};
 
 	IFSFunctionSystem ff_system(
@@ -117,7 +139,6 @@ void Model::fractal_flames() {
 	ff_system.fractal_frame(iters);
 
 	image_editor->set_edited_image_to(ff_system.get_image());
-
 }
 
 void Model::apply_julia_set(const int iterations, const double range){
@@ -132,8 +153,8 @@ void Model::apply_julia_set(const int iterations, const double range){
 		Color(204.0f, 171.0f, 214.0f) / 255.0f,
 		Color(242.0f, 251.0f, 122.0f) / 255.0f,
 		Color(0.0f, 251.0f, 122.0f) / 255.0f,
-		Color(0.0f, 1298.0f, 227.0f) / 255.0f,
-		Color(1.0f, 98.0f, 115.0f) / 255.0f
+		Color(0.0f, 1298.0f, 227.0f) / 255.0f
+		//Color(1.0f, 98.0f, 115.0f) / 255.0f
 	};
 	image_editor->julia_set(center, range, jul, color_lut);
 }

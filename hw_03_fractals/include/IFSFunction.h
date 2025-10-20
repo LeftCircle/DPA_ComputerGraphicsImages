@@ -13,7 +13,18 @@
 
 const float EPSILON = 0.000001;
 const float PI = 3.14159265358979;
+const double PId = 3.14159265358979323846;
 const float PI_OVER_TWO = PI / 2;
+
+//  Ω
+inline float zero_or_pi() { return (drand48() < 0.5) ? 0.0 : PI; }
+// Λ
+inline float neg_one_or_one() { return (drand48() < 0.5) ? -1.0 : 1.0; }
+// Ψ
+inline float uniform_0_1() { return static_cast<float>(drand48()); }
+inline float trunc(float x) { return (x >= 0.0f) ? std::floor(x) : std::ceil(x); }
+inline float decimal_part(float x) { return x - trunc(x); }
+
 
 struct Point{
 	double x, y;
@@ -22,7 +33,7 @@ struct Point{
 
 	void operator*=(double val) { x *= val, y *= val; }
 	void operator*=(const Point& other) { x *= other.x, y *= other.y; }
-	
+
 	void operator/=(double val) { x /= val, y /= val; }
 	void operator/=(const Point& other) { x /= other.x, y /= other.y; }
 
@@ -31,6 +42,9 @@ struct Point{
 
 	Point operator+(const Point& other) const { return Point(x + other.x, y + other.y); }
 	Point operator-(const Point& other) const { return Point(x - other.x, y - other.y); }
+
+	Point operator*(const Point& other) const { return Point(x * other.x, y * other.y); }
+	Point operator/(const Point& other) const { return Point(x / other.x, y / other.y); }
 
 	double magnitude_sq() {return x*x + y*y; }
 	double magnitude() {return std::sqrt(x*x + y*y); }
@@ -44,6 +58,24 @@ public:
 	virtual ~IFSFunction() = default;
 
 	virtual Point operator()(const Point& P) const = 0;
+};
+
+class Linear : public IFSFunction {
+public:
+	Linear() : _scale(1.0, 1.0) {}
+	Linear(float x_scale = 1.0, float y_scale = 1.0) : _scale(x_scale, y_scale) {}
+	~Linear() {}
+	Point operator()(const Point& P) const;
+private:
+	Point _scale;
+};
+
+class Truncate : public IFSFunction {
+public:
+	Truncate() {}
+	~Truncate() {}
+
+	Point operator()(const Point& P) const { return Point(decimal_part(P.x), decimal_part(P.y)); };
 };
 
 class Spherical : public IFSFunction {
@@ -67,18 +99,6 @@ public:
 	~Sinusoidal() {}
 
 	Point operator()(const Point& P) const;
-};
-
-class Scale : public IFSFunction {
-public:
-	Scale(float x_scale, float y_scale) { _x_scale = x_scale, _y_scale = y_scale ; }
-	~Scale() {}
-
-	Point operator()(const Point& P) const;
-
-private:
-	float _x_scale;
-	float _y_scale;
 };
 
 class JuliaIterations : public IFSFunction {
@@ -117,6 +137,14 @@ private:
 	float _rotation_matrix_2D[4];
 	float _radians;
 
+};
+
+class negate_x : public SymmetryIFS {
+public:
+	negate_x() {}
+	~negate_x() {}
+
+	Point operator()(const Point& P) const;
 };
 
 class IFSFunctionSystem{

@@ -1,6 +1,8 @@
 #include "IFSFunction.h"
 
-
+Point Linear::operator()(const Point& P) const {
+	return P * _scale;
+}
 
 Point Spherical::operator()(const Point& P) const {
 	Point shifted_p = P;
@@ -14,13 +16,6 @@ Point Spherical::operator()(const Point& P) const {
 	shifted_p /= rsq;
 	shifted_p += _center;
 	return shifted_p;
-}
-
-Point Scale::operator()(const Point& P) const {
-	Point new_p(0.0, 0.0);
-	new_p.x = P.x * _x_scale;
-	new_p.y = P.y * _y_scale;
-	return new_p;
 }
 
 JuliaIterations::JuliaIterations(const Point& complex_center, int iters, int cycles){
@@ -62,6 +57,12 @@ Point Rotation::operator()(const Point& P) const {
 	new_p.y = _rotation_matrix_2D[2] * P.x + _rotation_matrix_2D[3] * P.y;
 	return new_p;
 }
+
+Point negate_x::operator()(const Point& P) const {
+	Point new_p(-P.x, P.y);
+	return new_p;
+}
+
 
 Point Sinusoidal::operator()(const Point& P) const {
 	Point new_p(0.0, 0.0);
@@ -125,8 +126,6 @@ int IFSFunctionSystem::get_random_weighted_index(const std::vector<float>& weigh
 
 
 void IFSFunctionSystem::fractal_frame(int iters){
-	// for each iteration, roll a random check to see if we pull a 
-	// IF or a Symmetry function. Then apply to the rand point
 	img.set_pixel_values(0.0f);
 	Point p(double(2 * drand48() - 1), double(2 * drand48() - 1));
 	int width = img.get_width();
