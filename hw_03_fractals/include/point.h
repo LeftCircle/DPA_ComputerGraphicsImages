@@ -23,8 +23,9 @@ struct Point{
 	Point operator*(const Point& other) const { return Point(x * other.x, y * other.y); }
 	Point operator/(const Point& other) const { return Point(x / other.x, y / other.y); }
 
-	double magnitude_sq() {return x*x + y*y; }
-	double magnitude() {return std::sqrt(x*x + y*y); }
+	double magnitude_sq() const {return x*x + y*y; }
+	double magnitude() const {return std::sqrt(x*x + y*y); }
+
 
 };
 

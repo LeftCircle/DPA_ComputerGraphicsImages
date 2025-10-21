@@ -8,6 +8,18 @@ void FlameIFSFunction::set_trans_matrix(double m00, double m01, double m02, doub
 	_inverse_transf = _homogeneous_transform.inverse();
 }
 
+void FlameIFSFunction::add_rotation(double radians){
+	Eigen::Matrix3d rotation_matrix;
+	float cos_r = cos(radians);
+	float sin_r = sin(radians);
+	rotation_matrix << 
+		cos_r, -sin_r, 0.0,
+		sin_r, cos_r, 0.0,
+		0.0, 0.0, 1.0;
+	_homogeneous_transform = rotation_matrix * _homogeneous_transform;
+	_inverse_transf = _homogeneous_transform.inverse();
+}
+
 Point FlameIFSFunction::get_point_in_local_space(const Point& P){
 	Eigen::Vector3d p_homogeneous(P.x, P.y, 1.0);
 	Eigen::Vector3d p_local = _homogeneous_transform * p_homogeneous;
@@ -40,6 +52,15 @@ Point Spherical::operator()(const Point& P) const {
 	shifted_p /= rsq;
 	shifted_p += _center;
 	return shifted_p;
+}
+
+Point Handkerchief::operator()(const Point& P) const {
+	Point new_p(0.0, 0.0);
+	double r = P.magnitude();
+	double theta = atan2(P.y, P.x);
+	new_p.x = r * sin(theta + r);
+	new_p.y = r * cos(theta - r);
+	return new_p;
 }
 
 JuliaIterations::JuliaIterations(const Point& complex_center, int iters, int cycles){
@@ -180,12 +201,12 @@ void IFSFunctionSystem::fractal_frame(int iters){
 		// First apply the affine transform from the FlameIFSFunction
 		p = (*ifs).get_point_in_local_space(p);
 		p = (*ifs)(p);
-		p = (*_final_function)(p);
 		p = (*ifs).convert_point_to_global_space(p);
 		
 		// Now add values to the img
 		int xp = int(((p.x + 1.0f) / 2.0f) * width);
 		int yp = int(((p.y + 1.0f) / 2.0f) * height);
+		p = (*_final_function)(p);
 		if (xp < 0 || xp >= width || yp < 0 || yp >= height){
 			continue;
 		} else {

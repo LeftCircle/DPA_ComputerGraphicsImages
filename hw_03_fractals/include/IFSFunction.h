@@ -49,6 +49,7 @@ public:
 	const Eigen::Matrix3d& get_trans_matrix() const { return _homogeneous_transform; }
 
 	void set_trans_matrix(double m00, double m01, double m02, double m10, double m11, double m12);
+	void add_rotation(double radians);
 
 	Point get_point_in_local_space(const Point& P);
 	Point convert_point_to_global_space(const Point& P);
@@ -106,6 +107,13 @@ public:
 private:
 	Point _center;
 	Point _scale;
+};
+
+class Handkerchief : public FlameIFSFunction {
+public:
+	Handkerchief() {}
+	~Handkerchief() {}
+	Point operator()(const Point& P) const;
 };
 
 

@@ -55,6 +55,8 @@ void Model::on_down_arrow_pressed() {
 
 
 void Model::fractal_flames() {
+	// randomly seed drand48
+	srand48(static_cast<unsigned int>(time(nullptr)));
 
 	Spherical ifs_spherical(0.0, 0.0, 1.0, 1.0);
 	Spherical ifs_spherical2(-0.5, 0.0, 0.1, 0.1);
@@ -81,40 +83,88 @@ void Model::fractal_flames() {
 	Rotation three_way_symmetry_2(0.0);
 
 
+	
+	Randomize final_rand;
+	Linear final_linear(1.0, 1.0);
 
-	Randomize rand_final;
+	std::vector<FlameIFSFunction*> ifs_functions = {};
 
-	std::vector<FlameIFSFunction*> ifs_functions = {
-		// &ifs_linear,
-		&ifs_sin,
-		&ifs_sin_1,
-		//&ifs_spherical
-	};
 
 	std::vector<float> ifs_weights = {
-		1.0,
-		1.0,
+		//1.0,
+		//1.0,
 		// 1.0,
 		//1.0
 	};
 
 	// Color palette 258
 	std::vector<Color> colors = {
-		Color(1.0f, 175.0f, 186.0f) / 255.0f,
-		Color(204.0f, 171.0f, 214.0f) / 255.0f,
+		// Color(1.0f, 175.0f, 186.0f) / 255.0f,
+		// Color(204.0f, 171.0f, 214.0f) / 255.0f,
 		//Color(242.0f, 251.0f, 122.0f) / 255.0f,
 		//Color(0.0f, 251.0f, 122.0f) / 255.0f,
 		//Color(0.0f, 129.0f, 227.0f) / 255.0f,
 		//Color(1.0f, 98.0f, 115.0f) / 255.0f
 	};
 	
+	// Creating a ton of different sin function
+	std::vector<std::shared_ptr<FlameIFSFunction>> generated_funcs;
+	int n_funcs = 30;
+	std::pair<double, double> x_scale_min_max(0.25, 10.0);
+	std::pair<double, double> y_scale_min_max(0.25, 10.0);
+	std::pair<double, double> x_y_skew_min_max(0.0, 1.0);
+	std::pair<double, double> x_y_offset_min_max(-0.9, 0.9);
+
+	std::vector<Color> color_pallette = {
+		Color(1.0f, 175.0f, 186.0f) / 255.0f,
+		Color(204.0f, 171.0f, 214.0f) / 255.0f,
+		Color(242.0f, 251.0f, 122.0f) / 255.0f,
+		Color(0.0f, 251.0f, 122.0f) / 255.0f,
+		Color(0.0f, 129.0f, 227.0f) / 255.0f,
+		Color(1.0f, 98.0f, 115.0f) / 255.0f
+	};
+	
+	for (int i = 0; i < n_funcs; i++){
+		std::shared_ptr<FlameIFSFunction> func_a = std::make_shared<Spherical>(0.0, 0.0, 1.0, 1.0);
+		std::shared_ptr<FlameIFSFunction> func_b = std::make_shared<Handkerchief>();
+		double rand_choice = drand48();
+		std::shared_ptr<FlameIFSFunction> func = rand_choice < 0.5 ? func_a : func_b;
+		float weight = rand_choice < 0.5 ? 5.0f : 1.0f;
+		double rand_x_scale = x_scale_min_max.first + drand48() * (x_scale_min_max.second - x_scale_min_max.first);
+		double rand_y_scale = y_scale_min_max.first + drand48() * (y_scale_min_max.second - y_scale_min_max.first);
+		//double rand_y_scale = rand_x_scale; // keep aspect ratio for now
+		double rand_x_skew = x_y_skew_min_max.first + drand48() * (x_y_skew_min_max.second - x_y_skew_min_max.first);
+		double rand_y_skew = x_y_skew_min_max.first + drand48() * (x_y_skew_min_max.second - x_y_skew_min_max.first);
+		double rand_x_offset = x_y_offset_min_max.first + drand48() * (x_y_offset_min_max.second - x_y_offset_min_max.first);
+		double rand_y_offset = x_y_offset_min_max.first + drand48() * (x_y_offset_min_max.second - x_y_offset_min_max.first);
+
+		// account for the scale now in the rand offset and skew
+		rand_x_offset *= (rand_x_scale + rand_y_scale) / 2;
+		rand_y_offset *= (rand_x_scale + rand_y_scale) / 2;
+		rand_x_skew *= (rand_x_skew + rand_x_skew) / 2;
+		rand_y_skew *= (rand_x_skew + rand_y_skew) / 2;
+		func->set_trans_matrix(rand_x_scale, rand_x_skew, rand_x_offset,
+			rand_y_skew, rand_y_scale, rand_y_offset);
+		func->add_rotation(drand48() * 2.0 * PI);
+
+		generated_funcs.push_back(func);
+		ifs_functions.push_back(func.get());
+		ifs_weights.push_back(weight);
+		colors.push_back(color_pallette[i % color_pallette.size()]);
+	}
+
+	// ifs_functions.push_back(&final_rand);
+	// ifs_weights.push_back(0.0);
+	// colors.push_back(color_pallette[0]);
+
+
 	std::vector<SymmetryIFS*> rotation_functions = {
 		// &neg_x,
 		// &three_way_symmetry_0,
 		// &three_way_symmetry_1,
 		// &three_way_symmetry_2
 	};
-	
+
 	std::vector<float> rotation_weights = {
 		// 1.0,
 		// 1.0,
@@ -129,12 +179,12 @@ void Model::fractal_flames() {
 		colors,
 		rotation_functions,
 		rotation_weights,
-		&rand_final,
+		&final_linear,
 		image_editor->get_edited_image()->get_width(),
 		image_editor->get_edited_image()->get_height()
 	);
 
-	int iters = 10000000;
+	int iters = 100000000;
 
 	ff_system.fractal_frame(iters);
 
