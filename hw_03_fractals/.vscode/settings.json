@@ -82,6 +82,8 @@
         "__tuple": "cpp",
         "ios": "cpp",
         "__split_buffer": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "__locale": "cpp",
+        "*.inc": "cpp"
     }
 }

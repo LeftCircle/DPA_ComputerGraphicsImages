@@ -1,5 +1,29 @@
 #include "IFSFunction.h"
 
+void FlameIFSFunction::set_trans_matrix(double m00, double m01, double m02, double m10, double m11, double m12){
+	_homogeneous_transform << 
+			m00, m01, m02,
+			m10, m11, m12,
+			0.0f, 0.0f, 1.0f;
+	_inverse_transf = _homogeneous_transform.inverse();
+}
+
+Point FlameIFSFunction::get_point_in_local_space(const Point& P){
+	Eigen::Vector3d p_homogeneous(P.x, P.y, 1.0);
+	Eigen::Vector3d p_local = _homogeneous_transform * p_homogeneous;
+	Point p_out(p_local(0), p_local(1));
+	return p_out;
+}
+
+Point FlameIFSFunction::convert_point_to_global_space(const Point& P){
+	Eigen::Vector3d p_homogeneous(P.x, P.y, 1.0);
+	Eigen::Vector3d p_global = _inverse_transf * p_homogeneous;
+	p_global /= p_global[2];
+	Point p_out(p_global(0), p_global(1));
+	return p_out;
+}
+
+
 Point Linear::operator()(const Point& P) const {
 	return P * _scale;
 }
@@ -130,7 +154,7 @@ void IFSFunctionSystem::fractal_frame(int iters){
 	Point p(double(2 * drand48() - 1), double(2 * drand48() - 1));
 	int width = img.get_width();
 	int height = img.get_height();
-	std::vector<float> rgb(3, 0.0f);
+	//std::vector<float> rgb(3, 0.0f);
 
 	// Alpha channel will contain hit count for now
 	int rand_index;
@@ -152,17 +176,13 @@ void IFSFunctionSystem::fractal_frame(int iters){
 		rand_index = get_random_weighted_index(_weights);
 		ifs = get_ifs_function(rand_index);
 		const Color& c = get_color(rand_index);
+		
 		// First apply the affine transform from the FlameIFSFunction
-		const float* affine_t = (*ifs).get_trans_matrix();
-		Point pt(
-			affine_t[0] * p.x + affine_t[1] * p.y + affine_t[2],
-			affine_t[3] * p.x + affine_t[4] * p.y + affine_t[5]
-		);
-		p = (*ifs)(pt);
-
-		// Remove affine transformation?
+		p = (*ifs).get_point_in_local_space(p);
+		p = (*ifs)(p);
 		p = (*_final_function)(p);
-
+		p = (*ifs).convert_point_to_global_space(p);
+		
 		// Now add values to the img
 		int xp = int(((p.x + 1.0f) / 2.0f) * width);
 		int yp = int(((p.y + 1.0f) / 2.0f) * height);
@@ -172,8 +192,6 @@ void IFSFunctionSystem::fractal_frame(int iters){
 			// add values to the pixel
 			img.mix_rgb_values(xp, yp, c.r, c.g, c.b);
 			img.add_value(xp, yp, 3, (float)i / itersf);
-
-			//std::cout << "Drawing to pixel " << xp << " " << yp << " " << color.r << " " << color.g << " " << color.b <<  std::endl;
 		}
 	}
 	// Now we have to do our post processing and adjust the color and alpha parameters

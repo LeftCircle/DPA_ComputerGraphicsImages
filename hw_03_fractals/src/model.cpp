@@ -62,8 +62,8 @@ void Model::fractal_flames() {
 	Spherical ifs_spherical4(0.0, -0.5, 0.3, 0.3);
 	Sinusoidal ifs_sin;
 	Sinusoidal ifs_sin_1;
-	ifs_sin.set_trans_matrix(0.1, 0.0, 0.5, 0.0, 0.1, -0.5);
-	ifs_sin_1.set_trans_matrix(0.1, 0.0, -0.5, 0.0, 0.1, 0.5);
+	ifs_sin.set_trans_matrix(10.0, 5.0, 5, 0.0, 10.0, -5);
+	ifs_sin_1.set_trans_matrix(10.0, 0.0, -5.0, 1.0, 10.0, 5.0);
 	
 
 	Linear ifs_linear(1.0, 1.0);
@@ -82,10 +82,10 @@ void Model::fractal_flames() {
 
 
 
-	Linear skew(1.0, 1.0);
+	Randomize rand_final;
 
 	std::vector<FlameIFSFunction*> ifs_functions = {
-		&ifs_linear,
+		// &ifs_linear,
 		&ifs_sin,
 		&ifs_sin_1,
 		//&ifs_spherical
@@ -94,7 +94,7 @@ void Model::fractal_flames() {
 	std::vector<float> ifs_weights = {
 		1.0,
 		1.0,
-		1.0,
+		// 1.0,
 		//1.0
 	};
 
@@ -102,7 +102,7 @@ void Model::fractal_flames() {
 	std::vector<Color> colors = {
 		Color(1.0f, 175.0f, 186.0f) / 255.0f,
 		Color(204.0f, 171.0f, 214.0f) / 255.0f,
-		Color(242.0f, 251.0f, 122.0f) / 255.0f,
+		//Color(242.0f, 251.0f, 122.0f) / 255.0f,
 		//Color(0.0f, 251.0f, 122.0f) / 255.0f,
 		//Color(0.0f, 129.0f, 227.0f) / 255.0f,
 		//Color(1.0f, 98.0f, 115.0f) / 255.0f
@@ -129,12 +129,12 @@ void Model::fractal_flames() {
 		colors,
 		rotation_functions,
 		rotation_weights,
-		&skew,
+		&rand_final,
 		image_editor->get_edited_image()->get_width(),
 		image_editor->get_edited_image()->get_height()
 	);
 
-	int iters = 50000000;
+	int iters = 10000000;
 
 	ff_system.fractal_frame(iters);
 

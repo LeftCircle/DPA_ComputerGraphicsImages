@@ -39,24 +39,32 @@ public:
 
 class FlameIFSFunction : public IFSFunction {
 public:
-	FlameIFSFunction() : _transform_matrix{1.0, 0.0, 0.0, 0.0, 1.0, 0.0} {}
-	FlameIFSFunction(float m00, float m01, float m02, float m10, float m11, float m12) : _transform_matrix{
-		m00, m01, m02, m10, m11, m12} {}
+	FlameIFSFunction() {  _homogeneous_transform << 1.0, 0.0, 0.0,
+                              0.0, 1.0, 0.0,
+                              0.0, 0.0, 1.0;
+	}
 	~FlameIFSFunction() {}
 
 	virtual Point operator()(const Point& P) const = 0;
-	const float* get_trans_matrix() const { return _transform_matrix; }
-	void set_trans_matrix(float m00, float m01, float m02, float m10, float m11, float m12){
-		_transform_matrix[0] = m00;
-		_transform_matrix[1] = m01;
-		_transform_matrix[2] = m02;
-		_transform_matrix[3] = m10;
-		_transform_matrix[4] = m11;
-		_transform_matrix[5] = m12;
-	}
+	const Eigen::Matrix3d& get_trans_matrix() const { return _homogeneous_transform; }
+
+	void set_trans_matrix(double m00, double m01, double m02, double m10, double m11, double m12);
+
+	Point get_point_in_local_space(const Point& P);
+	Point convert_point_to_global_space(const Point& P);
 
 protected:
-	float _transform_matrix[6];
+	Eigen::Matrix3d _homogeneous_transform;
+	Eigen::Matrix3d _inverse_transf;
+
+};
+
+class Randomize : public FlameIFSFunction{
+public:
+	Randomize() {}
+	~Randomize() {}
+
+	Point operator()(const Point& P) const { return Point(double(2 * drand48() - 1), double(2 * drand48() - 1)); }
 };
 
 class Sinusoidal : public FlameIFSFunction {
