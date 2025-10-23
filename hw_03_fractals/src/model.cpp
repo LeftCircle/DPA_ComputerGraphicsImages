@@ -3,17 +3,13 @@
 Model* Model::pModel = nullptr;
 
 Model::Model()
-	: image_editor(nullptr), stencil(DEFAULT_STENCIL_HALF_WIDTH), _image_data(nullptr) {}
+	: stencil(DEFAULT_STENCIL_HALF_WIDTH) {}
 
-Model::~Model() {
-	delete image_editor;
-	image_editor = nullptr;
-	_image_data = nullptr;
-}
+Model::~Model() {}
 
 Model* create_model(ImageData& image_data) {
 	Model* model = Model::instance();
-	model->image_editor = new ImageEditor(image_data);
+	model->image_editor = ImageEditor(image_data);
 	return model;
 }
 
@@ -181,15 +177,15 @@ void Model::fractal_flames() {
 		rotation_functions,
 		rotation_weights,
 		&final_linear,
-		image_editor->get_edited_image()->get_width(),
-		image_editor->get_edited_image()->get_height()
+		image_editor.get_edited_image()->get_width(),
+		image_editor.get_edited_image()->get_height()
 	);
 
 	int iters = 100000000;
 
 	ff_system.fractal_frame(iters);
 
-	image_editor->set_edited_image_to(ff_system.get_image());
+	image_editor.set_edited_image_to(ff_system.get_image());
 }
 
 void Model::apply_julia_set(const int iterations, const double range){
@@ -207,5 +203,5 @@ void Model::apply_julia_set(const int iterations, const double range){
 		Color(0.0f, 1298.0f, 227.0f) / 255.0f
 		//Color(1.0f, 98.0f, 115.0f) / 255.0f
 	};
-	image_editor->julia_set(center, range, jul, color_lut);
+	image_editor.julia_set(center, range, jul, color_lut);
 }

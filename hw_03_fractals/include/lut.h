@@ -31,7 +31,7 @@ public:
 		val = std::max(0.0, std::min(1.0, val));
 
 		double scaled = val * (_table.size() - 1);
-		int index = static_cast<int>(scaled);
+		size_t index = static_cast<size_t>(scaled);
 		double t = scaled - index;
 		int next_index = index == _table.size() - 1 ? 0 : index + 1;
 

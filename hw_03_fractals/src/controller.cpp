@@ -16,7 +16,7 @@ Controller::~Controller() {}
 void Controller::keyboard( unsigned char key, int x, int y )
 {
 	Model* model = Model::instance();
-	ImageEditor* _image_editor = Model::instance()->image_editor;
+	ImageEditor _image_editor = Model::instance()->image_editor;
 	switch (key)
 	{
 		case 27: // esc
@@ -24,11 +24,11 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			break;
 		case 'c':
 			std::cout << "Clearing Image" << std::endl;
-			_image_editor->clear();
+			_image_editor.clear();
 			break;
 		case 'f':
 			std::cout << "f key pressed! Should flip" << std::endl;
-			_image_editor->flip();
+			_image_editor.flip();
 			break;
 		case 'F':
 			std::cout << "Fractal Flame!" << std::endl;
@@ -37,11 +37,11 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			break;
 		case 'g':
 			std::cout << "gamma of 0.9" << std::endl;
-			_image_editor->gamma_filter(0.9f);
+			_image_editor.gamma_filter(0.9f);
 			break;
 		case 'G':
 			std::cout << "gamma of 1.1111" << std::endl;
-			_image_editor->gamma_filter(1.0f + 1.0f / 9.0f);
+			_image_editor.gamma_filter(1.0f + 1.0f / 9.0f);
 			break;
 		case 'J': {
 			//std::cout << "Applying Julia fractal!" << std::endl;
@@ -53,10 +53,10 @@ void Controller::keyboard( unsigned char key, int x, int y )
 		}
 		case 'j':
 			std::cout << "Key j pressed" << std::endl;
-			_image_editor->save_edited_image();
+			_image_editor.save_edited_image();
 			break;
 		case 'm': {
-			std::cout << "max pixel value is " << _image_editor->get_edited_image()->get_max() << std::endl;
+			std::cout << "max pixel value is " << _image_editor.get_edited_image()->get_max() << std::endl;
 			break;
 		}
 		case 's':
@@ -111,11 +111,11 @@ std::pair<int, double> Controller::_get_julia_set_paramters(){
 }
 
 void Controller::_apply_stencil() {
-	ImageEditor* _image_editor = Model::instance()->image_editor;
+	ImageEditor _image_editor = Model::instance()->image_editor;
 	std::cout << "Applying stencil" << std::endl;
 			
 	Model::instance()->stencil.randomize_values();
 	
-	_image_editor->bounded_linear_convolution(Model::instance()->stencil);
+	_image_editor.bounded_linear_convolution(Model::instance()->stencil);
 	std::cout << "Stencil applied" << std::endl;
 }

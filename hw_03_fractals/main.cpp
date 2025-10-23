@@ -23,6 +23,11 @@ int main(int argc, char** argv)
 	View* view = View::instance();
 	Controller* controller = Controller::instance();
 	Model* model = create_model(img);
+
+	// To get rid of compiler warnings:
+	(void)controller;
+	(void)model;
+	//---------
 	
 	view->init(argc, argv, img.get_width(), img.get_height());
 

@@ -12,9 +12,10 @@ class ImageEditor {
 public:
 	ImageEditor(ImageData& image_data)
 		: _starting_image(&image_data), _edited_image(new ImageData(image_data)) {}
+	ImageEditor() {};
 	~ImageEditor();
-	const ImageData* get_starting_image() const { return _starting_image; }
-	const ImageData* get_edited_image() const { return _edited_image; }
+	const std::shared_ptr<ImageData> get_starting_image() const { return _starting_image; }
+	const std::shared_ptr<ImageData> get_edited_image() const { return _edited_image; }
 
 	void save_edited_image();
 
@@ -28,17 +29,14 @@ public:
 	void clear();
 	
 	void julia_set(const Point& center, const double range, const IFSFunction& fract, const LUT<Color>& color_lut);
-	//void fractal_flame(int iters, std::vector<IFSFunction*>& function_ptrs, std::vector<Color>& colors);
+	
 	void set_edited_image_to(const ImageData& other_image)  {*_edited_image = other_image; }
 
 
 private:
-	ImageData* _starting_image;
-	ImageData* _edited_image;
+	std::shared_ptr<ImageData> _starting_image;
+	std::shared_ptr<ImageData> _edited_image;
 
-
-	// Possibly save a list of operations that have been applied. Could require a mapping of
-	// inputs to operations and how to reverse them.
 };
 
 

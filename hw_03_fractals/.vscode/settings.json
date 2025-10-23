@@ -84,6 +84,8 @@
         "__split_buffer": "cpp",
         "filesystem": "cpp",
         "__locale": "cpp",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "dense": "cpp",
+        "core": "cpp"
     }
 }

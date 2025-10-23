@@ -158,7 +158,7 @@ void IFSFunctionSystem::normalize(std::vector<float>& vec){
 int IFSFunctionSystem::get_random_weighted_index(const std::vector<float>& weights){
 	float randf = drand48();
 	float weight_sum = 0.0f;
-	for (int i = 0; i < weights.size(); i++){
+	for (size_t i = 0; i < weights.size(); i++){
 		weight_sum += weights[i];
 		if (randf <= weight_sum){
 			return i;
@@ -166,7 +166,7 @@ int IFSFunctionSystem::get_random_weighted_index(const std::vector<float>& weigh
 	}
 
 	std::cout << "Random weight somehow didn't get picked. Should not happen" << std::endl;
-	return weights.size() - 1;
+	return static_cast<int>(weights.size() - 1);
 }
 
 
@@ -182,7 +182,6 @@ void IFSFunctionSystem::fractal_frame(int iters){
 	FlameIFSFunction* ifs;
 	SymmetryIFS* sym;
 	float itersf = static_cast<float>(iters);
-	float one_over_itersf = 1.0f / itersf;
 	bool has_sym = has_symmetry();
 
 	for (int i = 1; i <= iters; i++){

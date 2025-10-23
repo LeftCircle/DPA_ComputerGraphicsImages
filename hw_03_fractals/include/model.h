@@ -20,7 +20,6 @@ const Point DEFAULT_CENTER(0.03811, 0.01329);
 const Point DEFAULT_COMPLEX_CENTER(0.8*cos(254.3 * 3.14159265/180.0), 0.8*sin(254.3 * 3.14159265/180.0));
 
 
-// A singleton model class that will be used to drive GLUT inputs
 class Model
 {
 public:
@@ -39,14 +38,12 @@ public:
     
 	~Model();
     
-	//void set_image_data(ImageData* image_data);
-	const ImageData* get_modified_image_ptr() const { return image_editor->get_edited_image(); }
     
-    // Public variables
-    ImageEditor* image_editor;
+    ImageEditor image_editor;
     Stencil stencil = Stencil(DEFAULT_STENCIL_HALF_WIDTH);
-
-	// Image Modification functions and setup
+	
+	const std::shared_ptr<ImageData> get_modified_image_ptr() const { return image_editor.get_edited_image(); }
+	
 	void fractal_flames();
 	void apply_julia_set(const int iterations = 100, const double range = 1.0);
 	void on_J_pressed();
@@ -56,7 +53,7 @@ public:
 	void on_left_arrow_pressed();
 
 private:
-	ImageData* _image_data;
+	std::shared_ptr<ImageData> _image_data;
 	
 	static Model* pModel;
 	State _current_state = DEFAULT;
