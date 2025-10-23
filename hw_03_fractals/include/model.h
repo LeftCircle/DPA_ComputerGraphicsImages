@@ -12,7 +12,7 @@
 const int DEFAULT_STENCIL_HALF_WIDTH = 5;
 
 // Julia set parameters
-const double RANGE_SCALE_FACTOR = 5.0;
+const double RANGE_SCALE_FACTOR = 10.0;
 const int JULIA_ITERATION_STEP = 50;
 const int DEFAULT_JULIA_ITERATIONS = 100;
 const double DEFAULT_JULIA_RANGE = 1.0;
@@ -68,7 +68,6 @@ private:
 	// Some private variables that could be better placed in specific state classes
 	int _julia_iterations = 100;
 	double _julia_range = 1.0;
-
 };
 
 

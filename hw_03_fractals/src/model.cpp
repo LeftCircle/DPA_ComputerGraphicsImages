@@ -22,6 +22,7 @@ void Model::on_J_pressed() {
 	_julia_iterations = DEFAULT_JULIA_ITERATIONS;
 	_julia_range = DEFAULT_JULIA_RANGE;
 	std::cout << "Applying Julia Set with " << _julia_iterations << " iterations and range " << _julia_range << std::endl;
+	std::cout << " Use the up and down arrow keys to adjust the zoom. The left and right arrow keys to adjust iterations." << std::endl;
 	apply_julia_set(_julia_iterations, _julia_range);
 }
 
