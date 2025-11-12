@@ -51,6 +51,7 @@ public:
 	void on_down_arrow_pressed();
 	void on_right_arrow_pressed();
 	void on_left_arrow_pressed();
+	void convert_to_contrast_units();
 
 private:
 	std::shared_ptr<ImageData> _image_data;

@@ -51,6 +51,10 @@ void Model::on_down_arrow_pressed() {
 }
 
 
+void Model::convert_to_contrast_units() {
+	image_editor.convert_to_contrast_units();
+}
+
 void Model::fractal_flames() {
 	// randomly seed drand48
 	srand48(static_cast<unsigned int>(time(nullptr)));

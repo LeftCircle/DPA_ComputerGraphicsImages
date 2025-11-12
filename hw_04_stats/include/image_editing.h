@@ -31,9 +31,10 @@ public:
 	void julia_set(const Point& center, const double range, const IFSFunction& fract, const LUT<Color>& color_lut);
 	
 	void set_edited_image_to(const ImageData& other_image)  {*_edited_image = other_image; }
-
+	void convert_to_contrast_units();
 
 private:
+
 	std::shared_ptr<ImageData> _starting_image;
 	std::shared_ptr<ImageData> _edited_image;
 

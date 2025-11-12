@@ -86,6 +86,7 @@
         "__locale": "cpp",
         "*.inc": "cpp",
         "dense": "cpp",
-        "core": "cpp"
+        "core": "cpp",
+        "complex": "cpp"
     }
 }

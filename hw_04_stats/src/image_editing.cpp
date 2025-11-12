@@ -185,3 +185,20 @@ void ImageEditor::julia_set(const Point& center, const double range, const IFSFu
 		}
 	}
 }
+
+
+void ImageEditor::convert_to_contrast_units() {
+	//
+	const auto avg = _edited_image->get_average();
+	const auto rms = _edited_image->get_rms(avg);
+	for (int j = 0; j < _edited_image->get_height(); j++){
+		for (int i = 0; i < _edited_image->get_width(); i++){ 
+			auto pixels = _edited_image->get_pixel_values(i, j);
+			for (int c = 0; c < _edited_image->get_channels(); c++){
+				pixels[c] -= avg[c];
+				pixels[c] /= rms[c];
+			}
+			_edited_image->set_pixel_values(i, j, pixels);
+		}
+	}
+}

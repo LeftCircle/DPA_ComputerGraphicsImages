@@ -23,8 +23,7 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			exit(0);
 			break;
 		case 'c':
-			std::cout << "Clearing Image" << std::endl;
-			_image_editor.clear();
+			model->convert_to_contrast_units();
 			break;
 		case 'f':
 			std::cout << "f key pressed! Should flip" << std::endl;

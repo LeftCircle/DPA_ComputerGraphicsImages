@@ -54,7 +54,9 @@ public:
 	int get_data_len() const;
 	
 	float get_max() const;
-
+	std::vector<float> get_average() const;
+	std::vector<float> get_rms() const;
+	std::vector<float> get_rms(const std::vector<float>& avg) const;
 
 	void clear();
 	

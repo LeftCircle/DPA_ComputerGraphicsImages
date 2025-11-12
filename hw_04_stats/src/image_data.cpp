@@ -225,6 +225,70 @@ float ImageData::get_max() const {
 	return max_val;
 }
 
+std::vector<float> ImageData::get_average() const {
+	std::vector<double> avg_of_each_channel(_channels, 0.0);
+	double n_pixels = static_cast<double>(_width * _height);
+	for(int j = 0; j < _height; j++){
+		std::vector<double> row_avg(_channels, 0.0);
+		for(int i = 0; i < _width; i++){
+			for (int c = 0; c < _channels; c++){
+				row_avg[c] += static_cast<double>(get_pixel_value(i, j, c));
+			}
+		}
+		for (int c = 0; c < _channels; c++){
+			row_avg[c] /= n_pixels;
+			avg_of_each_channel[c] += row_avg[c];
+			row_avg[c] = 0.0;
+		}
+	}
+	std::cout << "Avg = ";
+	for(int c = 0; c < _channels; c++){
+		std::cout << avg_of_each_channel[c] << " ";
+	}
+	std::cout << std::endl;
+	std::vector<float> avg_of_each_channelf(_channels, 0.0);
+	for (int c = 0; c < _channels; c++){
+		avg_of_each_channelf[c] = static_cast<float>(avg_of_each_channel[c]);
+	}
+	return avg_of_each_channelf;
+}
+
+std::vector<float> ImageData::get_rms() const {
+	auto avgf = get_average();
+	return get_rms(avgf);
+}
+
+std::vector<float> ImageData::get_rms(const std::vector<float>& avgf) const {
+	std::vector<double> avg(_channels, 0.0);
+	for (int c = 0; c < _channels; c++){
+		avg[c] = static_cast<double>(avgf[c]);
+	}
+	std::vector<double> rms(_channels, 0.0);
+	double n_pixels = static_cast<double>(_width * _height);
+	for(int j = 0; j < _height; j++){
+		for(int i = 0; i < _width; i++){
+			for (int c = 0; c < _channels; c++){
+				double pc = static_cast<double>(get_pixel_value(i, j, c));
+				double diff = pc - avg[c];
+				rms[c] += diff * diff;
+			}
+		}
+	}
+
+	// now sqrt everything
+	std::vector<float> rmsf(_channels, 0.0f);
+	std::cout << "RMS = ";
+	for (int c = 0; c < _channels; c++){
+		rms[c] = sqrt(rms[c]);
+		rmsf[c] = static_cast<float>(rms[c]);
+		std::cout << rms[c] << " ";
+	}
+	std::cout << std::endl;
+	return rmsf;
+}
+
+
+
 void ImageData::clear() {
 	_width = 0;
 	_height = 0;
