@@ -202,3 +202,18 @@ void ImageEditor::convert_to_contrast_units() {
 		}
 	}
 }
+
+void ImageEditor::histogram_equalize(const int n_bins) {
+	// Start by getting max and min
+	std::vector<float> max = _edited_image->get_max();
+	auto min = _edited_image->get_min();
+	const int n_channels = _edited_image->get_channels();
+	// Now create bins for each channel. We need one bin for each channel, so 
+	std::vector<int> bins(n_channels * n_bins);
+	std::vector<float> bin_width(n_channels, 0.0);
+	for (int i = 0; i < n_channels; i++){
+		bin_width[i] = (max[i] - min[i]) / static_cast<float>(n_bins);
+	}
+	
+
+}

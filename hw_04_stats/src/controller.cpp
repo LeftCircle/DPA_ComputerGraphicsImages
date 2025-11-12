@@ -42,6 +42,10 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			std::cout << "gamma of 1.1111" << std::endl;
 			_image_editor.gamma_filter(1.0f + 1.0f / 9.0f);
 			break;
+		case 'h':{
+			_image_editor.histogram_equalize();
+			break;
+		}
 		case 'J': {
 			//std::cout << "Applying Julia fractal!" << std::endl;
 			//std::pair<int, double> iters_and_range = _get_julia_set_paramters();
@@ -54,10 +58,6 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			std::cout << "Key j pressed" << std::endl;
 			_image_editor.save_edited_image();
 			break;
-		case 'm': {
-			std::cout << "max pixel value is " << _image_editor.get_edited_image()->get_max() << std::endl;
-			break;
-		}
 		case 's':
 			_apply_stencil();
 			break;

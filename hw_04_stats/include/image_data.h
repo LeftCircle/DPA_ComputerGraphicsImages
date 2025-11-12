@@ -53,7 +53,9 @@ public:
 	const int& get_channels() const { return _channels; }
 	int get_data_len() const;
 	
-	float get_max() const;
+	std::vector<float> get_max() const;
+	std::vector<float> get_min() const;
+
 	std::vector<float> get_average() const;
 	std::vector<float> get_rms() const;
 	std::vector<float> get_rms(const std::vector<float>& avg) const;
