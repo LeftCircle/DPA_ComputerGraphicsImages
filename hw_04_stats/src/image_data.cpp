@@ -62,6 +62,11 @@ long ImageData::get_index(int x, int y) const {
 	return _channels * (x + y * _width);
 }
 
+void ImageData::set_pixel_value(const int x, const int y, const int c, const float val){
+	const int index = get_index(x, y, c);
+	_image_data_ptr[index] = val;
+}
+
 void ImageData::set_pixel_values(int x, int y, const std::vector<float>& values) {
 	if (x < 0 || x >= _width || y < 0 || y >= _height || values.size() != static_cast<size_t>(_channels)) {
 		throw std::out_of_range("Invalid coordinates or values size");

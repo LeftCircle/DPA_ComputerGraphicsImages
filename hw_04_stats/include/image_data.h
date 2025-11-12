@@ -30,6 +30,7 @@ public:
 	void get_pixel_values(int x, int y, std::vector<float>& values) const;
 	const float& get_pixel_value(int x, int y, int c) const { return _image_data_ptr[(y * _width + x) * _channels + c]; }
 
+	void set_pixel_value(const int x, const int y, const int c, const float val);
 	void set_pixel_values(int x, int y, const std::vector<float>& values);
 	void set_pixel_values(const std::vector<float>& values);
 	void set_pixel_values(const float val);

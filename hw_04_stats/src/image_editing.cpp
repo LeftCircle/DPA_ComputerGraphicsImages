@@ -208,12 +208,49 @@ void ImageEditor::histogram_equalize(const int n_bins) {
 	std::vector<float> max = _edited_image->get_max();
 	auto min = _edited_image->get_min();
 	const int n_channels = _edited_image->get_channels();
+	const int width = _edited_image->get_width();
+	const int height = _edited_image->get_height();
+	const float n_pixelsf = static_cast<float>(width * height);
+
 	// Now create bins for each channel. We need one bin for each channel, so 
-	std::vector<int> bins(n_channels * n_bins);
+	std::vector<int> bins(n_channels * n_bins, 0);
 	std::vector<float> bin_width(n_channels, 0.0);
 	for (int i = 0; i < n_channels; i++){
 		bin_width[i] = (max[i] - min[i]) / static_cast<float>(n_bins);
 	}
 	
+	// Now accumulate the pixels into the bins
+	for (int j = 0; j < _edited_image->get_height(); j++){
+		for (int i = 0; i < _edited_image->get_width(); i++){
+			for (int c = 0; c < n_channels; c++){
+				float p = _edited_image->get_pixel_value(i, j, c);
+				int bin_index = int((p - min[c]) / bin_width[c]);
+				bins[bin_index * n_channels + c] += 1;
+			}
+		}
+	}
+	
+	// Create the probability distribution function. Just divide each bin
+	// by the total number of pixels
+	std::vector<float> pdf(n_channels * n_bins, 0.0f);
+	std::vector<float> cdf(n_channels * n_bins, 0.0f);
+	std::vector<float> channel_probabilities(n_channels, 0.0);
+	for (int i = 0; i < n_channels * n_bins; i++){
+		float bin_prob = static_cast<float>(bins[i]) / n_pixelsf;
+		channel_probabilities[i % n_channels] += bin_prob;
+		pdf[i] = bin_prob;
+		cdf[i] = channel_probabilities[i % n_channels];
+	}
 
+	// Now loop over each pixel and replace the pixel with the cdf value of the
+	// bin that the pixel falls into
+	for (int j = 0; j < _edited_image->get_height(); j++){
+		for (int i = 0; i < _edited_image->get_width(); i++){
+			for (int c = 0; c < n_channels; c++){
+				float p = _edited_image->get_pixel_value(i, j, c);
+				int bin_index = int((p - min[c]) / bin_width[c]) * n_channels + c;
+				_edited_image->set_pixel_value(i, j, c, cdf[bin_index]);
+			}
+		}
+	}
 }
