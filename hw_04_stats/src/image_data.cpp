@@ -8,11 +8,29 @@ ImageData::ImageData()
 ImageData::~ImageData() {
 }
 
+ImageData::ImageData(const int width, const int height, const int channels) {
+	_width = width;
+	_height = height;
+	_channels = channels;
+	_image_data_ptr = std::make_unique<float[]>(get_data_len());
+}
+
 // Deep copy constructor and assignement operator
 ImageData::ImageData(const ImageData& other)
 	: _width(other._width), _height(other._height), _channels(other._channels) {
 	_file_name = other._file_name;
 	_file_type = other._file_type;
+	int data_len = other.get_data_len();
+	_image_data_ptr = std::make_unique<float[]>(data_len);
+	std::copy(other._image_data_ptr.get(), other._image_data_ptr.get() + data_len, _image_data_ptr.get());
+}
+
+void ImageData::set_to(const ImageData& other){
+	_width = other._width;
+	_height = other._height;
+	_channels = other._channels;
+	//_file_name = other._file_name;
+	//_file_type = other._file_type;
 	int data_len = other.get_data_len();
 	_image_data_ptr = std::make_unique<float[]>(data_len);
 	std::copy(other._image_data_ptr.get(), other._image_data_ptr.get() + data_len, _image_data_ptr.get());
@@ -121,6 +139,18 @@ void ImageData::add_value(int x, int y, int channel, float val){
 	assert(channel < _channels);
 	int index = (y * _width + x) * _channels + channel;
 	_image_data_ptr[index] += val;
+}
+
+void ImageData::divide_each_pixel_by(const std::vector<float>& vals) {
+	for (int j = 0; j < _height; j++){
+		#pragma omp parallel for
+		for (int i = 0; i < _width; i++){
+			for (int c = 0; c < _channels; c++){
+				int idx = get_index(i, j, c);
+				_image_data_ptr[idx] /= vals[j * _width + i];
+			}
+		}
+	}
 }
 
 void ImageData::mix_rgb_values(int x, int y, float r, float g, float b){

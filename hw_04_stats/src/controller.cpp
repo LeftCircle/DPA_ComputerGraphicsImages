@@ -30,6 +30,18 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			model->convert_to_contrast_units();
 			break;
 		}
+		case 'd':{
+			std::cout << "Starting downscale ..." << std::endl;
+			int new_width = _image_editor.get_edited_image()->get_width() / 1.25;
+			int new_height = _image_editor.get_edited_image()->get_height() / 1.25;
+			new_width = std::max(new_width, 6);
+			new_height = std::max(new_height, 8);
+			//std::cout << "New width = " << new_width << std::endl;
+			//_image_editor.downscale(new_width, new_height);
+			_image_editor.downscale(12, 16);
+			std::cout << "Downscale complete!" << std::endl;
+			break;
+		}
 		case 'f':
 			std::cout << "f key pressed! Should flip" << std::endl;
 			_image_editor.flip();
@@ -59,18 +71,85 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			model->on_J_pressed();
 			break;
 		}
-		case 'j':
+		case 'j':{
 			std::cout << "Key j pressed" << std::endl;
 			_image_editor.save_edited_image();
 			break;
+		}
+		case 'm':{
+			// Palette match
+			std::cout << "Starting palette match ..." << std::endl;
+			// std::vector<float> colors = {
+			// 							 0.769f, 0.855f, 0.365f,
+			// 							 0.953f, 0.953f, 0.757f,
+			// 							 0.784f, 0.957f, 0.918f,
+			// 							 0.396f, 0.612f, 0.769f,
+			// 							 0.196f, 0.314f, 0.490f,
+			// 							 0.129f, 0.196f, 0.290f
+			// 							};make
+			
+			_image_editor.palette_match(colors);
+			std::cout << "Palette match done!" << std::endl;
+			break;
+		}
 		case 'o':{
 			// Output the image as .exr
 			_image_editor.save_edited_image(".exr");
 			break;
 		}
+		case 'p':{
+			// If the width/height of the image is less than 20x20, print out
+			// the pixel values
+
+			// Create a map of colors to index in color vector
+			auto color_hash = [](const std::vector<float>& color) {
+			size_t h1 = std::hash<float>{}(color[0]);
+			size_t h2 = std::hash<float>{}(color[1]);
+			size_t h3 = std::hash<float>{}(color[2]);
+			return h1 ^ (h2 << 1) ^ (h3 << 2);
+			};
+
+			std::unordered_map<std::vector<float>, int, decltype(color_hash)> color_map(10, color_hash);
+			int n_colors = static_cast<int>(colors.size() / 3);
+			for (int i = 0; i < n_colors; i++){
+				std::vector<float> color = {colors[i*3], colors[i*3+1], colors[i*3+2]};
+				color_map[color] = i;
+			}
+
+
+			if (_image_editor.get_edited_image()->get_width() <= 20 &&
+				_image_editor.get_edited_image()->get_height() <= 20){
+				std::cout << "Image pixel values:" << std::endl;
+				for (int j = 0; j < _image_editor.get_edited_image()->get_height(); j++){
+					for (int i = 0; i < _image_editor.get_edited_image()->get_width(); i++){
+						auto pixels = _image_editor.get_edited_image()->get_pixel_values(i, j);
+						std::cout << "(";
+						// print the rgb values based on the color map
+						std::vector<float> color = {pixels[0], pixels[1], pixels[2]};
+						
+						if (color_map.find(color) != color_map.end()){
+							std::cout << color_map[color];
+						} else{
+							std::cout << "ERROR";
+						}
+						std::cout << ") ";
+					}
+					std::cout << std::endl;
+				}
+			} else{
+				std::cout << "Image too large to print pixel values" << std::endl;
+			}
+
+			break;
+		}
 		case 's':
 			_apply_stencil();
 			break;
+		case 'q':{
+			_image_editor.quantize(5);
+			std::cout << "Quanitze is done!" << std::endl;
+			break;
+		}
 	}
 }
 

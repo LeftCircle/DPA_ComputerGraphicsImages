@@ -35,6 +35,11 @@ public:
 	void convert_to_contrast_units();
 	void histogram_equalize(const int n_bins = 500);
 
+	void downscale(const int new_width, const int new_height);
+	void palette_match(const std::vector<float>& colors);
+	void quantize(int levels);
+
+
 private:
 
 	std::shared_ptr<ImageData> _starting_image;

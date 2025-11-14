@@ -159,10 +159,135 @@ void ImageEditor::clear(){
 	_edited_image->set_pixel_values(0.0f);
 }
 
-// ------------------------------------------------------------------------------------------
-// fractal things!
-// ------------------------------------------------------------------------------------------
+void ImageEditor::downscale(const int new_width, const int new_height){
+	if (new_width > _edited_image->get_width() || new_height > _edited_image->get_height()){
+		std::cout << "Width or height is not smaller" << std::endl;
+		return;
+	}
 
+	// Create a new image
+	ImageData new_img(new_width, new_height, _edited_image->get_channels());
+	new_img.set_pixel_values(0.0f);
+	const int channels = _edited_image->get_channels();
+	const float dx_new = 1.0 / static_cast<float>(new_width);
+	const float dy_new = 1.0 / static_cast<float>(new_height);
+
+	const float new_widthf = static_cast<float>(new_width);
+	const float new_heightf = static_cast<float>(new_height);
+
+	const int old_width = _edited_image->get_width();
+	const int old_height = _edited_image->get_height();
+	const float old_widthf = static_cast<float>(old_width);
+	const float old_heihgtf = static_cast<float>(old_height);
+	std::vector<float> sum_of_weights(new_width * new_height, 0);
+	// We only have to loop over each pixel in the OG image. Each pixel is basically falling into a 2D bucket based on the size
+	// of the new image
+	for(int j = 0; j < old_height; j++){
+		float y = static_cast<float>(j) / old_heihgtf;
+		int new_j = int(y * new_heightf);
+		float new_y = static_cast<float>(new_j) / new_heightf;
+		for(int i = 0; i < old_width; i++){
+			float x = static_cast<float>(i) / old_widthf;
+			int new_i = int(x * new_widthf);
+			float new_x = static_cast<float>(new_i) / new_widthf;
+			// Add the value to the bucket
+			float x_w = x - new_x - dx_new;
+			float y_w = y - new_y - dy_new;
+			float weight = x_w * x_w + y_w * y_w;
+			sum_of_weights[new_j * new_width + new_i] += weight;
+			for (int c = 0; c < channels; c++){
+				float pc = _edited_image->get_pixel_value(i, j, c);
+				new_img.add_value(new_i, new_j, c, pc * weight);
+			}
+		}
+	}
+
+	// Now divide all values by the weight
+	new_img.divide_each_pixel_by(sum_of_weights);
+	_edited_image->set_to(new_img);
+
+}
+
+void ImageEditor::quantize(int levels){
+	int w = _edited_image->get_width();
+	int h = _edited_image->get_height();
+	int channels = _edited_image->get_channels();
+	for (int j = 0; j < h; j++){
+		#pragma omp parallel for
+		for (int i = 0; i < w; i++){
+			for (int c = 0; c < channels; c++){
+				float cc = _edited_image->get_pixel_value(i, j, c);
+				cc = (float)(int)(cc * levels) / (float)levels;
+				_edited_image->set_pixel_value(i, j, c, cc);
+			}
+		}
+	}
+}
+
+void ImageEditor::palette_match(const std::vector<float>& colors){
+	// Start by quantizing the image to the same number of colors as the 
+	// palette. Then create a dict of color to closest palette
+	const int n_colors = colors.size() / 3;
+	quantize(n_colors);
+
+	// Create a hash function for RGB color vectors
+    auto color_hash = [](const std::vector<float>& color) {
+        size_t h1 = std::hash<float>{}(color[0]);
+        size_t h2 = std::hash<float>{}(color[1]);
+        size_t h3 = std::hash<float>{}(color[2]);
+        return h1 ^ (h2 << 1) ^ (h3 << 2);
+	};
+
+	std::unordered_map<std::vector<float>, std::vector<float>, decltype(color_hash)> color_map(10, color_hash);
+
+	int w = _edited_image->get_width();
+    int h = _edited_image->get_height();
+
+	// Collect unique quantized colors
+    for (int j = 0; j < h; j++){
+        for (int i = 0; i < w; i++){
+            auto quantized_color = _edited_image->get_pixel_values(i, j);
+            quantized_color.resize(3); // Only RGB
+            
+            if (color_map.find(quantized_color) == color_map.end()){
+                // Find closest palette color
+                float min_dist = std::numeric_limits<float>::max();
+                std::vector<float> closest_color(3);
+                
+                for (int p = 0; p < n_colors; p++){
+                    float dr = colors[p*3] - quantized_color[0];
+                    float dg = colors[p*3+1] - quantized_color[1];
+                    float db = colors[p*3+2] - quantized_color[2];
+                    float dist = dr*dr + dg*dg + db*db;
+                    
+                    if (dist < min_dist){
+                        min_dist = dist;
+                        closest_color = {colors[p*3], colors[p*3+1], colors[p*3+2]};
+                    }
+                }
+                color_map[quantized_color] = closest_color;
+            }
+			// Early out once we have mapped all colors
+			// if (color_map.size() >= static_cast<size_t>(n_colors)){
+			// 	break;
+			// }
+        }
+    }
+    
+    // Apply palette mapping
+    for (int j = 0; j < h; j++){
+        for (int i = 0; i < w; i++){
+            auto quantized_color = _edited_image->get_pixel_values(i, j);
+            quantized_color.resize(3);
+            auto it = color_map.find(quantized_color);
+            if (it != color_map.end()){
+                _edited_image->set_first_three_channels(i, j, it->second);
+            } else{
+				std::cout << "Color not found in map!" << std::endl;
+			}
+        }
+    }
+}
 
 void ImageEditor::julia_set(const Point& center, const double range, const IFSFunction& fract, const LUT<Color>& color_lut){
 	double w = (double)_edited_image->get_width();

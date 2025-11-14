@@ -15,7 +15,10 @@ public:
 	ImageData();
 	ImageData(const char* filename) { oiio_read(filename); }
 	ImageData(const ImageData& other);
+	ImageData(const int width, const int height, const int channels);
 	~ImageData();
+
+	void set_to(const ImageData& other);
 
 	void oiio_read(const char* filename);
 	void oiio_write();
@@ -41,6 +44,8 @@ public:
 
 	void add_values(int x, int y, float r, float g, float b, float a);
 	void add_value(int x, int y, int channel, float val);
+	void divide_each_pixel_by(const std::vector<float>& vals);
+	
 	void mix_rgb_values(int x, int y, float r, float g, float b);
 	void mix_rgb_values(int x, int y, float r, float g, float b, float weight);
 
