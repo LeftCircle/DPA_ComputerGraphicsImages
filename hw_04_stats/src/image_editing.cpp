@@ -9,6 +9,12 @@ void ImageEditor::save_edited_image() {
 	}
 }
 
+void ImageEditor::save_edited_image(const std::string& file_extension){
+	if (_edited_image){
+		_edited_image->oiio_write(file_extension);
+	}
+}
+
 void ImageEditor::gamma_filter(float gamma) {
 	if (gamma <= 0.0f) {
 		throw std::invalid_argument("Gamma value must be greater than 0.");

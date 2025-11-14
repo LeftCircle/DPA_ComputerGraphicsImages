@@ -19,6 +19,7 @@ public:
 
 	void oiio_read(const char* filename);
 	void oiio_write();
+	void oiio_write(const std::string& file_extension);
 	
 	void set_dimensions(int width, int height, int channels);	
 	

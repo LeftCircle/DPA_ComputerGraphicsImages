@@ -22,9 +22,14 @@ void Controller::keyboard( unsigned char key, int x, int y )
 		case 27: // esc
 			exit(0);
 			break;
-		case 'c':
+		case 'c':{
 			model->convert_to_contrast_units();
 			break;
+			}
+		case 'C':{
+			model->convert_to_contrast_units();
+			break;
+		}
 		case 'f':
 			std::cout << "f key pressed! Should flip" << std::endl;
 			_image_editor.flip();
@@ -58,6 +63,11 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			std::cout << "Key j pressed" << std::endl;
 			_image_editor.save_edited_image();
 			break;
+		case 'o':{
+			// Output the image as .exr
+			_image_editor.save_edited_image(".exr");
+			break;
+		}
 		case 's':
 			_apply_stencil();
 			break;

@@ -197,6 +197,26 @@ void ImageData::oiio_write() {
 	out->close();
 }
 
+void ImageData::oiio_write(const std::string& file_extension) {
+	if (!_image_data_ptr) {
+		std::cerr << "No image data to write." << std::endl;
+		return;
+	}
+	std::string filename = _file_name + "_out" + file_extension;
+	std::unique_ptr<ImageOutput> out = ImageOutput::create(filename);
+	if (!out) {
+		std::cerr << "Error creating image file: " << filename << std::endl;
+		return;
+	}
+	ImageSpec spec(_width, _height, _channels, TypeDesc::FLOAT);
+	if (!out->open(filename, spec)) {
+		std::cerr << "Error opening image file for writing: " << filename << std::endl;
+		return;
+	}
+	out->write_image(TypeDesc::FLOAT, _image_data_ptr.get());
+	out->close();
+}
+
 std::vector<float> ImageData::get_pixel_values(int x, int y) {
 	std::vector<float> pixel_data(_channels);
 	int start_index = get_index(x, y);

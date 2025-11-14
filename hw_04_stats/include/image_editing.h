@@ -18,6 +18,7 @@ public:
 	const std::shared_ptr<ImageData> get_edited_image() const { return _edited_image; }
 
 	void save_edited_image();
+	void save_edited_image(const std::string& file_extension);
 
 	// Image editing functions
 	void gamma_filter(float gamma);
