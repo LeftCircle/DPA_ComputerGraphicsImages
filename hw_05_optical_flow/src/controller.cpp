@@ -1,0 +1,209 @@
+#include "controller.h"
+
+
+Controller* Controller::pController = nullptr;
+
+Controller* create_controller()
+{
+	Controller* ctrl = Controller::instance();
+	return ctrl;
+}
+
+Controller::Controller() {}
+
+Controller::~Controller() {}
+
+void Controller::keyboard( unsigned char key, int x, int y )
+{
+	Model* model = Model::instance();
+	ImageEditor _image_editor = Model::instance()->image_editor;
+	switch (key)
+	{
+		case 27: // esc
+			exit(0);
+			break;
+		case 'c':{
+			model->convert_to_contrast_units();
+			break;
+			}
+		case 'C':{
+			model->convert_to_contrast_units();
+			break;
+		}
+		case 'd':{
+			std::cout << "Starting downscale ..." << std::endl;
+			int new_width = _image_editor.get_edited_image()->get_width() / 1.25;
+			int new_height = _image_editor.get_edited_image()->get_height() / 1.25;
+			new_width = std::max(new_width, 6);
+			new_height = std::max(new_height, 8);
+			//std::cout << "New width = " << new_width << std::endl;
+			//_image_editor.downscale(new_width, new_height);
+			_image_editor.downscale(12, 16);
+			std::cout << "Downscale complete!" << std::endl;
+			break;
+		}
+		case 'f':
+			std::cout << "f key pressed! Should flip" << std::endl;
+			_image_editor.flip();
+			break;
+		case 'F':
+			std::cout << "Fractal Flame!" << std::endl;
+			model->fractal_flames();
+			std::cout << "Done" << std::endl; 
+			break;
+		case 'g':
+			std::cout << "gamma of 0.9" << std::endl;
+			_image_editor.gamma_filter(0.9f);
+			break;
+		case 'G':
+			std::cout << "gamma of 1.1111" << std::endl;
+			_image_editor.gamma_filter(1.0f + 1.0f / 9.0f);
+			break;
+		case 'h':{
+			_image_editor.histogram_equalize();
+			break;
+		}
+		case 'J': {
+			//std::cout << "Applying Julia fractal!" << std::endl;
+			//std::pair<int, double> iters_and_range = _get_julia_set_paramters();
+			//model->apply_julia_set(iters_and_range.first, iters_and_range.second);
+			//std::cout << "Julia fractal finished!" << std::endl;
+			model->on_J_pressed();
+			break;
+		}
+		case 'j':{
+			std::cout << "Key j pressed" << std::endl;
+			_image_editor.save_edited_image();
+			break;
+		}
+		case 'm':{
+			// Palette match
+			std::cout << "Starting palette match ..." << std::endl;
+			// std::vector<float> colors = {
+			// 							 0.769f, 0.855f, 0.365f,
+			// 							 0.953f, 0.953f, 0.757f,
+			// 							 0.784f, 0.957f, 0.918f,
+			// 							 0.396f, 0.612f, 0.769f,
+			// 							 0.196f, 0.314f, 0.490f,
+			// 							 0.129f, 0.196f, 0.290f
+			// 							};make
+			
+			_image_editor.palette_match(colors);
+			std::cout << "Palette match done!" << std::endl;
+			break;
+		}
+		case 'o':{
+			// Output the image as .exr
+			_image_editor.save_edited_image(".exr");
+			break;
+		}
+		case 'p':{
+			// If the width/height of the image is less than 20x20, print out
+			// the pixel values
+
+			// Create a map of colors to index in color vector
+			auto color_hash = [](const std::vector<float>& color) {
+			size_t h1 = std::hash<float>{}(color[0]);
+			size_t h2 = std::hash<float>{}(color[1]);
+			size_t h3 = std::hash<float>{}(color[2]);
+			return h1 ^ (h2 << 1) ^ (h3 << 2);
+			};
+
+			std::unordered_map<std::vector<float>, int, decltype(color_hash)> color_map(10, color_hash);
+			int n_colors = static_cast<int>(colors.size() / 3);
+			for (int i = 0; i < n_colors; i++){
+				std::vector<float> color = {colors[i*3], colors[i*3+1], colors[i*3+2]};
+				color_map[color] = i;
+			}
+
+
+			if (_image_editor.get_edited_image()->get_width() <= 20 &&
+				_image_editor.get_edited_image()->get_height() <= 20){
+				std::cout << "Image pixel values:" << std::endl;
+				for (int j = 0; j < _image_editor.get_edited_image()->get_height(); j++){
+					for (int i = 0; i < _image_editor.get_edited_image()->get_width(); i++){
+						auto pixels = _image_editor.get_edited_image()->get_pixel_values(i, j);
+						std::cout << "(";
+						// print the rgb values based on the color map
+						std::vector<float> color = {pixels[0], pixels[1], pixels[2]};
+						
+						if (color_map.find(color) != color_map.end()){
+							std::cout << color_map[color];
+						} else{
+							std::cout << "ERROR";
+						}
+						std::cout << ") ";
+					}
+					std::cout << std::endl;
+				}
+			} else{
+				std::cout << "Image too large to print pixel values" << std::endl;
+			}
+
+			break;
+		}
+		case 's':
+			_apply_stencil();
+			break;
+		case 'q':{
+			_image_editor.quantize(5);
+			std::cout << "Quanitze is done!" << std::endl;
+			break;
+		}
+	}
+}
+
+void Controller::special_keys(int key, int x, int y){
+	Model* model = Model::instance();
+	switch (key){
+		case GLUT_KEY_UP:
+			std::cout << "Up arrow pressed" << std::endl;
+			model->on_up_arrow_pressed();
+			break;
+		case GLUT_KEY_DOWN:
+			std::cout << "Down arrow pressed" << std::endl;
+			model->on_down_arrow_pressed();
+			break;
+		case GLUT_KEY_RIGHT:
+			std::cout << "Right arrow pressed" << std::endl;
+			model->on_right_arrow_pressed();
+			break;
+		case GLUT_KEY_LEFT:
+			std::cout << "Left arrow pressed" << std::endl;	
+			model->on_left_arrow_pressed();
+			break;
+	}
+}
+
+std::pair<int, double> Controller::_get_julia_set_paramters(){
+	int iters;
+	double range;
+
+	std::cout << "Enter the number of iterations: (int) " << std::flush;
+	if (!(std::cin >> iters)){
+		std::cin.clear();
+		std::string discard;
+		std::getline(std::cin, discard);
+		std::cout << "Invalid parameters. Just using defaults" << "std::endl";
+		return {100, 1.0};
+	}
+	std:: cout << "Enter a range can be of format ie 1.0 or 1.0e-6: (double)" << std::flush;
+	if (!(std::cin >> range)) {
+		std::cin.clear();
+		std::string discard;
+		std::getline(std::cin, discard);
+		std::cout << "Invalid parameters. Just using defaults" << "std::endl";
+		return {100, 1.0};
+	}
+	return {iters, range};
+}
+
+void Controller::_apply_stencil() {
+	ImageEditor _image_editor = Model::instance()->image_editor;
+	std::cout << "Applying stencil" << std::endl;
+			
+	Model::instance()->stencil.randomize_values();
+	
+	_image_editor.bounded_linear_convolution(Model::instance()->stencil);
+	std::cout << "Stencil applied" << std::endl;
+}
