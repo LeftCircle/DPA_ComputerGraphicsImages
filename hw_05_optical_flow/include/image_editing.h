@@ -7,6 +7,7 @@
 #include <stencil.h>
 #include <IFSFunction.h>
 #include <lut.h>
+#include <stats.h>
 
 class ImageEditor {
 public:
@@ -38,7 +39,8 @@ public:
 	void downscale(const int new_width, const int new_height);
 	void palette_match(const std::vector<float>& colors);
 	void quantize(int levels);
-
+	ImageData ensemble_average(const ImageData& image);
+	void optical_flow(const std::vector<ImageData>& image_sequence);
 
 private:
 

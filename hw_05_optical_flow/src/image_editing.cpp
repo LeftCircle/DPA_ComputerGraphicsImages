@@ -385,3 +385,76 @@ void ImageEditor::histogram_equalize(const int n_bins) {
 		}
 	}
 }
+
+
+ImageData ImageEditor::ensemble_average(const ImageData& img){
+	const int w = img.get_width();
+	const int h = img.get_height();
+	const int channels = img.get_channels();
+	ImageData avg_img(w, h, channels);
+
+	const float* img_data_ptr = img.get_pixel_ptr();
+	for (int j = 0; j < h; j++){
+		#pragma omp parallel for
+		for (int i = 0; i < w; i++){
+			auto avg = average_ensemble2Df(img_data_ptr, w, h, channels, i, j, 1);
+			avg_img.set_pixel_values(i, j, avg);
+		}
+	}
+	return avg_img;
+}
+
+void ImageEditor::optical_flow(const std::vector<ImageData>& image_sequence){
+	
+	const int w = image_sequence[0].get_width();
+	const int h = image_sequence[0].get_height();
+	const int channels = image_sequence[0].get_channels();
+	// 1. Get the displacement images
+	ImageData dIx = image_sequence[0].get_gradient(true);
+	ImageData dIy = image_sequence[0].get_gradient(false);
+	
+	// 2. Generate ensemble averages Qxy = <<(Id - Iu) * dixy>>
+	ImageData Qx;
+	ImageData Qy;
+
+	// Id is the displaced image(the next image in the sequence) and Iu is the current image
+	Qx = image_sequence[1].duplicate();
+	Qy = image_sequence[1].duplicate();
+	Qx.subtract_then_multiply(image_sequence[0], dIx);
+	Qy.subtract_then_multiply(image_sequence[0], dIy);
+
+	// 2a. Now compute the ensemble averages of these
+	Qx = ensemble_average(Qx);
+	Qy = ensemble_average(Qy);
+
+	// 3. Now for the correlation matrix component images
+	ImageData dIx_sq = dIx.duplicate();
+	dIx_sq *= dIx;
+	ImageData dIy_sq = dIy.duplicate();
+	dIy_sq *= dIy;
+	ImageData dIx_dIy = dIx.duplicate();
+	dIx_dIy *= dIy;
+
+	// 3a. Now compute the ensemble averages of these
+	ImageData c00 = ensemble_average(dIx_sq);
+	ImageData c11 = ensemble_average(dIy_sq);
+	ImageData c_off_diag = ensemble_average(dIx_dIy);
+
+	// 4. Now compute the displacement with D = Q dot C^-1
+	// Inverse of 2x2 matrix C is (1/det) * [c11, -c01; -c10, c00]
+	// where det = c00 * c11 - c01 * c10
+	ImageData displacement_field(w, h, 2 * channels); // (dx, dy) for each original channel
+	for (int j = 0; j < h; j++){
+		#pragma omp parallel for
+		for (int i = 0; i < w; i++){
+			// Start with the Qs component
+			auto qx = Qx.get_pixel_values(i, j);
+			auto qy = Qy.get_pixel_values(i, j);
+			
+			// Now get the C^-1 components
+			auto c00_pix = c00.get_pixel_values(i, j);
+			auto c11_pix = c11.get_pixel_values(i, j);
+			auto coff_diag = c_off_diag.get_pixel_values(i, j);
+			
+		}
+}

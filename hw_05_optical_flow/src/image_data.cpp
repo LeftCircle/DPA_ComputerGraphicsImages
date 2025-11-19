@@ -13,6 +13,7 @@ ImageData::ImageData(const int width, const int height, const int channels) {
 	_height = height;
 	_channels = channels;
 	_image_data_ptr = std::make_unique<float[]>(get_data_len());
+	set_pixel_values(0.0f);
 }
 
 // Deep copy constructor and assignement operator
@@ -50,6 +51,33 @@ ImageData& ImageData::operator=(const ImageData& other) {
 		int data_len = other.get_data_len();
 		_image_data_ptr = std::make_unique<float[]>(data_len);
 		std::copy(other._image_data_ptr.get(), other._image_data_ptr.get() + data_len, _image_data_ptr.get());
+	}
+	return *this;
+}
+
+ImageData& ImageData::operator*=(const ImageData& other) {
+	if (_width != other._width || _height != other._height || _channels != other._channels) {
+		throw std::invalid_argument("Image dimensions and channels must match for multiplication.");
+	}
+
+	int data_len = get_data_len();
+	#pragma omp parallel for
+	for (int i = 0; i < data_len; ++i) {
+		_image_data_ptr[i] *= other._image_data_ptr[i];
+	}
+	return *this;
+}
+
+ImageData& ImageData::subtract_then_multiply(const ImageData& sub_img, const ImageData& mul_img) {
+	if (_width != sub_img._width || _height != sub_img._height || _channels != sub_img._channels ||
+		_width != mul_img._width || _height != mul_img._height || _channels != mul_img._channels) {
+		throw std::invalid_argument("Image dimensions and channels must match for subtract_then_multiply.");
+	}
+
+	int data_len = get_data_len();
+	#pragma omp parallel for
+	for (int i = 0; i < data_len; ++i) {
+		_image_data_ptr[i] = ( _image_data_ptr[i] - sub_img._image_data_ptr[i] ) * mul_img._image_data_ptr[i];
 	}
 	return *this;
 }
@@ -436,6 +464,42 @@ ImageData ImageData::get_x_y_gradients() const {
 					gy = (get_pixel_value(i, j + 1, c) - get_pixel_value(i, j - 1, c)) / 2.0f;
 				}
 				gradients.set_pixel_value(i, j, c + _channels, gy);
+			}
+		}
+	}
+	return gradients;
+}
+
+ImageData ImageData::get_gradient(const bool is_x_gradient) const {
+	// Return a new ImageData object with same channels:
+	// The channels are either the x gradients or the y gradients
+	ImageData gradients(_width, _height, _channels);
+	const int x_addition = is_x_gradient ? 1 : 0;
+	const int y_addition = is_x_gradient ? 0 : 1;
+	for (int j = 0; j < _height; j++){
+		for (int i = 0; i < _width; i++){
+			for (int c = 0; c < _channels; c++){
+				float g = 0.0f;
+				if (is_x_gradient){
+					// Compute x gradient
+					if (i == 0){
+						g = get_pixel_value(i + 1, j, c) - get_pixel_value(i, j, c);
+					} else if (i == _width - 1){
+						g = get_pixel_value(i, j, c) - get_pixel_value(i - 1, j, c);
+					} else {
+						g = (get_pixel_value(i + 1, j, c) - get_pixel_value(i - 1, j, c)) / 2.0f;
+					}
+				} else {
+					// Compute y gradient
+					if (j == 0){
+						g = get_pixel_value(i, j + 1, c) - get_pixel_value(i, j, c);
+					} else if (j == _height - 1){
+						g = get_pixel_value(i, j, c) - get_pixel_value(i, j - 1, c);
+					} else {
+						g = (get_pixel_value(i, j + 1, c) - get_pixel_value(i, j - 1, c)) / 2.0f;
+					}
+				}
+				gradients.set_pixel_value(i, j, c, g);
 			}
 		}
 	}

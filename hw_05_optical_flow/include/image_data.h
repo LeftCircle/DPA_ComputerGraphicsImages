@@ -72,6 +72,7 @@ public:
 	std::vector<float> interpolate_bilinear(const float x, const float y) const;
 
 	ImageData get_x_y_gradients() const;
+	ImageData get_gradient(const bool is_x_gradient) const;
 
 	void clear();
 	
@@ -80,6 +81,8 @@ public:
 	ImageData duplicate() const;
 
 	ImageData& operator=(const ImageData& other);
+	ImageData& operator*=(const ImageData& other);
+	ImageData& subtract_then_multiply(const ImageData& sub_img, const ImageData& mul_img);
 	
 	
 
