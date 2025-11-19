@@ -454,7 +454,25 @@ void ImageEditor::optical_flow(const std::vector<ImageData>& image_sequence){
 			// Now get the C^-1 components
 			auto c00_pix = c00.get_pixel_values(i, j);
 			auto c11_pix = c11.get_pixel_values(i, j);
-			auto coff_diag = c_off_diag.get_pixel_values(i, j);
+			auto coff_diag = c_off_diag.get_pixel_values(i, j);\
+			for (int c = 0; c < channels; c++){
+				float det = c00_pix[c] * c11_pix[c] - coff_diag[c] * coff_diag[c];
+				if (std::abs(det) < 1e-6){
+					// Singular matrix, set displacement to zero
+					displacement_field.set_pixel_value(i, j, c * 2, 0.0f);
+					displacement_field.set_pixel_value(i, j, c * 2 + 1, 0.0f);
+				} else {
+					float inv_c00 = c11_pix[c] / det;
+					float inv_c11 = c00_pix[c] / det;
+					float inv_coff_diag = -coff_diag[c] / det;
+
+					// Now compute D = Q dot C^-1
+					float dx = qx[c] * inv_c00 + qy[c] * inv_coff_diag;
+					float dy = qx[c] * inv_coff_diag + qy[c] * inv_c11;
+					displacement_field.set_pixel_value(i, j, c * 2, dx);
+					displacement_field.set_pixel_value(i, j, c * 2 + 1, dy);
+				}
+			}
 			
 		}
 }
