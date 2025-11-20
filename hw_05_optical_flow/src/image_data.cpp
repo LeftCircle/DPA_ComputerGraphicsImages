@@ -436,6 +436,38 @@ std::vector<float> ImageData::interpolate_bilinear(const float x, const float y)
 	return result;
 }
 
+float ImageData::interpolate_bilinear(const float x, const float y, const int channel) const {
+	int x0 = static_cast<int>(std::floor(x));
+	int x1 = x0 + 1;
+	int y0 = static_cast<int>(std::floor(y));
+	int y1 = y0 + 1;
+
+	x0 = std::max(0, std::min(x0, _width - 1));
+	x1 = std::max(0, std::min(x1, _width - 1));
+	y0 = std::max(0, std::min(y0, _height - 1));
+	y1 = std::max(0, std::min(y1, _height - 1));
+
+
+	float wx = x - x0;
+	float wy = y - y0;
+	float w00 = (1.0 - wx) * (1.0 - wy);
+	float w10 = (1.0 - wx) * wy;
+	float w01 = wx * (1.0 - wy);
+	float w11 = wx * wy;
+
+	float result = 0.0f;
+
+	auto c00 = get_pixel_value(x0, y0, channel);
+	auto c10 = get_pixel_value(x1, y0, channel);
+	auto c01 = get_pixel_value(x0, y1, channel);
+	auto c11 = get_pixel_value(x1, y1, channel);
+	result += c00 * w00;
+	result += c10 * w10;
+	result += c01 * w01;
+	result += c11 * w11;
+	return result;
+}
+
 ImageData ImageData::get_x_y_gradients() const {
 	// Return a new ImageData object with 2*channels:
 	// The first half of the channels are the x gradients, the second half are the y gradients

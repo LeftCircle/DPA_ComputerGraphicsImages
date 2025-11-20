@@ -406,73 +406,116 @@ ImageData ImageEditor::ensemble_average(const ImageData& img){
 
 void ImageEditor::optical_flow(const std::vector<ImageData>& image_sequence){
 	
+	// Create a double buffer for updating/reading the flowed image
+	ImageData flow_img;
+	ImageData flow_img_b;
+	flow_img = image_sequence[0].duplicate();
+	flow_img_b = image_sequence[0].duplicate();
+
+	ImageData* current = &flow_img;
+	ImageData* next = &flow_img_b;
+	
 	const int w = image_sequence[0].get_width();
 	const int h = image_sequence[0].get_height();
 	const int channels = image_sequence[0].get_channels();
-	// 1. Get the displacement images
-	ImageData dIx = image_sequence[0].get_gradient(true);
-	ImageData dIy = image_sequence[0].get_gradient(false);
-	
-	// 2. Generate ensemble averages Qxy = <<(Id - Iu) * dixy>>
-	ImageData Qx;
-	ImageData Qy;
+	const int num_images = image_sequence.size();
+	for (int img_idx = 0; img_idx < num_images - 1; img_idx++){
+		// TODO -> tuck this into a nice little optical flow step function 
+		// with the inputs of img_seq, iteration number, current, next
+		// then end with std::swap(current, next);
+		// 1. Get the displacement images
+		ImageData dIx = image_sequence[img_idx].get_gradient(true);
+		ImageData dIy = image_sequence[img_idx].get_gradient(false);
+		
+		// 2. Generate ensemble averages Qxy = <<(Id - Iu) * dixy>>
+		ImageData Qx;
+		ImageData Qy;
 
-	// Id is the displaced image(the next image in the sequence) and Iu is the current image
-	Qx = image_sequence[1].duplicate();
-	Qy = image_sequence[1].duplicate();
-	Qx.subtract_then_multiply(image_sequence[0], dIx);
-	Qy.subtract_then_multiply(image_sequence[0], dIy);
+		// Id is the displaced image(the next image in the sequence) and Iu is the current image
+		Qx = image_sequence[img_idx + 1].duplicate();
+		Qy = image_sequence[img_idx + 1].duplicate();
+		Qx.subtract_then_multiply(image_sequence[img_idx], dIx);
+		Qy.subtract_then_multiply(image_sequence[img_idx], dIy);
 
-	// 2a. Now compute the ensemble averages of these
-	Qx = ensemble_average(Qx);
-	Qy = ensemble_average(Qy);
+		// 2a. Now compute the ensemble averages of these
+		Qx = ensemble_average(Qx);
+		Qy = ensemble_average(Qy);
 
-	// 3. Now for the correlation matrix component images
-	ImageData dIx_sq = dIx.duplicate();
-	dIx_sq *= dIx;
-	ImageData dIy_sq = dIy.duplicate();
-	dIy_sq *= dIy;
-	ImageData dIx_dIy = dIx.duplicate();
-	dIx_dIy *= dIy;
+		// 3. Now for the correlation matrix component images
+		ImageData dIx_sq = dIx.duplicate();
+		dIx_sq *= dIx;
+		ImageData dIy_sq = dIy.duplicate();
+		dIy_sq *= dIy;
+		ImageData dIx_dIy = dIx.duplicate();
+		dIx_dIy *= dIy;
 
-	// 3a. Now compute the ensemble averages of these
-	ImageData c00 = ensemble_average(dIx_sq);
-	ImageData c11 = ensemble_average(dIy_sq);
-	ImageData c_off_diag = ensemble_average(dIx_dIy);
+		// 3a. Now compute the ensemble averages of these
+		ImageData c00 = ensemble_average(dIx_sq);
+		ImageData c11 = ensemble_average(dIy_sq);
+		ImageData c_off_diag = ensemble_average(dIx_dIy);
 
-	// 4. Now compute the displacement with D = Q dot C^-1
-	// Inverse of 2x2 matrix C is (1/det) * [c11, -c01; -c10, c00]
-	// where det = c00 * c11 - c01 * c10
-	ImageData displacement_field(w, h, 2 * channels); // (dx, dy) for each original channel
-	for (int j = 0; j < h; j++){
-		#pragma omp parallel for
-		for (int i = 0; i < w; i++){
-			// Start with the Qs component
-			auto qx = Qx.get_pixel_values(i, j);
-			auto qy = Qy.get_pixel_values(i, j);
-			
-			// Now get the C^-1 components
-			auto c00_pix = c00.get_pixel_values(i, j);
-			auto c11_pix = c11.get_pixel_values(i, j);
-			auto coff_diag = c_off_diag.get_pixel_values(i, j);\
-			for (int c = 0; c < channels; c++){
-				float det = c00_pix[c] * c11_pix[c] - coff_diag[c] * coff_diag[c];
-				if (std::abs(det) < 1e-6){
-					// Singular matrix, set displacement to zero
-					displacement_field.set_pixel_value(i, j, c * 2, 0.0f);
-					displacement_field.set_pixel_value(i, j, c * 2 + 1, 0.0f);
-				} else {
-					float inv_c00 = c11_pix[c] / det;
-					float inv_c11 = c00_pix[c] / det;
-					float inv_coff_diag = -coff_diag[c] / det;
+		// 4. Now compute the velcity field with V = Q * C^-1
+		// Inverse of 2x2 matrix C is (1/det) * [c11, -c01; -c10, c00]
+		// where det = c00 * c11 - c01 * c10
+		ImageData velocity_field(w, h, 2 * channels); // (dx, dy) for each original channel
+		for (int j = 0; j < h; j++){
+			#pragma omp parallel for
+			for (int i = 0; i < w; i++){
+				// Start with the Qs component
+				auto qx = Qx.get_pixel_values(i, j);
+				auto qy = Qy.get_pixel_values(i, j);
+				
+				// Now get the C^-1 components
+				auto c00_pix = c00.get_pixel_values(i, j);
+				auto c11_pix = c11.get_pixel_values(i, j);
+				auto coff_diag = c_off_diag.get_pixel_values(i, j);\
+				for (int c = 0; c < channels; c++){
+					float det = c00_pix[c] * c11_pix[c] - coff_diag[c] * coff_diag[c];
+					if (std::abs(det) < 1e-6){
+						// Singular matrix, set velocity to zero
+						velocity_field.set_pixel_value(i, j, c * 2, 0.0f);
+						velocity_field.set_pixel_value(i, j, c * 2 + 1, 0.0f);
+					} else {
+						float inv_c00 = c11_pix[c] / det;
+						float inv_c11 = c00_pix[c] / det;
+						float inv_coff_diag = -coff_diag[c] / det;
 
-					// Now compute D = Q dot C^-1
-					float dx = qx[c] * inv_c00 + qy[c] * inv_coff_diag;
-					float dy = qx[c] * inv_coff_diag + qy[c] * inv_c11;
-					displacement_field.set_pixel_value(i, j, c * 2, dx);
-					displacement_field.set_pixel_value(i, j, c * 2 + 1, dy);
+						// Now compute D = Q * C^-1
+						float dx = qx[c] * inv_c00 + qy[c] * inv_coff_diag;
+						float dy = qx[c] * inv_coff_diag + qy[c] * inv_c11;
+						velocity_field.set_pixel_value(i, j, c * 2, dx);
+						velocity_field.set_pixel_value(i, j, c * 2 + 1, dy);
+					}
 				}
 			}
-			
 		}
+
+		// 5. Now that we have the velocity field, apply that to the iterated image.
+		// TODO -> We might be able to just tuck all of this above ^^. Maybe don't even need
+		// velocity field as an image. 
+		
+		// Let's just try to loop over each pixel position x, y, then apply the velocity
+		// to that pixel to get an x', y', then bilinear interpolate the value of the edited image
+		// at the new position
+		for (int j = 0; j < h; j++){
+			float y = (float)j / (float)h;
+			#pragma omp parallel for
+			for (int i = 0; i < w; i++){
+				float x = (float)i / (float)w;
+				// We have per channel velocity, so we need to do the bilinear interp for just a given channel
+				for (int c = 0; c < channels; c++){
+					float dx = velocity_field.get_pixel_value(i, j, c * 2);
+					float dy = velocity_field.get_pixel_value(i, j, c * 2 + 1);
+					// Read from current, write to next
+					float c_interp = current->interpolate_bilinear(x + dx, y + dy, c);
+					next->set_pixel_value(i, j, c, c_interp);
+				}
+			}
+		}
+		std::swap(current, next);
+	}
+
+	// Now we have the final image! Mayybe set that to _edited_image and show?
+	_edited_image->set_to(*current);
+
 }

@@ -70,6 +70,7 @@ public:
 
 	std::vector<float> interpolate_nearest_neighbor(const float x, const float y) const;
 	std::vector<float> interpolate_bilinear(const float x, const float y) const;
+	float interpolate_bilinear(const float x, const float y, const int c) const;
 
 	ImageData get_x_y_gradients() const;
 	ImageData get_gradient(const bool is_x_gradient) const;
