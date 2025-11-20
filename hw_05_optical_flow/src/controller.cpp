@@ -79,14 +79,6 @@ void Controller::keyboard( unsigned char key, int x, int y )
 		case 'm':{
 			// Palette match
 			std::cout << "Starting palette match ..." << std::endl;
-			// std::vector<float> colors = {
-			// 							 0.769f, 0.855f, 0.365f,
-			// 							 0.953f, 0.953f, 0.757f,
-			// 							 0.784f, 0.957f, 0.918f,
-			// 							 0.396f, 0.612f, 0.769f,
-			// 							 0.196f, 0.314f, 0.490f,
-			// 							 0.129f, 0.196f, 0.290f
-			// 							};make
 			
 			_image_editor.palette_match(colors);
 			std::cout << "Palette match done!" << std::endl;
@@ -100,16 +92,31 @@ void Controller::keyboard( unsigned char key, int x, int y )
 		case 'O':{
 			// Optical flow
 			std::cout << "Starting optical flow ..." << std::endl;
+			
 			// Start by prompting the user for a path to a directory of images
 			std::string dir_path;
 			std::cout << "Enter the path to the directory of images: " << std::flush;
 			std::cin >> dir_path;
+			
 			// Now ask for the name of the image sequence
 			std::string img_sequence_name;
 			std::cout << "Enter the base name of the image sequence (without numbering or extension): " << std::flush;
 			std::cin >> img_sequence_name;
 			// Now use file Utils to get the names of the images in the directory
-			std::vector<std::string> image_file_names = FileUtils::get_all_files_starting_with(dir_path, img_sequence_name);
+			std::vector<std::string> image_file_names = get_all_files_starting_with(dir_path, img_sequence_name);
+			sort_based_on_number_suffix(image_file_names);
+			// Now create image sequences from these
+			// TODO -> just pass the paths to optical flow function
+			std::vector<ImageData> image_sequence;
+			for (const auto& file_name : image_file_names){
+				ImageData img(file_name.c_str());
+				std::cout << "Loaded image: " << file_name << std::endl;
+				image_sequence.push_back(img);
+			}
+			
+			_image_editor.optical_flow(image_sequence, *_image_editor.get_edited_image());
+			std::cout << "Optical flow done!" << std::endl;
+			
 			break;
 		}
 		case 'p':{

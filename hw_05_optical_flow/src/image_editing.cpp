@@ -455,7 +455,8 @@ void ImageEditor::optical_flow(const std::vector<ImageData>& image_sequence, con
 		ImageData c_off_diag = ensemble_average(dIx_dIy);
 
 		// 4. Now compute the velcity field with V = Q * C^-1
-		// Inverse of 2x2 matrix C is (1/det) * [c11, -c01; -c10, c00]
+		// Inverse of 2x2 matrix C is (1/det) * [c11, -c01;
+		//										 -c10, c00]
 		// where det = c00 * c11 - c01 * c10
 		ImageData velocity_field(w, h, 2 * channels); // (dx, dy) for each original channel
 		for (int j = 0; j < h; j++){
