@@ -97,6 +97,21 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			_image_editor.save_edited_image(".exr");
 			break;
 		}
+		case 'O':{
+			// Optical flow
+			std::cout << "Starting optical flow ..." << std::endl;
+			// Start by prompting the user for a path to a directory of images
+			std::string dir_path;
+			std::cout << "Enter the path to the directory of images: " << std::flush;
+			std::cin >> dir_path;
+			// Now ask for the name of the image sequence
+			std::string img_sequence_name;
+			std::cout << "Enter the base name of the image sequence (without numbering or extension): " << std::flush;
+			std::cin >> img_sequence_name;
+			// Now use file Utils to get the names of the images in the directory
+			std::vector<std::string> image_file_names = FileUtils::get_all_files_starting_with(dir_path, img_sequence_name);
+			break;
+		}
 		case 'p':{
 			// If the width/height of the image is less than 20x20, print out
 			// the pixel values

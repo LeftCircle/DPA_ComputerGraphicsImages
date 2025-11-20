@@ -404,13 +404,13 @@ ImageData ImageEditor::ensemble_average(const ImageData& img){
 	return avg_img;
 }
 
-void ImageEditor::optical_flow(const std::vector<ImageData>& image_sequence){
+void ImageEditor::optical_flow(const std::vector<ImageData>& image_sequence, const ImageData& img_to_flow){
 	
 	// Create a double buffer for updating/reading the flowed image
 	ImageData flow_img;
 	ImageData flow_img_b;
-	flow_img = image_sequence[0].duplicate();
-	flow_img_b = image_sequence[0].duplicate();
+	flow_img = img_to_flow.duplicate();
+	flow_img_b = img_to_flow.duplicate();
 
 	ImageData* current = &flow_img;
 	ImageData* next = &flow_img_b;

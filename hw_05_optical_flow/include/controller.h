@@ -8,6 +8,7 @@
 #include "image_data.h"
 #include "image_editing.h"
 #include "model.h"
+#include "file_utils.h"
 
 // A singleton controller class that will be used to drive GLUT inputs
 class Controller

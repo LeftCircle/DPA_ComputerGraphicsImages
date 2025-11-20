@@ -40,7 +40,7 @@ public:
 	void palette_match(const std::vector<float>& colors);
 	void quantize(int levels);
 	ImageData ensemble_average(const ImageData& image);
-	void optical_flow(const std::vector<ImageData>& image_sequence);
+	void optical_flow(const std::vector<ImageData>& image_sequence, const ImageData& img_to_flow);
 
 private:
 
