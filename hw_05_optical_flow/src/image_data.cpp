@@ -506,8 +506,6 @@ ImageData ImageData::get_gradient(const bool is_x_gradient) const {
 	// Return a new ImageData object with same channels:
 	// The channels are either the x gradients or the y gradients
 	ImageData gradients(_width, _height, _channels);
-	const int x_addition = is_x_gradient ? 1 : 0;
-	const int y_addition = is_x_gradient ? 0 : 1;
 	for (int j = 0; j < _height; j++){
 		for (int i = 0; i < _width; i++){
 			for (int c = 0; c < _channels; c++){

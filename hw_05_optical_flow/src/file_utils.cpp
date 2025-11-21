@@ -25,22 +25,30 @@ std::string get_file_name(const std::string& filepath){
     return filepath.substr(start, dot_pos - start);
 }
 
+int get_file_number_suffix(const std::string& filename){
+    size_t i = filename.length() - 1;
+    while (i > 0 && isdigit(filename[i])) {
+        --i;
+    } 
+    if (i == filename.length() - 1) {
+        std::cout << "No trailing number found in filename: " << filename << std::endl;
+        return -1; // No trailing number
+    }
+    return std::stoi(filename.substr(i + 1));
+}
+
 void sort_based_on_number_suffix(std::vector<std::string>& file_names, bool remove_extension){
     
     std::sort(file_names.begin(), file_names.end(),
-        [](const std::string& a, const std::string& b) {
-            auto extract_number = [](const std::string& filename) -> int {
-                size_t i = filename.length() - 1;
-                while (i > 0 && isdigit(filename[i])) {
-                    --i;
-                } 
-                if (i == filename.length() - 1) {
-                    return -1; // No trailing number
-                }
-                return std::stoi(filename.substr(i + 1));
-            };
-            int num_a = extract_number(a);
-            int num_b = extract_number(b);
+        [remove_extension](const std::string& a, const std::string& b) {
+            std::string name_a = a;
+            std::string name_b = b;
+            if (remove_extension){
+                name_a = get_file_name(a);
+                name_b = get_file_name(b);
+            }
+            int num_a = get_file_number_suffix(name_a);
+            int num_b = get_file_number_suffix(name_b);
             return num_a < num_b;
         });
 }

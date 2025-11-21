@@ -5,13 +5,14 @@
 #include <vector>
 #include <filesystem>
 #include <algorithm>
-
+#include <iostream>
 
 //namespace FileUtils{
 std::vector<std::string> get_all_files_starting_with(const std::string& directory, const std::string& prefix);
 void sort_based_on_number_suffix(std::vector<std::string>& file_names, bool remove_extension = false);
 /* given path/to/file_name.extension, returns file_name*/
 std::string get_file_name(const std::string& filepath);
+int get_file_number_suffix(const std::string& filename);
 //}
 
 #endif 
