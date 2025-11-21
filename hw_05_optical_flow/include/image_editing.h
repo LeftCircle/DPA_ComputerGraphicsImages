@@ -39,8 +39,9 @@ public:
 	void downscale(const int new_width, const int new_height);
 	void palette_match(const std::vector<float>& colors);
 	void quantize(int levels);
-	ImageData ensemble_average(const ImageData& image);
+	ImageData ensemble_average(const ImageData& image, int half_width = 1);
 	void optical_flow(const std::vector<ImageData>& image_sequence, const ImageData& img_to_flow);
+	void bilinear_interpolate_each_channel();
 
 private:
 

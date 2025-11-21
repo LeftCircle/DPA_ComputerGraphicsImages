@@ -22,6 +22,19 @@ void Controller::keyboard( unsigned char key, int x, int y )
 		case 27: // esc
 			exit(0);
 			break;
+		case 'a':{
+			std::cout << "Starting ensemble average ..." << std::endl;
+			ImageData avg_img = _image_editor.ensemble_average(*_image_editor.get_edited_image(), 1);
+			_image_editor.set_edited_image_to(avg_img);
+			std::cout << "Ensemble average done!" << std::endl;
+			break;
+		}
+		case 'b':{
+			std::cout << "Applying bilinear interpolation to each color channel ..." << std::endl;
+			_image_editor.bilinear_interpolate_each_channel();
+			std::cout << "Bilinear interpolation done!" << std::endl;
+			break;
+		}
 		case 'c':{
 			model->convert_to_contrast_units();
 			break;

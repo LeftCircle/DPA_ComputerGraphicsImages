@@ -73,7 +73,8 @@ public:
 	float interpolate_bilinear(const float x, const float y, const int c) const;
 
 	ImageData get_x_y_gradients() const;
-	ImageData get_gradient(const bool is_x_gradient) const;
+	ImageData get_x_gradient() const;
+	ImageData get_y_gradient() const;
 
 	void clear();
 	

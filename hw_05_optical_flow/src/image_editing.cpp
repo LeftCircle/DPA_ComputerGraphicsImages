@@ -387,7 +387,7 @@ void ImageEditor::histogram_equalize(const int n_bins) {
 }
 
 
-ImageData ImageEditor::ensemble_average(const ImageData& img){
+ImageData ImageEditor::ensemble_average(const ImageData& img, int half_width){
 	const int w = img.get_width();
 	const int h = img.get_height();
 	const int channels = img.get_channels();
@@ -397,7 +397,7 @@ ImageData ImageEditor::ensemble_average(const ImageData& img){
 	for (int j = 0; j < h; j++){
 		#pragma omp parallel for
 		for (int i = 0; i < w; i++){
-			auto avg = average_ensemble2Df(img_data_ptr, w, h, channels, i, j, 1);
+			auto avg = average_ensemble2Df(img_data_ptr, w, h, channels, i, j, half_width);
 			avg_img.set_pixel_values(i, j, avg);
 		}
 	}
@@ -405,7 +405,17 @@ ImageData ImageEditor::ensemble_average(const ImageData& img){
 }
 
 void ImageEditor::optical_flow(const std::vector<ImageData>& image_sequence, const ImageData& img_to_flow){
-	
+	// Sanity check: See if the optical flow target is the same size as the images
+	int flow_w = img_to_flow.get_width();
+	int flow_h = img_to_flow.get_height();
+	int flow_c = img_to_flow.get_channels();
+	int seq_w = image_sequence[0].get_width();
+	int seq_h = image_sequence[0].get_height();
+	int seq_c = image_sequence[0].get_channels();
+	if (flow_w != seq_w || flow_h != seq_h || flow_c != seq_c){
+		throw std::invalid_argument("Optical flow target image dimensions do not match image sequence dimensions.");
+		return;
+	}
 	// Create a double buffer for updating/reading the flowed image
 	ImageData flow_img;
 	ImageData flow_img_b;
@@ -424,8 +434,8 @@ void ImageEditor::optical_flow(const std::vector<ImageData>& image_sequence, con
 		// with the inputs of img_seq, iteration number, current, next
 		// then end with std::swap(current, next);
 		// 1. Get the displacement images
-		ImageData dIx = image_sequence[img_idx].get_gradient(true);
-		ImageData dIy = image_sequence[img_idx].get_gradient(false);
+		ImageData dIx = image_sequence[img_idx].get_x_gradient();
+		ImageData dIy = image_sequence[img_idx].get_y_gradient();
 		
 		// 2. Generate ensemble averages Qxy = <<(Id - Iu) * dixy>>
 		ImageData Qx;
@@ -469,7 +479,7 @@ void ImageEditor::optical_flow(const std::vector<ImageData>& image_sequence, con
 				// Now get the C^-1 components
 				auto c00_pix = c00.get_pixel_values(i, j);
 				auto c11_pix = c11.get_pixel_values(i, j);
-				auto coff_diag = c_off_diag.get_pixel_values(i, j);\
+				auto coff_diag = c_off_diag.get_pixel_values(i, j);
 				for (int c = 0; c < channels; c++){
 					float det = c00_pix[c] * c11_pix[c] - coff_diag[c] * coff_diag[c];
 					if (std::abs(det) < 1e-6){
@@ -482,8 +492,11 @@ void ImageEditor::optical_flow(const std::vector<ImageData>& image_sequence, con
 						float inv_coff_diag = -coff_diag[c] / det;
 
 						// Now compute D = Q * C^-1
+						// Q = [qx, qy] = 1 x 2 matrix. 
+						// This way Q * C^-1 = 1 x 2 * 2 x 2 = 1 x 2 matrix so we get (dx, dy)
 						float dx = qx[c] * inv_c00 + qy[c] * inv_coff_diag;
 						float dy = qx[c] * inv_coff_diag + qy[c] * inv_c11;
+						
 						velocity_field.set_pixel_value(i, j, c * 2, dx);
 						velocity_field.set_pixel_value(i, j, c * 2 + 1, dy);
 					}
@@ -499,10 +512,10 @@ void ImageEditor::optical_flow(const std::vector<ImageData>& image_sequence, con
 		// to that pixel to get an x', y', then bilinear interpolate the value of the edited image
 		// at the new position
 		for (int j = 0; j < h; j++){
-			float y = (float)j / (float)h;
+			float y = (float)j;
 			#pragma omp parallel for
 			for (int i = 0; i < w; i++){
-				float x = (float)i / (float)w;
+				float x = (float)i;
 				// We have per channel velocity, so we need to do the bilinear interp for just a given channel
 				for (int c = 0; c < channels; c++){
 					float dx = velocity_field.get_pixel_value(i, j, c * 2);
@@ -519,4 +532,26 @@ void ImageEditor::optical_flow(const std::vector<ImageData>& image_sequence, con
 	// Now we have the final image! Mayybe set that to _edited_image and show?
 	_edited_image->set_to(*current);
 
+}
+
+void ImageEditor::bilinear_interpolate_each_channel(){
+	const int w = _edited_image->get_width();
+	const int h = _edited_image->get_height();
+	const int channels = _edited_image->get_channels();
+	ImageData interp_img(w, h, channels);
+
+	for (int j = 0; j < h; j++){
+		//#pragma omp parallel for
+		for (int i = 0; i < w; i++){
+			for (int c = 0; c < channels; c++){
+				float x = static_cast<float>(i);
+				float y = static_cast<float>(j);
+				float interp_val = _edited_image->interpolate_bilinear(x, y, c);
+				interp_img.set_pixel_value(i, j, c, interp_val);
+			}
+			//auto values = _edited_image->interpolate_bilinear((float)i, (float)j);
+			//interp_img.set_pixel_values(i, j, values);
+		}
+	}
+	_edited_image->set_to(interp_img);
 }

@@ -416,9 +416,9 @@ std::vector<float> ImageData::interpolate_bilinear(const float x, const float y)
 
 	float wx = x - x0;
 	float wy = y - y0;
-	float w00 = (1.0 - wx) * (1.0 - wy);
-	float w10 = (1.0 - wx) * wy;
-	float w01 = wx * (1.0 - wy);
+	float w00 = (1.0f - wx) * (1.0f - wy);
+	float w10 = (1.0f - wx) * wy;
+	float w01 = wx * (1.0f - wy);
 	float w11 = wx * wy;
 
 	std::vector<float> result(_channels, 0.0);
@@ -450,9 +450,9 @@ float ImageData::interpolate_bilinear(const float x, const float y, const int ch
 
 	float wx = x - x0;
 	float wy = y - y0;
-	float w00 = (1.0 - wx) * (1.0 - wy);
-	float w10 = (1.0 - wx) * wy;
-	float w01 = wx * (1.0 - wy);
+	float w00 = (1.0f - wx) * (1.0f - wy);
+	float w10 = (1.0f - wx) * wy;
+	float w01 = wx * (1.0f - wy);
 	float w11 = wx * wy;
 
 	float result = 0.0f;
@@ -502,32 +502,40 @@ ImageData ImageData::get_x_y_gradients() const {
 	return gradients;
 }
 
-ImageData ImageData::get_gradient(const bool is_x_gradient) const {
+ImageData ImageData::get_x_gradient() const {
 	// Return a new ImageData object with same channels:
-	// The channels are either the x gradients or the y gradients
 	ImageData gradients(_width, _height, _channels);
 	for (int j = 0; j < _height; j++){
 		for (int i = 0; i < _width; i++){
 			for (int c = 0; c < _channels; c++){
 				float g = 0.0f;
-				if (is_x_gradient){
-					// Compute x gradient
-					if (i == 0){
-						g = get_pixel_value(i + 1, j, c) - get_pixel_value(i, j, c);
-					} else if (i == _width - 1){
-						g = get_pixel_value(i, j, c) - get_pixel_value(i - 1, j, c);
-					} else {
-						g = (get_pixel_value(i + 1, j, c) - get_pixel_value(i - 1, j, c)) / 2.0f;
-					}
+				if (i == 0){
+					g = get_pixel_value(i + 1, j, c) - get_pixel_value(i, j, c);
+				} else if (i == _width - 1){
+					g = get_pixel_value(i, j, c) - get_pixel_value(i - 1, j, c);
 				} else {
-					// Compute y gradient
-					if (j == 0){
-						g = get_pixel_value(i, j + 1, c) - get_pixel_value(i, j, c);
-					} else if (j == _height - 1){
-						g = get_pixel_value(i, j, c) - get_pixel_value(i, j - 1, c);
-					} else {
-						g = (get_pixel_value(i, j + 1, c) - get_pixel_value(i, j - 1, c)) / 2.0f;
-					}
+					g = (get_pixel_value(i + 1, j, c) - get_pixel_value(i - 1, j, c)) / 2.0f;
+				}
+				gradients.set_pixel_value(i, j, c, g);
+			}
+		}
+	}
+	return gradients;
+}
+
+ImageData ImageData::get_y_gradient() const {
+	// Return a new ImageData object with same channels:
+	ImageData gradients(_width, _height, _channels);
+	for (int j = 0; j < _height; j++){
+		for (int i = 0; i < _width; i++){
+			for (int c = 0; c < _channels; c++){
+				float g = 0.0f;
+				if (j == 0){
+					g = get_pixel_value(i, j + 1, c) - get_pixel_value(i, j, c);
+				} else if (j == _height - 1){
+					g = get_pixel_value(i, j, c) - get_pixel_value(i, j - 1, c);
+				} else {
+					g = (get_pixel_value(i, j + 1, c) - get_pixel_value(i, j - 1, c)) / 2.0f;
 				}
 				gradients.set_pixel_value(i, j, c, g);
 			}
