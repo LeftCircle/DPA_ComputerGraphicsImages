@@ -356,6 +356,7 @@ void ImageEditor::histogram_equalize(const int n_bins) {
 			for (int c = 0; c < n_channels; c++){
 				float p = _edited_image->get_pixel_value(i, j, c);
 				int bin_index = int((p - min[c]) / bin_width[c]);
+				bin_index = std::min(std::max(bin_index, 0), n_bins - 1);
 				bins[bin_index * n_channels + c] += 1;
 			}
 		}
@@ -380,6 +381,7 @@ void ImageEditor::histogram_equalize(const int n_bins) {
 			for (int c = 0; c < n_channels; c++){
 				float p = _edited_image->get_pixel_value(i, j, c);
 				int bin_index = int((p - min[c]) / bin_width[c]) * n_channels + c;
+				bin_index = std::min(std::max(bin_index, 0), n_bins * n_channels - 1);
 				_edited_image->set_pixel_value(i, j, c, cdf[bin_index]);
 			}
 		}

@@ -1,41 +1,5 @@
 #include "IFSFunction.h"
 
-void FlameIFSFunction::set_trans_matrix(double m00, double m01, double m02, double m10, double m11, double m12){
-	_homogeneous_transform << 
-			m00, m01, m02,
-			m10, m11, m12,
-			0.0f, 0.0f, 1.0f;
-	_inverse_transf = _homogeneous_transform.inverse();
-}
-
-void FlameIFSFunction::add_rotation(double radians){
-	Eigen::Matrix3d rotation_matrix;
-	float cos_r = cos(radians);
-	float sin_r = sin(radians);
-	rotation_matrix << 
-		cos_r, -sin_r, 0.0,
-		sin_r, cos_r, 0.0,
-		0.0, 0.0, 1.0;
-	_homogeneous_transform = rotation_matrix * _homogeneous_transform;
-	_inverse_transf = _homogeneous_transform.inverse();
-}
-
-Point FlameIFSFunction::get_point_in_local_space(const Point& P){
-	Eigen::Vector3d p_homogeneous(P.x, P.y, 1.0);
-	Eigen::Vector3d p_local = _homogeneous_transform * p_homogeneous;
-	Point p_out(p_local(0), p_local(1));
-	return p_out;
-}
-
-Point FlameIFSFunction::convert_point_to_global_space(const Point& P){
-	Eigen::Vector3d p_homogeneous(P.x, P.y, 1.0);
-	Eigen::Vector3d p_global = _inverse_transf * p_homogeneous;
-	p_global /= p_global[2];
-	Point p_out(p_global(0), p_global(1));
-	return p_out;
-}
-
-
 Point Linear::operator()(const Point& P) const {
 	return P * _scale;
 }
@@ -198,9 +162,7 @@ void IFSFunctionSystem::fractal_frame(int iters){
 		const Color& c = get_color(rand_index);
 		
 		// First apply the affine transform from the FlameIFSFunction
-		p = (*ifs).get_point_in_local_space(p);
 		p = (*ifs)(p);
-		p = (*ifs).convert_point_to_global_space(p);
 		
 		// Now add values to the img
 		int xp = int(((p.x + 1.0f) / 2.0f) * width);

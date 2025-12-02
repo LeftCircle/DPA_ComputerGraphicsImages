@@ -65,8 +65,6 @@ void Model::fractal_flames() {
 	Spherical ifs_spherical4(0.0, -0.5, 0.3, 0.3);
 	Sinusoidal ifs_sin;
 	Sinusoidal ifs_sin_1;
-	ifs_sin.set_trans_matrix(10.0, 5.0, 5, 0.0, 10.0, -5);
-	ifs_sin_1.set_trans_matrix(10.0, 0.0, -5.0, 1.0, 10.0, 5.0);
 	
 
 	Linear ifs_linear(1.0, 1.0);
@@ -144,9 +142,6 @@ void Model::fractal_flames() {
 		rand_y_offset *= (rand_x_scale + rand_y_scale) / 2;
 		rand_x_skew *= (rand_x_skew + rand_x_skew) / 2;
 		rand_y_skew *= (rand_x_skew + rand_y_skew) / 2;
-		func->set_trans_matrix(rand_x_scale, rand_x_skew, rand_x_offset,
-			rand_y_skew, rand_y_scale, rand_y_offset);
-		func->add_rotation(drand48() * 2.0 * PI);
 
 		generated_funcs.push_back(func);
 		ifs_functions.push_back(func.get());
