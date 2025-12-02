@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <complex>
 #include <iostream>
-#include <Eigen/Core>
-#include <Eigen/Dense>
+//#include <Eigen/Core>
+//#include <Eigen/Dense>
 
 
 #include <image_data.h>
@@ -39,24 +39,25 @@ public:
 
 class FlameIFSFunction : public IFSFunction {
 public:
-	FlameIFSFunction() {  _homogeneous_transform << 1.0, 0.0, 0.0,
-                              0.0, 1.0, 0.0,
-                              0.0, 0.0, 1.0;
-	}
+	// FlameIFSFunction() {  _homogeneous_transform << 1.0, 0.0, 0.0,
+    //                           0.0, 1.0, 0.0,
+    //                           0.0, 0.0, 1.0;
+	// }
+	FlameIFSFunction() {}
 	~FlameIFSFunction() {}
 
 	virtual Point operator()(const Point& P) const = 0;
-	const Eigen::Matrix3d& get_trans_matrix() const { return _homogeneous_transform; }
+	//const Eigen::Matrix3d& get_trans_matrix() const { return _homogeneous_transform; }
 
-	void set_trans_matrix(double m00, double m01, double m02, double m10, double m11, double m12);
-	void add_rotation(double radians);
+	//void set_trans_matrix(double m00, double m01, double m02, double m10, double m11, double m12);
+	//void add_rotation(double radians);
 
-	Point get_point_in_local_space(const Point& P);
-	Point convert_point_to_global_space(const Point& P);
+	//Point get_point_in_local_space(const Point& P);
+	//Point convert_point_to_global_space(const Point& P);
 
 protected:
-	Eigen::Matrix3d _homogeneous_transform;
-	Eigen::Matrix3d _inverse_transf;
+	//Eigen::Matrix3d _homogeneous_transform;
+	//Eigen::Matrix3d _inverse_transf;
 
 };
 
@@ -184,7 +185,7 @@ public:
 	FlameIFSFunction* get_ifs_function(int index) const { return _ifs_functions[index]; }
 	SymmetryIFS* get_symmetry_function(int index) const { return _symmetry_functions[index]; }
 	const Color& get_color(int index) const { return _colors[index]; }
-	const ImageData& get_image() const {return img; }
+	const ImageData& get_image() const { return img; }
 
 	void normalize(std::vector<float>& vec);
 

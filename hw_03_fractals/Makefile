@@ -1,10 +1,21 @@
 CC = g++
+
+# Update these to point to your custom include and lib directories for OpenImageIO and OpenEXR
+OPEN_IMG_IO_AND_EXR_INCLUDE_PATH = /home/leftcircle/programming/include
+OPEN_IMG_IO_AND_EXR_LIB_PATH = /home/leftcircle/programming/lib
+
 CFLAGS = -Wall -g -O2 -fPIC -fopenmp -std=c++17 \
 -Iinclude \
--I/home/leftcircle/programming/include/ 
+-I$(OPEN_IMG_IO_AND_EXR_INCLUDE_PATH) 
 
-# Had some problems on the desktop. Not sure if L/home/leftcircle/programming/lib -wl -rpath stuff is needed
-LDFLAGS = -lOpenImageIO -lOpenImageIO_Util -lGL -lGLU -lglut #-L/home/leftcircle/programming/lib -Wl,-rpath,/home/leftcircle/programming/lib
+# -L/home/leftcircle/programming/lib:
+#     Linker flags to find OpenImageIO and OpenEXR libs at compile time
+# -Wl,-rpath,/home/leftcircle/programming/lib
+#     Linker flags to find OpenImageIO and OpenEXR libs at runtime
+LDFLAGS = -lOpenImageIO -lOpenImageIO_Util -lGL -lGLU -lglut \
+-L$(OPEN_IMG_IO_AND_EXR_LIB_PATH) \
+-Wl,-rpath,$(OPEN_IMG_IO_AND_EXR_LIB_PATH)
+
 
 SRC = $(wildcard src/*.cpp)
 # Filter out tests.cpp from the main build

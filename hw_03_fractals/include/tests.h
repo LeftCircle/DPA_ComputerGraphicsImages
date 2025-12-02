@@ -5,8 +5,8 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
-#include <Eigen/Core>
-#include <Eigen/Dense>
+//#include <Eigen/Core>
+//#include <Eigen/Dense>
 
 #include "command_line_parser.h"
 #include "image_data.h"
