@@ -42,8 +42,24 @@ public:
 	ImageData ensemble_average(const ImageData& image, int half_width = 1);
 	void optical_flow(const std::vector<ImageData>& image_sequence, const ImageData& img_to_flow);
 	void bilinear_interpolate_each_channel();
-
+	
+	
 private:
+	ImageData _build_ensemble_average_in_sequence(const ImageData& next_image, const ImageData& current_image, const ImageData& image_gradient);
+	std::tuple<ImageData, ImageData, ImageData> _compute_correlation_matrix_components(const ImageData& dIx, const ImageData& dIy);
+	void _compute_velocity_field(
+		const ImageData& Qx,
+		const ImageData& Qy,
+		const ImageData& c00,
+		const ImageData& c11,
+		const ImageData& c_off_diag,
+		int w, int h, int channels,
+		ImageData& velocity_field
+	);
+	void _apply_velocity_field(
+		const ImageData& velocity_field,
+		const ImageData& input_image,
+		ImageData& output_image);
 
 	std::shared_ptr<ImageData> _starting_image;
 	std::shared_ptr<ImageData> _edited_image;

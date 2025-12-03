@@ -24,7 +24,8 @@ public:
 	void oiio_write();
 	void oiio_write(const std::string& file_extension);
 	
-	void set_dimensions(int width, int height, int channels);	
+	void set_dimensions(int width, int height, int channels);
+	bool dimensions_match(const ImageData& other) const;
 	
 	const float* get_pixel_ptr() const { return _image_data_ptr.get(); }
 	float* get_pixel_ptr() { return _image_data_ptr.get(); }

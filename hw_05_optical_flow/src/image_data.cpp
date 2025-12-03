@@ -68,6 +68,10 @@ ImageData& ImageData::operator*=(const ImageData& other) {
 	return *this;
 }
 
+bool ImageData::dimensions_match(const ImageData& other) const {
+	return (_width == other._width) && (_height == other._height) && (_channels == other._channels);
+}
+
 ImageData& ImageData::subtract_then_multiply(const ImageData& sub_img, const ImageData& mul_img) {
 	if (_width != sub_img._width || _height != sub_img._height || _channels != sub_img._channels ||
 		_width != mul_img._width || _height != mul_img._height || _channels != mul_img._channels) {
