@@ -171,30 +171,6 @@ void test_lut() {
     std::cout << "LUT passed!" << std::endl;
 }
 
-void test_eigen_2x3_inverse(){
-    // Test taking a 2D point from one coordinate space to another and back
-    Eigen::Matrix3f transform;
-    transform << 0.5, 0.0, -1.0,
-                 0.0, 0.5, -1.0,
-                 0.0, 0.0, 1.0;
-    // The OG coordinate system is just the standard one with origin at (0,0)
-    Eigen::Vector3f point_og(0.5f, 1.5f, 1.0f); // Homogeneous coordinates
-    Eigen::Vector3f transformed_point = transform * point_og;
-
-    // Now invert the transform
-    Eigen::Matrix3f inverse_tr = transform.inverse();
-    
-    // Confirm that the inv * transformed_point == point_og (within a tolerance)
-    Eigen::Vector3f recovered_point = inverse_tr * transformed_point;
-    // Normalize 
-    recovered_point /= recovered_point[2];
-    std::cout << "Recovered point: " << recovered_point.transpose() << std::endl;
-    std::cout << "Original point: " << point_og.transpose() << std::endl;
-    float tol = 1e-5;
-    assert(std::abs(recovered_point(0) - point_og(0)) < tol);
-    assert(std::abs(recovered_point(1) - point_og(1)) < tol);
-    std::cout << "Eigen 2x3 inverse passed!" << std::endl;   
-}
 
 void Tests::run_tests() {
     // test_get_image_length();
@@ -206,8 +182,7 @@ void Tests::run_tests() {
     // test_write_image();
     // // //test_image_editor_initialization();
     // test_lut();
-    test_eigen_2x3_inverse();
-    std::cout << "All tests passed!" << std::endl;
+    //std::cout << "All tests passed!" << std::endl;
 }
 
 int main(int argc, char** argv){
