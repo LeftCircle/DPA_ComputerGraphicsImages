@@ -118,16 +118,8 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			// Now use file Utils to get the names of the images in the directory
 			std::vector<std::string> image_file_names = get_all_files_starting_with(dir_path, img_sequence_name);
 			sort_based_on_number_suffix(image_file_names, true);
-			// Now create image sequences from these
-			// TODO -> just pass the paths to optical flow function
-			std::vector<ImageData> image_sequence;
-			for (const auto& file_name : image_file_names){
-				ImageData img(file_name.c_str());
-				std::cout << "Loaded image: " << file_name << std::endl;
-				image_sequence.push_back(img);
-			}
 			
-			_image_editor.optical_flow(image_sequence, *_image_editor.get_edited_image());
+			_image_editor.optical_flow(image_file_names, *_image_editor.get_edited_image());
 			std::cout << "Optical flow done!" << std::endl;
 			
 			break;

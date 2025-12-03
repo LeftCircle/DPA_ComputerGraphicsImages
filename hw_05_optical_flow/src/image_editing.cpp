@@ -406,12 +406,7 @@ ImageData ImageEditor::ensemble_average(const ImageData& img, int half_width){
 	return avg_img;
 }
 
-void ImageEditor::optical_flow(const std::vector<ImageData>& image_sequence, const ImageData& img_to_flow){
-	if (!img_to_flow.dimensions_match(image_sequence[0])) {
-		// TODO -> allow for resizing the flow target image
-		throw std::invalid_argument("Optical flow target image dimensions do not match image sequence dimensions.");
-		return;
-	}
+void ImageEditor::optical_flow(const std::vector<std::string>& image_sequence, const ImageData& img_to_flow){
 	// Create a double buffer for updating/reading the flowed image
 	ImageData flow_img;
 	ImageData flow_img_b;
@@ -421,28 +416,32 @@ void ImageEditor::optical_flow(const std::vector<ImageData>& image_sequence, con
 	ImageData* current = &flow_img;
 	ImageData* next = &flow_img_b;
 	
-	const int w = image_sequence[0].get_width();
-	const int h = image_sequence[0].get_height();
-	const int channels = image_sequence[0].get_channels();
+	const int w = img_to_flow.get_width();
+	const int h = img_to_flow.get_height();
+	const int channels = img_to_flow.get_channels();
 	const int num_images = image_sequence.size();
 	for (int img_idx = 0; img_idx < num_images - 1; img_idx++){
-		// 1. Get the displacement images
-		ImageData dIx = image_sequence[img_idx].get_x_gradient();
-		ImageData dIy = image_sequence[img_idx].get_y_gradient();
+		const ImageData next_img(image_sequence[img_idx + 1].c_str());
+		const ImageData curr_img(image_sequence[img_idx].c_str());
+
+		if (!img_to_flow.dimensions_match(next_img) || !img_to_flow.dimensions_match(curr_img)){
+			// TODO -> allow for resizing the flow target image
+			throw std::invalid_argument("Optical flow target image dimensions do not match image sequence dimensions.");
+			return;
+		}
 		
+		// 1. Get the displacement images
+		ImageData dIx = curr_img.get_x_gradient();
+		ImageData dIy = curr_img.get_y_gradient();
+
 		// 2. Generate ensemble averages Qxy = <<(Id - Iu) * dixy>>
-		const ImageData& next_img = image_sequence[img_idx + 1];
-		const ImageData& curr_img = image_sequence[img_idx];
 		ImageData Qx = _build_ensemble_average_in_sequence(next_img, curr_img, dIx);
 		ImageData Qy = _build_ensemble_average_in_sequence(next_img, curr_img, dIy);
 
 		// 3. Now for the correlation matrix component images
 		auto [c00, c11, c_off_diag] = _compute_correlation_matrix_components(dIx, dIy);
 
-		// 4. Now compute the velcity field with V = Q * C^-1
-		// Inverse of 2x2 matrix C is (1/det) * [c11, -c01;
-		//										 -c10, c00]
-		// where det = c00 * c11 - c01 * c10
+		
 		ImageData velocity_field(w, h, 2 * channels); // (dx, dy) for each original channel
 		_compute_velocity_field(Qx, Qy, c00, c11, c_off_diag, w, h, channels, velocity_field);
 
