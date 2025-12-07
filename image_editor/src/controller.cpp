@@ -125,7 +125,13 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			std::vector<std::string> image_file_names = get_all_files_starting_with(dir_path, img_sequence_name);
 			sort_based_on_number_suffix(image_file_names, true);
 			
-			_image_editor.optical_flow(image_file_names, *_image_editor.get_edited_image());
+			// Now ask for an output directory
+			std::string output_dir;
+			std::cout << "Enter the output directory for flowed images (or leave blank to not save): " << std::flush;
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // clear the input buffer
+			std::getline(std::cin, output_dir);
+
+			_image_editor.optical_flow(image_file_names, *_image_editor.get_edited_image(), output_dir);
 			std::cout << "Optical flow done!" << std::endl;
 			
 			break;

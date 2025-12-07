@@ -23,7 +23,9 @@ public:
 	void oiio_read(const char* filename);
 	void oiio_write();
 	void oiio_write(const std::string& file_extension);
+	void oiio_write_to(const std::string& filename);
 	
+
 	void set_dimensions(int width, int height, int channels);
 	bool dimensions_match(const ImageData& other) const;
 	

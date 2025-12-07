@@ -413,7 +413,11 @@ ImageData ImageEditor::ensemble_average(const ImageData& img, int half_width){
 	return avg_img;
 }
 
-void ImageEditor::optical_flow(const std::vector<std::string>& image_sequence, const ImageData& img_to_flow){
+void ImageEditor::optical_flow(
+	const std::vector<std::string>& image_sequence,
+	const ImageData& img_to_flow,
+	std::string output_dir	
+){
 	// Create a double buffer for updating/reading the flowed image
 	ImageData flow_img;
 	ImageData flow_img_b;
@@ -454,6 +458,11 @@ void ImageEditor::optical_flow(const std::vector<std::string>& image_sequence, c
 
 		// 5. Now that we have the velocity field, apply that to the iterated image.
 		_apply_velocity_field(velocity_field, *current, *next);
+		// Save the flowed image
+		if (!output_dir.empty()){
+			std::string out_filename = output_dir + "/flowed_" + std::to_string(img_idx + 1) + ".png";
+			current->oiio_write_to(out_filename);
+		}
 		std::swap(current, next);
 		_edited_image->set_to(*current);
 	}
