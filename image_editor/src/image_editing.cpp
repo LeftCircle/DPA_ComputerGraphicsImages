@@ -413,14 +413,31 @@ ImageData ImageEditor::ensemble_average(const ImageData& img, int half_width){
 	return avg_img;
 }
 
+ImageData ImageEditor::gaussian_average(const ImageData& img, int half_width){
+	const int w = img.get_width();
+	const int h = img.get_height();
+	const int channels = img.get_channels();
+	ImageData avg_img(w, h, channels);
+
+	const float* img_data_ptr = img.get_pixel_ptr();
+	for (int j = 0; j < h; j++){
+		#pragma omp parallel for
+		for (int i = 0; i < w; i++){
+			auto avg = gaussian_ensemble2Df(img_data_ptr, w, h, channels, i, j, half_width);
+			avg_img.set_pixel_values(i, j, avg);
+		}
+	}
+	return avg_img;
+}
+
 void ImageEditor::optical_flow(
 	const std::vector<std::string>& image_sequence,
 	const ImageData& img_to_flow,
-	std::string output_dir	
+	std::string output_dir,
+	int iterations_per_image	
 ){
 	// Create a double buffer for updating/reading the flowed image
-	ImageData flow_img;
-	ImageData flow_img_b;
+	ImageData flow_img, flow_img_b;
 	flow_img = img_to_flow.duplicate();
 	flow_img_b = img_to_flow.duplicate();
 
@@ -430,7 +447,10 @@ void ImageEditor::optical_flow(
 	const int w = img_to_flow.get_width();
 	const int h = img_to_flow.get_height();
 	const int channels = img_to_flow.get_channels();
+	ImageData velocity_field(w, h, 2 * channels); // (dx, dy) for each original channel
+
 	const int num_images = image_sequence.size();
+	const int ensemble_avg_half_width = 3;
 	for (int img_idx = 0; img_idx < num_images - 1; img_idx++){
 		const ImageData next_img(image_sequence[img_idx + 1].c_str());
 		const ImageData curr_img(image_sequence[img_idx].c_str());
@@ -440,27 +460,32 @@ void ImageEditor::optical_flow(
 			throw std::invalid_argument("Optical flow target image dimensions do not match image sequence dimensions.");
 			return;
 		}
-		
-		// 1. Get the displacement images
-		ImageData dIx = curr_img.get_x_gradient();
-		ImageData dIy = curr_img.get_y_gradient();
+		//iter_a->set_to(curr_img);
 
-		// 2. Generate ensemble averages Qxy = <<(Id - Iu) * dixy>>
-		ImageData Qx = _build_ensemble_average_in_sequence(next_img, curr_img, dIx);
-		ImageData Qy = _build_ensemble_average_in_sequence(next_img, curr_img, dIy);
-
-		// 3. Now for the correlation matrix component images
-		auto [c00, c11, c_off_diag] = _compute_correlation_matrix_components(dIx, dIy);
-
-		
-		ImageData velocity_field(w, h, 2 * channels); // (dx, dy) for each original channel
-		_compute_velocity_field(Qx, Qy, c00, c11, c_off_diag, w, h, channels, velocity_field);
-
-		// 5. Now that we have the velocity field, apply that to the iterated image.
-		_apply_velocity_field(velocity_field, *current, *next);
+		for (int iter = 0; iter < iterations_per_image; iter++){
+			// 1. Get the displacement images
+			ImageData dIx = current->get_x_gradient();
+			ImageData dIy = current->get_y_gradient();
+	
+			// 2. Generate ensemble averages Qxy = <<(Id - Iu) * dixy>>
+			ImageData Qx = _build_ensemble_average_in_sequence(next_img, *current, dIx, ensemble_avg_half_width);
+			ImageData Qy = _build_ensemble_average_in_sequence(next_img, *current, dIy, ensemble_avg_half_width);
+	
+			// 3. Now for the correlation matrix component images
+			auto [c00, c11, c_off_diag] = _compute_correlation_matrix_components(dIx, dIy, ensemble_avg_half_width);
+	
+			_compute_velocity_field(Qx, Qy, c00, c11, c_off_diag, w, h, channels, velocity_field);
+	
+			// 5. Now that we have the velocity field, apply that to the iterated image.
+			_apply_velocity_field(velocity_field, *current, *next);
+			std::swap(current, next);
+			
+		}
 		// Save the flowed image
+		std::string ext = img_to_flow.get_ext();
 		if (!output_dir.empty()){
-			std::string out_filename = output_dir + "/flowed_" + std::to_string(img_idx + 1) + ".png";
+			std::string img_n = StringFuncs::get_zero_padded_number_string(img_idx, 4);
+			std::string out_filename = output_dir + "/flowed_" + img_n + "." + ext;
 			current->oiio_write_to(out_filename);
 		}
 		std::swap(current, next);
@@ -472,7 +497,8 @@ void ImageEditor::optical_flow(
 ImageData ImageEditor::_build_ensemble_average_in_sequence(
 	const ImageData& next_image,
 	const ImageData& current_image,
-	const ImageData& image_gradient
+	const ImageData& image_gradient,
+	int ensemble_avg_half_width
 ){
 	ImageData Q;
 
@@ -481,13 +507,15 @@ ImageData ImageEditor::_build_ensemble_average_in_sequence(
 	Q.subtract_then_multiply(current_image, image_gradient);
 
 	// 2a. Now compute the ensemble averages of these
-	Q = ensemble_average(Q);
+	//Q = ensemble_average(Q, ensemble_avg_half_width);
+	Q = gaussian_average(Q, ensemble_avg_half_width);
 	return Q;
 }
 
 std::tuple<ImageData, ImageData, ImageData> ImageEditor::_compute_correlation_matrix_components(
 	const ImageData& dIx,
-	const ImageData& dIy
+	const ImageData& dIy,
+	int ensemble_avg_half_width
 ){
 	ImageData dIx_sq = dIx.duplicate();
 	dIx_sq *= dIx;
@@ -496,9 +524,9 @@ std::tuple<ImageData, ImageData, ImageData> ImageEditor::_compute_correlation_ma
 	ImageData dIx_dIy = dIx.duplicate();
 	dIx_dIy *= dIy;
 
-	ImageData c00 = ensemble_average(dIx_sq);
-	ImageData c11 = ensemble_average(dIy_sq);
-	ImageData c_off_diag = ensemble_average(dIx_dIy);
+	ImageData c00 = gaussian_average(dIx_sq, ensemble_avg_half_width);
+	ImageData c11 = gaussian_average(dIy_sq, ensemble_avg_half_width);
+	ImageData c_off_diag = gaussian_average(dIx_dIy, ensemble_avg_half_width);
 
 	return {c00, c11, c_off_diag};
 }
@@ -570,8 +598,15 @@ void ImageEditor::_apply_velocity_field(
 			for (int c = 0; c < channels; c++){
 				float dx = velocity_field.get_pixel_value(i, j, c * 2);
 				float dy = velocity_field.get_pixel_value(i, j, c * 2 + 1);
+				
+				float sample_x = x + dx;;
+				float sample_y = y + dy;
+
+				// Clamp to image bounds
+				sample_x = std::min(std::max(sample_x, 0.0f), static_cast<float>(w - 1));
+				sample_y = std::min(std::max(sample_y, 0.0f), static_cast<float>(h - 1));
 				// Read from current, write to next
-				float c_interp = input_image.interpolate_bilinear(x + dx, y + dy, c);
+				float c_interp = input_image.interpolate_bilinear(sample_x, sample_y, c);
 				output_image.set_pixel_value(i, j, c, c_interp);
 			}
 		}

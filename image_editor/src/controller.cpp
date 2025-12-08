@@ -131,7 +131,7 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // clear the input buffer
 			std::getline(std::cin, output_dir);
 
-			_image_editor.optical_flow(image_file_names, *_image_editor.get_edited_image(), output_dir);
+			_image_editor.optical_flow(image_file_names, *_image_editor.get_edited_image(), output_dir, 30);
 			std::cout << "Optical flow done!" << std::endl;
 			
 			break;

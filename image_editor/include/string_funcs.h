@@ -25,6 +25,14 @@ public:
         size_t start = (slash_pos == std::string::npos) ? 0 : slash_pos + 1;
         return filepath.substr(start, dot_pos - start);
     }
+
+    static std::string get_zero_padded_number_string(int number, int total_length) {
+        std::string number_str = std::to_string(number);
+        while (static_cast<int>(number_str.length()) < total_length) {
+            number_str = "0" + number_str;
+        }
+        return number_str;
+    }
 };
 
 

@@ -40,16 +40,29 @@ public:
 	void palette_match(const std::vector<float>& colors);
 	void quantize(int levels);
 	ImageData ensemble_average(const ImageData& image, int half_width = 1);
+	ImageData gaussian_average(const ImageData& image, int half_width = 1);
+	
 	void optical_flow(
 		const std::vector<std::string>& image_sequence,
 		const ImageData& img_to_flow,
-		std::string output_dir = "");
+		std::string output_dir = "", 
+		int iterations_per_image = 1
+	);
 	void bilinear_interpolate_each_channel();
 	
 	
 private:
-	ImageData _build_ensemble_average_in_sequence(const ImageData& next_image, const ImageData& current_image, const ImageData& image_gradient);
-	std::tuple<ImageData, ImageData, ImageData> _compute_correlation_matrix_components(const ImageData& dIx, const ImageData& dIy);
+	ImageData _build_ensemble_average_in_sequence(
+		const ImageData& next_image,
+		const ImageData& current_image,
+		const ImageData& image_gradient,
+		int ensemble_avg_half_width = 2
+	);
+	std::tuple<ImageData, ImageData, ImageData> _compute_correlation_matrix_components(
+		const ImageData& dIx,
+		const ImageData& dIy,
+		int ensemble_avg_half_width = 2
+	);
 	void _compute_velocity_field(
 		const ImageData& Qx,
 		const ImageData& Qy,

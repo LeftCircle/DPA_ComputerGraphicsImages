@@ -82,6 +82,7 @@ public:
 	void clear();
 	
 	std::string get_output_file_name() const { return _file_name + "_out." + _file_type; }
+	std::string get_ext() const { return _file_type; }
 	
 	ImageData duplicate() const;
 
