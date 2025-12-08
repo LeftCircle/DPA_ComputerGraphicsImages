@@ -80,6 +80,9 @@ public:
 	ImageData get_x_gradient() const;
 	ImageData get_y_gradient() const;
 
+	void write_x_gradient_into(ImageData& out_image) const;
+	void write_y_gradient_into(ImageData& out_image) const;
+
 	void clear();
 	
 	std::string get_output_file_name() const { return _file_name + "_out." + _file_type; }

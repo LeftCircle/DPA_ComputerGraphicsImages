@@ -142,7 +142,7 @@ void Controller::keyboard( unsigned char key, int x, int y )
 				}
 			}
 			if (choice == 'v'){
-				_image_editor.optical_flow_video(image_file_names, 5, output_dir, 15);
+				_image_editor.optical_flow_video(image_file_names, 2, output_dir, 5, true, false);
 				std::cout << "Optical flow video done!" << std::endl;
 			} else if (choice == 'i'){
 				_image_editor.optical_flow(image_file_names, *_image_editor.get_edited_image(), output_dir, 30);
@@ -197,9 +197,10 @@ void Controller::keyboard( unsigned char key, int x, int y )
 
 			break;
 		}
-		case 's':
+		case 's':{
 			_apply_stencil();
 			break;
+		}
 		case 'q':{
 			_image_editor.quantize(5);
 			std::cout << "Quanitze is done!" << std::endl;

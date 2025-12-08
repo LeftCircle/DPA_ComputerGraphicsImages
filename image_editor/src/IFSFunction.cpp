@@ -178,8 +178,8 @@ void IFSFunctionSystem::fractal_frame(int iters){
 	}
 	// Now we have to do our post processing and adjust the color and alpha parameters
 	// based off of log(alpha) / alpha
+	#pragma omp parallel for
 	for (int j = 0; j < img.get_height(); j++){
-		#pragma omp parallel for
 		for (int i = 0; i < img.get_width(); i++){
 			float a = img.get_pixel_value(i, j, 3);
 			if (a == 0){

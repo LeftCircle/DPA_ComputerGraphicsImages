@@ -181,8 +181,8 @@ void ImageData::add_pixels_into(int x, int y, std::vector<float>& pixel_values){
 }
 
 void ImageData::divide_each_pixel_by(const std::vector<float>& vals) {
+	#pragma omp parallel for
 	for (int j = 0; j < _height; j++){
-		#pragma omp parallel for
 		for (int i = 0; i < _width; i++){
 			for (int c = 0; c < _channels; c++){
 				int idx = get_index(i, j, c);
@@ -510,6 +510,7 @@ ImageData ImageData::get_x_y_gradients() const {
 	// Return a new ImageData object with 2*channels:
 	// The first half of the channels are the x gradients, the second half are the y gradients
 	ImageData gradients(_width, _height, 2 * _channels);
+	#pragma omp parallel for
 	for (int j = 0; j < _height; j++){
 		for (int i = 0; i < _width; i++){
 			for (int c = 0; c < _channels; c++){
@@ -543,6 +544,7 @@ ImageData ImageData::get_x_y_gradients() const {
 ImageData ImageData::get_x_gradient() const {
 	// Return a new ImageData object with same channels:
 	ImageData gradients(_width, _height, _channels);
+	#pragma omp parallel for
 	for (int j = 0; j < _height; j++){
 		for (int i = 0; i < _width; i++){
 			for (int c = 0; c < _channels; c++){
@@ -561,9 +563,55 @@ ImageData ImageData::get_x_gradient() const {
 	return gradients;
 }
 
+void ImageData::write_x_gradient_into(ImageData& out_image) const {
+	if (out_image._width != _width || out_image._height != _height || out_image._channels != _channels) {
+		throw std::invalid_argument("Output image dimensions and channels must match for write_x_gradient_into.");
+	}
+	#pragma omp parallel for
+	for (int j = 0; j < _height; j++){
+		for (int i = 0; i < _width; i++){
+			for (int c = 0; c < _channels; c++){
+				float g = 0.0f;
+				if (i == 0){
+					g = get_pixel_value(i + 1, j, c) - get_pixel_value(i, j, c);
+				} else if (i == _width - 1){
+					g = get_pixel_value(i, j, c) - get_pixel_value(i - 1, j, c);
+				} else {
+					g = (get_pixel_value(i + 1, j, c) - get_pixel_value(i - 1, j, c)) / 2.0f;
+				}
+				out_image.set_pixel_value(i, j, c, g);
+			}
+		}
+	}
+}
+
+void ImageData::write_y_gradient_into(ImageData& output_img) const {
+	if (output_img._width != _width || output_img._height != _height || output_img._channels != _channels) {
+		throw std::invalid_argument("Output image dimensions and channels must match for write_y_gradient_into.");
+	}
+	#pragma omp parallel for
+	for (int j = 0; j < _height; j++){
+		for (int i = 0; i < _width; i++){
+			for (int c = 0; c < _channels; c++){
+				float g = 0.0f;
+				if (j == 0){
+					g = get_pixel_value(i, j + 1, c) - get_pixel_value(i, j, c);
+				} else if (j == _height - 1){
+					g = get_pixel_value(i, j, c) - get_pixel_value(i, j - 1, c);
+				} else {
+					g = (get_pixel_value(i, j + 1, c) - get_pixel_value(i, j - 1, c)) / 2.0f;
+				}
+				output_img.set_pixel_value(i, j, c, g);
+			}
+		}
+	}
+}
+
+
 ImageData ImageData::get_y_gradient() const {
 	// Return a new ImageData object with same channels:
 	ImageData gradients(_width, _height, _channels);
+	#pragma omp parallel for
 	for (int j = 0; j < _height; j++){
 		for (int i = 0; i < _width; i++){
 			for (int c = 0; c < _channels; c++){
