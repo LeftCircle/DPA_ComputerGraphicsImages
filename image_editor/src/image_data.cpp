@@ -354,6 +354,21 @@ std::vector<float> ImageData::get_min() const {
 	return min_vals;
 }
 
+int ImageData::get_n_pixels_withc_channel_value(int channel, float value, float epsilon) const {
+	if (channel < 0 || channel >= _channels) {
+		throw std::out_of_range("Invalid channel");
+	}
+	int count = 0;
+	for (int j = 0; j < _height; j++){
+		for( int i = 0; i < _width; i++){
+			if (abs(get_pixel_value(i, j, channel) - value) < epsilon) {
+				count++;
+			}
+		}
+	}
+	return count;
+}
+
 std::vector<float> ImageData::get_average() const {
 	std::vector<double> avg_of_each_channel(_channels, 0.0);
 	double n_pixels = static_cast<double>(_width * _height);

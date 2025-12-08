@@ -68,6 +68,7 @@ public:
 	std::vector<float> get_min() const;
 
 	std::vector<float> get_average() const;
+	int get_n_pixels_withc_channel_value(int channel, float value, float epsilon = 0.001) const;
 	std::vector<float> get_rms() const;
 	std::vector<float> get_rms(const std::vector<float>& avg) const;
 

@@ -53,7 +53,7 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			new_height = std::max(new_height, 8);
 			//std::cout << "New width = " << new_width << std::endl;
 			//_image_editor.downscale(new_width, new_height);
-			_image_editor.downscale(new_width, new_height, true);
+			_image_editor.downscale(new_width, new_height, false);
 			std::cout << "Downscale complete!" << std::endl;
 			break;
 		}
