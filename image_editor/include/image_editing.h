@@ -42,12 +42,22 @@ public:
 	ImageData ensemble_average(const ImageData& image, int half_width = 1);
 	ImageData gaussian_average(const ImageData& image, int half_width = 1);
 	
-	void optical_flow(
+	ImageData optical_flow(
 		const std::vector<std::string>& image_sequence,
 		const ImageData& img_to_flow,
 		std::string output_dir = "", 
+		int iterations_per_image = 1,
+		bool save_images = true
+	);
+
+	// Takes in a video, then applies n frames of optical flow to each frame.
+	void optical_flow_video(
+		const std::vector<std::string>& video_frame_sequence,
+		int flow_frames_per_image = 5,
+		std::string output_dir = "",
 		int iterations_per_image = 1
 	);
+
 	void bilinear_interpolate_each_channel();
 	
 	

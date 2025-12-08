@@ -430,11 +430,12 @@ ImageData ImageEditor::gaussian_average(const ImageData& img, int half_width){
 	return avg_img;
 }
 
-void ImageEditor::optical_flow(
+ImageData ImageEditor::optical_flow(
 	const std::vector<std::string>& image_sequence,
 	const ImageData& img_to_flow,
 	std::string output_dir,
-	int iterations_per_image	
+	int iterations_per_image,
+	bool save_images	
 ){
 	// Create a double buffer for updating/reading the flowed image
 	ImageData flow_img, flow_img_b;
@@ -458,7 +459,7 @@ void ImageEditor::optical_flow(
 		if (!img_to_flow.dimensions_match(next_img) || !img_to_flow.dimensions_match(curr_img)){
 			// TODO -> allow for resizing the flow target image
 			throw std::invalid_argument("Optical flow target image dimensions do not match image sequence dimensions.");
-			return;
+			return *current;
 		}
 		//iter_a->set_to(curr_img);
 
@@ -483,7 +484,7 @@ void ImageEditor::optical_flow(
 		}
 		// Save the flowed image
 		std::string ext = img_to_flow.get_ext();
-		if (!output_dir.empty()){
+		if (!output_dir.empty() && save_images){
 			std::string img_n = StringFuncs::get_zero_padded_number_string(img_idx, 4);
 			std::string out_filename = output_dir + "/flowed_" + img_n + "." + ext;
 			current->oiio_write_to(out_filename);
@@ -491,7 +492,45 @@ void ImageEditor::optical_flow(
 		std::swap(current, next);
 		_edited_image->set_to(*current);
 	}
+	return *current;
+}
 
+void ImageEditor::optical_flow_video(
+	const std::vector<std::string>& video_frame_sequence,
+	int flow_frames_per_image,
+	std::string output_dir,
+	int iterations_per_image
+){
+	for (size_t i = 0; i < video_frame_sequence.size() - flow_frames_per_image; i++){
+		ImageData img_to_flow(video_frame_sequence[i].c_str());
+		std::vector<std::string> flow_sequence;
+		for (int f = 0; f < flow_frames_per_image; f++){
+			flow_sequence.push_back(video_frame_sequence[i + 1]);
+		}
+		ImageData flowed_image = optical_flow(flow_sequence, img_to_flow, output_dir, iterations_per_image, false);
+		
+		std::string img_n = StringFuncs::get_zero_padded_number_string(i, 4);
+		std::string out_filename = output_dir + "/flowed_" + img_n + "." + flowed_image.get_ext();
+		flowed_image.oiio_write_to(out_filename);
+		
+		std::cout << "Completed optical flow for frame " << i << " of " << video_frame_sequence.size() << std::endl;
+	}
+	// Specail treatment for the last few frames that don't have enough frames to flow into
+	size_t start_idx = video_frame_sequence.size() - flow_frames_per_image;
+	for (size_t i = start_idx; i < video_frame_sequence.size() - 1; i++){
+		// Either just use less frames to flow, or reuse the last velocity field
+		ImageData img_to_flow(video_frame_sequence[i].c_str());
+		std::vector<std::string> flow_sequence;
+		for (size_t f = i + 1; f < video_frame_sequence.size(); f++){
+			flow_sequence.push_back(video_frame_sequence[f]);
+		}
+		ImageData flowed_image = optical_flow(flow_sequence, img_to_flow, output_dir, iterations_per_image, false);
+		std::string img_n = StringFuncs::get_zero_padded_number_string(i, 4);
+		std::string out_filename = output_dir + "/flowed_" + img_n + "." + flowed_image.get_ext();
+		flowed_image.oiio_write_to(out_filename);
+
+		std::cout << "Completed optical flow for frame " << i << " of " << video_frame_sequence.size() << std::endl;
+	}
 }
 
 ImageData ImageEditor::_build_ensemble_average_in_sequence(

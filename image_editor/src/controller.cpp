@@ -131,9 +131,25 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // clear the input buffer
 			std::getline(std::cin, output_dir);
 
-			_image_editor.optical_flow(image_file_names, *_image_editor.get_edited_image(), output_dir, 30);
-			std::cout << "Optical flow done!" << std::endl;
-			
+			// Ask for movie or single image
+			std::cout << "Apply to target image or to video sequence? (i/v): " << std::flush;
+			char choice;
+			// Loop until i or v is entered
+			while (choice != 'i' && choice != 'v') {
+				std::cin >> choice;
+				if (choice != 'i' && choice != 'v') {
+					std::cout << "Invalid choice. Please enter 'i' for image or 'v' for video: " << std::flush;
+				}
+			}
+			if (choice == 'v'){
+				_image_editor.optical_flow_video(image_file_names, 5, output_dir, 15);
+				std::cout << "Optical flow video done!" << std::endl;
+			} else if (choice == 'i'){
+				_image_editor.optical_flow(image_file_names, *_image_editor.get_edited_image(), output_dir, 30);
+				std::cout << "Optical flow done!" << std::endl;
+			} else{
+				std::cout << "Invalid choice, skipping optical flow." << std::endl;
+			}
 			break;
 		}
 		case 'p':{
