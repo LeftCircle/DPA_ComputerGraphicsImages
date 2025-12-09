@@ -142,7 +142,7 @@ void Controller::keyboard( unsigned char key, int x, int y )
 				}
 			}
 			if (choice == 'v'){
-				_image_editor.optical_flow_video(image_file_names, 2, output_dir, 5, true, false);
+				_image_editor.optical_flow_video(image_file_names, 4, output_dir, 5, true, false);
 				std::cout << "Optical flow video done!" << std::endl;
 			} else if (choice == 'i'){
 				_image_editor.optical_flow(image_file_names, *_image_editor.get_edited_image(), output_dir, 1, true);
@@ -150,6 +150,8 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			} else{
 				std::cout << "Invalid choice, skipping optical flow." << std::endl;
 			}
+			// Kill the program when it is done
+			exit(0);
 			break;
 		}
 		case 'p':{

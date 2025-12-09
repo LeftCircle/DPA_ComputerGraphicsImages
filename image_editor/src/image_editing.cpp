@@ -643,6 +643,8 @@ ImageData ImageEditor::_optical_flow(
 		// Now that we are done with iterations, flow the original image
 		_apply_velocity_field(velocity_field, *current, *next, negative);
 		std::swap(current, next);
+		// blend the current and next for fun
+		//blend_images(*current, *next, 0.5f);
 		// Save the flowed image
 		std::string ext = img_to_flow.get_ext();
 		if (!output_dir.empty() && save_images){
