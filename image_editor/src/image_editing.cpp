@@ -323,6 +323,29 @@ void ImageEditor::julia_set(const Point& center, const double range, const IFSFu
 	}
 }
 
+ImageData ImageEditor::greyscale(const ImageData& img){
+	int w = img.get_width();
+	int h = img.get_height();
+	int channels = img.get_channels();
+	ImageData grey_img(w, h, 1);
+
+	#pragma omp parallel for
+	for (int j = 0; j < h; j++){
+		for (int i = 0; i < w; i++){
+			auto pixel_vals = img.get_pixel_values(i, j);
+			float grey_val = 0.0f;
+			if (channels >= 3){
+				grey_val = 0.299f * pixel_vals[0] + 0.587f * pixel_vals[1] + 0.114f * pixel_vals[2];
+			} else if (channels == 1){
+				grey_val = pixel_vals[0];
+			} else{
+				grey_val = pixel_vals[0]; // Just use the first channel
+			}
+			grey_img.set_pixel_value(i, j, 0, grey_val);
+		}
+	}
+	return grey_img;
+}
 
 void ImageEditor::convert_to_contrast_units() {
 	//
@@ -483,7 +506,9 @@ ImageData ImageEditor::optical_flow(
 
 	const int w = img_to_flow.get_width();
 	const int h = img_to_flow.get_height();
-	const int channels = img_to_flow.get_channels();
+	// Try a gresyscale conversion
+	const int channels = 1;//img_to_flow.get_channels();
+	
 	ImageData velocity_field(w, h, 2 * channels); // (dx, dy) for each original channel
 
 	ImageData dIx, dIy, dIx_sq, dIy_sq, dIx_dIy, Qx, Qy, c00, c11, c_off_diag;
@@ -562,11 +587,20 @@ ImageData ImageEditor::_optical_flow(
 	const int channels = img_to_flow.get_channels();
 
 	const int num_images = image_sequence.size();
-	const int ensemble_avg_half_width = 5;
+	const int ensemble_avg_half_width = 1;
 	auto c_components = std::tie(c00, c11, c_off_diag);
 	for (size_t i = 0; i < indices.size() - 1; i++){
 		const ImageData& next_img = image_sequence[indices[i + 1]];
 		const ImageData& curr_img = image_sequence[indices[i]];
+
+		ImageData iter_current = curr_img.duplicate();
+		ImageData iter_current_b = curr_img.duplicate();
+		ImageData* iter_a = &iter_current;
+		ImageData* iter_b = &iter_current_b;
+		
+		//current->set_to(grey_current);
+		//ImageData grey_current = greyscale(*iter_a);
+		//ImageData grey_next = greyscale(next_img);
 
 		if (!img_to_flow.dimensions_match(next_img) || !img_to_flow.dimensions_match(curr_img)){
 			// TODO -> allow for resizing the flow target image
@@ -577,8 +611,9 @@ ImageData ImageEditor::_optical_flow(
 
 		for (int iter = 0; iter < iterations_per_image; iter++){
 			// 1. Get the displacement images
-			current->write_x_gradient_into(dIx);
-			current->write_y_gradient_into(dIy);
+			//grey_current = greyscale(*iter_a);
+			iter_a->write_x_gradient_into(dIx);
+			iter_a->write_y_gradient_into(dIy);
 			
 			// Could certainly be optimized
 			dIx_sq.set_to(dIx);
@@ -589,8 +624,8 @@ ImageData ImageEditor::_optical_flow(
 			dIx_dIy *= dIy;
 	
 			// 2. Generate ensemble averages Qxy = <<(Id - Iu) * dixy>>
-			_build_ensemble_average_in_sequence(next_img, *current, dIx, ensemble_avg_half_width, Qx);
-			_build_ensemble_average_in_sequence(next_img, *current, dIy, ensemble_avg_half_width, Qy);
+			_build_ensemble_average_in_sequence(next_img, *iter_a, dIx, ensemble_avg_half_width, Qx);
+			_build_ensemble_average_in_sequence(next_img, *iter_a, dIy, ensemble_avg_half_width, Qy);
 	
 			// 3. Now for the correlation matrix component images
 			_compute_correlation_matrix_components(dIx_sq, dIy_sq, dIx_dIy, ensemble_avg_half_width, c_components);
@@ -598,10 +633,16 @@ ImageData ImageEditor::_optical_flow(
 			_compute_velocity_field(Qx, Qy, c00, c11, c_off_diag, w, h, channels, velocity_field);
 	
 			// 5. Now that we have the velocity field, apply that to the iterated image.
-			_apply_velocity_field(velocity_field, *current, *next, negative);
-			std::swap(current, next);
-			
+			// If we are on the last iteration, then just pass since we have the velocity field already
+			if (iter == iterations_per_image - 1){
+				break;
+			}
+			_apply_velocity_field(velocity_field, *iter_a, *iter_b, negative);
+			std::swap(iter_a, iter_b);
 		}
+		// Now that we are done with iterations, flow the original image
+		_apply_velocity_field(velocity_field, *current, *next, negative);
+		std::swap(current, next);
 		// Save the flowed image
 		std::string ext = img_to_flow.get_ext();
 		if (!output_dir.empty() && save_images){
@@ -609,7 +650,6 @@ ImageData ImageEditor::_optical_flow(
 			std::string out_filename = output_dir + "/flowed_" + img_n + "." + ext;
 			current->oiio_write_to(out_filename);
 		}
-		std::swap(current, next);
 		_edited_image->set_to(*current);
 	}
 	return *current;
@@ -846,6 +886,10 @@ void ImageEditor::_apply_velocity_field(
 			float x = (float)i;
 			// We have per channel velocity, so we need to do the bilinear interp for just a given channel
 			for (int c = 0; c < channels; c++){
+				// For greyscale
+				//float dx = velocity_field.get_pixel_value(i, j, 0) * neg_factor;
+				//float dy = velocity_field.get_pixel_value(i, j, 1) * neg_factor;
+				// For standard img
 				float dx = velocity_field.get_pixel_value(i, j, c * 2) * neg_factor;
 				float dy = velocity_field.get_pixel_value(i, j, c * 2 + 1) * neg_factor;
 				

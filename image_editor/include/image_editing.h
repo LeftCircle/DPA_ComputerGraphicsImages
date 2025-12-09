@@ -35,6 +35,7 @@ public:
 	void set_edited_image_to(const ImageData& other_image)  {*_edited_image = other_image; }
 	void convert_to_contrast_units();
 	void histogram_equalize(const int n_bins = 500, bool ignore_alpha = false);
+	ImageData greyscale(const ImageData& img);
 
 	void downscale(const int new_width, const int new_height, bool ignore_alpha_of_zero = false);
 	void palette_match(const std::vector<float>& colors);
