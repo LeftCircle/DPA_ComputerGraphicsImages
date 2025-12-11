@@ -133,12 +133,12 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			std::getline(std::cin, output_dir);
 
 			// Ask for movie or single image
-			std::cout << "Apply to target image or to video sequence? (i/v): " << std::flush;
+			std::cout << "Apply to target image or to video sequence or retime (i/v/r): " << std::flush;
 			char choice;
 			// Loop until i or v is entered
-			while (choice != 'i' && choice != 'v') {
+			while (choice != 'i' && choice != 'v' && choice != 'r') {
 				std::cin >> choice;
-				if (choice != 'i' && choice != 'v') {
+				if (choice != 'i' && choice != 'v' && choice != 'r') {
 					std::cout << "Invalid choice. Please enter 'i' for image or 'v' for video: " << std::flush;
 				}
 			}
@@ -148,7 +148,17 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			} else if (choice == 'i'){
 				_image_editor.optical_flow(image_file_names, *_image_editor.get_edited_image(), output_dir, 1);
 				std::cout << "Optical flow done!" << std::endl;
-			} else{
+			} else if (choice == 'r'){
+				// ask for a fps and a new duration
+				int fps;
+				float duration;
+				std::cout << "Enter the fps of the original video: " << std::flush;
+				std::cin >> fps;
+				std::cout << "Enter the target duration in seconds: " << std::flush;
+				std::cin >> duration;
+				_image_editor.extend_video_duration_to(image_file_names, fps, duration, output_dir, 5);
+				std::cout << "Optical flow retiming done!" << std::endl;
+			} else {
 				std::cout << "Invalid choice, skipping optical flow." << std::endl;
 			}
 			// Kill the program when it is done

@@ -6,12 +6,23 @@ OpticalFlow::OpticalFlow(std::vector<ImageData>& image_sequence, const ImageData
 	_init_data_images(target_image);
 }
 
+OpticalFlow::OpticalFlow(int w, int h, int channels)
+: _image_sequence(empty_image_sequence) {
+	ImageData img_to_flow(w, h, channels);
+	_init_data_images(img_to_flow);
+	_image_sequence = empty_image_sequence;
+}
+
 ImageData OpticalFlow::flow(
 		const std::vector<size_t>& indices_used,
 		std::string output_dir, 
-		int iterations_per_image
+		int iterations_per_image,
+		float flow_delta
 	){
 	// Create a double buffer for updating/reading the flowed image
+	ImageData* current_image = &_image_to_flow;
+	ImageData* next_image = &_image_to_flow_buffer;
+
 	ImageData* iter_a = &_iteration_imga;
 	ImageData* iter_b = &_iteration_imgb;
 
@@ -20,8 +31,8 @@ ImageData OpticalFlow::flow(
 	for (size_t i = 0; i < indices_used.size() - 1; i++){
 		const ImageData& next_img = _image_sequence[indices_used[i + 1]];
 		const ImageData& curr_img = _image_sequence[indices_used[i]];
-		_iteration_imga.set_to(curr_img);
-		_iteration_imgb.set_to(curr_img);
+		iter_a->set_to(curr_img);
+		iter_b->set_to(curr_img);
 
 		if (!_image_to_flow.dimensions_match(next_img) || !_image_to_flow.dimensions_match(curr_img)){
 			// TODO -> allow for resizing the flow target image
@@ -54,11 +65,14 @@ ImageData OpticalFlow::flow(
 			if (iter == iterations_per_image - 1){
 				break;
 			}
-			iter_b->set_to(*iter_a);
-			_apply_velocity_field(_iteration_velocity_field, *iter_b, *iter_a);
+			//iter_b->set_to(*iter_a);
+			_apply_velocity_field(_iteration_velocity_field, *iter_a, *iter_b, flow_delta);
+			std::swap(iter_a, iter_b);
 		}
 		// Now that we are done with iterations, flow the original image
-		_apply_velocity_field_to_flow();
+		//_apply_velocity_field_to_flow();
+		_apply_velocity_field(_velocity_field, *current_image, *next_image, flow_delta);
+		std::swap(current_image, next_image);
 		// blend the current and next for fun
 		//blend_images(*current, *next, 0.5f);
 		// Save the flowed image
@@ -66,10 +80,10 @@ ImageData OpticalFlow::flow(
 		if (!output_dir.empty()){
 			std::string img_n = StringFuncs::get_zero_padded_number_string(indices_used[i], 4);
 			std::string out_filename = output_dir + "/flowed_" + img_n + "." + ext;
-			_image_to_flow.oiio_write_to(out_filename);
+			current_image->oiio_write_to(out_filename);
 		}
 	}
-	return _image_to_flow;
+	return *current_image;
 }
 
 void OpticalFlow::_set_gradient_squared_images() noexcept {
@@ -169,16 +183,11 @@ void OpticalFlow::_compute_velocity_field(
 	}
 }
 
-void OpticalFlow::_apply_velocity_field_to_flow()
-{
-	_image_to_flow_buffer.set_to(_image_to_flow);
-	_apply_velocity_field(_velocity_field, _image_to_flow_buffer, _image_to_flow);
-}
-
 void OpticalFlow::_apply_velocity_field(
 	const ImageData& velocity_field,
 	const ImageData& input_image,
-	ImageData& output_image
+	ImageData& output_image,
+	float flow_delta
 ){
 	const int w = input_image.get_width();
 	const int h = input_image.get_height();
@@ -195,8 +204,8 @@ void OpticalFlow::_apply_velocity_field(
 				//float dx = velocity_field.get_pixel_value(i, j, 0) * neg_factor;
 				//float dy = velocity_field.get_pixel_value(i, j, 1) * neg_factor;
 				// For standard img
-				float dx = velocity_field.get_pixel_value(i, j, c * 2) * neg_factor;
-				float dy = velocity_field.get_pixel_value(i, j, c * 2 + 1) * neg_factor;
+				float dx = velocity_field.get_pixel_value(i, j, c * 2) * neg_factor * flow_delta;
+				float dy = velocity_field.get_pixel_value(i, j, c * 2 + 1) * neg_factor * flow_delta;
 				
 				float sample_x = x + dx;;
 				float sample_y = y + dy;
@@ -215,11 +224,20 @@ void OpticalFlow::_apply_velocity_field(
 void OpticalFlow::set_new_target_image(const ImageData& new_target_image){
 	if (new_target_image.dimensions_match(_image_to_flow)){
 		_image_to_flow.set_to(new_target_image);
+		_image_to_flow_buffer.set_to(new_target_image);
 	} else {
 		_init_data_images(new_target_image);
 	}
-
 }
+
+void OpticalFlow::set_new_image_sequence(std::vector<ImageData>& new_image_sequence){
+	_image_sequence = new_image_sequence;
+	// confirm that dimension match at least the first image
+	if (!_image_to_flow.dimensions_match(_image_sequence[0])){
+		_init_data_images(_image_sequence[0]);
+	}
+}
+
 
 void OpticalFlow::_init_data_images(const ImageData& img_to_flow) noexcept{
 	_image_to_flow = img_to_flow.duplicate();

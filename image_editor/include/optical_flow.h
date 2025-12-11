@@ -8,19 +8,25 @@
 #include "image_data_modifier.h"
 #include "image_data.h"
 
+// A bit of a hack at the moment
+static std::vector<ImageData> empty_image_sequence;
+
 class OpticalFlow {
 
 public:
     OpticalFlow(std::vector<ImageData>& image_sequence, const ImageData& target_image);
-    ~OpticalFlow() = default;
+    OpticalFlow(int w, int h, int channels);
+	~OpticalFlow() = default;
 
 	ImageData flow(
 		const std::vector<size_t>& indices_used,
 		std::string output_dir = "", 
-		int iterations_per_image = 1
+		int iterations_per_image = 1,
+		float flow_delta = 1.0f
 	);
 
 	void set_new_target_image(const ImageData& new_target_image);
+	void set_new_image_sequence(std::vector<ImageData>& new_image_sequence);
 
 private:
 	OpticalFlow() = delete;	
@@ -76,12 +82,11 @@ private:
 		ImageData& velocity_field
 	);
 
-	void _apply_velocity_field_to_flow();
-
 	void _apply_velocity_field(
 		const ImageData& velocity_field,
 		const ImageData& input_image,
-		ImageData& output_image
+		ImageData& output_image,
+		float flow_delta
 	);
 
 };

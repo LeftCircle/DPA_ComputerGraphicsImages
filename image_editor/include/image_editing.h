@@ -40,6 +40,14 @@ public:
 		bool reverse_flow_direction = false
 	);
 
+	void extend_video_duration_to(
+		const std::vector<std::string>& video_frame_sequence,
+		int fps,
+		float target_duration_seconds,
+		std::string output_dir = "",
+		int iterations_per_image = 1
+	);
+
 private:
 
 	std::shared_ptr<ImageData> _starting_image;
