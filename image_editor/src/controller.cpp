@@ -17,6 +17,7 @@ void Controller::keyboard( unsigned char key, int x, int y )
 {
 	Model* model = Model::instance();
 	ImageEditor _image_editor = Model::instance()->image_editor;
+	const std::shared_ptr<ImageData> edited_image = _image_editor.get_edited_image();
 	switch (key)
 	{
 		case 27: // esc
@@ -24,14 +25,14 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			break;
 		case 'a':{
 			std::cout << "Starting ensemble average ..." << std::endl;
-			ImageData avg_img = _image_editor.ensemble_average(*_image_editor.get_edited_image(), 1);
+			ImageData avg_img = ImageDataModifier::ensemble_average(*_image_editor.get_edited_image(), 1);
 			_image_editor.set_edited_image_to(avg_img);
 			std::cout << "Ensemble average done!" << std::endl;
 			break;
 		}
 		case 'b':{
 			std::cout << "Applying bilinear interpolation to each color channel ..." << std::endl;
-			_image_editor.bilinear_interpolate_each_channel();
+			ImageDataModifier::bilinear_interpolate_each_channel(*edited_image);
 			std::cout << "Bilinear interpolation done!" << std::endl;
 			break;
 		}
@@ -53,13 +54,13 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			new_height = std::max(new_height, 8);
 			//std::cout << "New width = " << new_width << std::endl;
 			//_image_editor.downscale(new_width, new_height);
-			_image_editor.downscale(new_width, new_height, false);
+			ImageDataModifier::downscale(*edited_image, new_width, new_height, false);
 			std::cout << "Downscale complete!" << std::endl;
 			break;
 		}
 		case 'f':
 			std::cout << "f key pressed! Should flip" << std::endl;
-			_image_editor.flip();
+			edited_image->flip();
 			break;
 		case 'F':
 			std::cout << "Fractal Flame!" << std::endl;
@@ -68,18 +69,18 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			break;
 		case 'g':
 			std::cout << "gamma of 0.9" << std::endl;
-			_image_editor.gamma_filter(0.9f);
+			ImageDataModifier::gamma_filter(*edited_image, 0.9f);
 			break;
 		case 'G':
 			std::cout << "gamma of 1.1111" << std::endl;
-			_image_editor.gamma_filter(1.0f + 1.0f / 9.0f);
+			ImageDataModifier::gamma_filter(*edited_image, 1.0f + 1.0f / 9.0f);
 			break;
 		case 'h':{
-			_image_editor.histogram_equalize(500, false);
+			ImageDataModifier::histogram_equalize(*edited_image, 500, false);
 			break;
 		}
 		case 'H':{
-			_image_editor.histogram_equalize(500, true);
+			ImageDataModifier::histogram_equalize(*edited_image, 500, true);
 			break;
 		}
 		case 'J': {
@@ -99,7 +100,7 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			// Palette match
 			std::cout << "Starting palette match ..." << std::endl;
 			
-			_image_editor.palette_match(colors);
+			ImageDataModifier::palette_match(*edited_image, colors);
 			std::cout << "Palette match done!" << std::endl;
 			break;
 		}
@@ -145,7 +146,7 @@ void Controller::keyboard( unsigned char key, int x, int y )
 				_image_editor.optical_flow_video(image_file_names, 4, output_dir, 5, true, false);
 				std::cout << "Optical flow video done!" << std::endl;
 			} else if (choice == 'i'){
-				_image_editor.optical_flow(image_file_names, *_image_editor.get_edited_image(), output_dir, 1, true);
+				_image_editor.optical_flow(image_file_names, *_image_editor.get_edited_image(), output_dir, 1);
 				std::cout << "Optical flow done!" << std::endl;
 			} else{
 				std::cout << "Invalid choice, skipping optical flow." << std::endl;
@@ -204,7 +205,7 @@ void Controller::keyboard( unsigned char key, int x, int y )
 			break;
 		}
 		case 'q':{
-			_image_editor.quantize(5);
+			ImageDataModifier::quantize(*edited_image, 5);
 			std::cout << "Quanitze is done!" << std::endl;
 			break;
 		}
@@ -258,10 +259,11 @@ std::pair<int, double> Controller::_get_julia_set_paramters(){
 
 void Controller::_apply_stencil() {
 	ImageEditor _image_editor = Model::instance()->image_editor;
+	std::shared_ptr<ImageData> edited_image = _image_editor.get_edited_image();
 	std::cout << "Applying stencil" << std::endl;
 			
 	Model::instance()->stencil.randomize_values();
 	
-	_image_editor.bounded_linear_convolution(Model::instance()->stencil);
+	ImageDataModifier::bounded_linear_convolution(*edited_image, Model::instance()->stencil);
 	std::cout << "Stencil applied" << std::endl;
 }

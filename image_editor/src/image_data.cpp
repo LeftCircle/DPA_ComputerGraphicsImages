@@ -68,6 +68,19 @@ ImageData& ImageData::operator*=(const ImageData& other) {
 	return *this;
 }
 
+ImageData& ImageData::operator+=(const ImageData& other) {
+	if (!dimensions_match(other)) {
+		throw std::invalid_argument("Image dimensions and channels must match for addition.");
+	}
+
+	int data_len = get_data_len();
+	#pragma omp parallel for
+	for (int i = 0; i < data_len; ++i) {
+		_image_data_ptr[i] += other._image_data_ptr[i];
+	}
+	return *this;
+}
+	
 bool ImageData::dimensions_match(const ImageData& other) const {
 	return (_width == other._width) && (_height == other._height) && (_channels == other._channels);
 }
@@ -137,9 +150,9 @@ void ImageData::set_pixel_values(const std::vector<float>& values) {
 	}
 }
 
-void ImageData::set_pixel_values(const float val){
+void ImageData::set_pixel_values(const float val) noexcept{
 	#pragma omp parallel for
-	for (int i = 0; i < get_data_len(); ++i) {
+	for (int i = 0; i < get_data_len(); i++) {
 		_image_data_ptr[i] = val;
 	}
 }
@@ -474,6 +487,31 @@ std::vector<float> ImageData::interpolate_bilinear(const float x, const float y)
 	return result;
 }
 
+std::vector<float> ImageData::get_average_ensemble(int x, int y, int half_width) const {
+	std::vector<float> avg_vals(_channels, 0.0f);
+    float total = static_cast<float>(2 * half_width + 1) * static_cast<float>(2 * half_width + 1);
+    for (int j = -half_width; j <= half_width; ++j) {
+        for (int i = -half_width; i <= half_width; ++i) {
+            int xi = x + i;
+            int yj = y + j;
+            if (xi < 0 || xi >= _width || yj < 0 || yj >= _height) {
+                continue;
+            }
+            long index = (yj * _width + xi) * _channels;
+            for (int c = 0; c < _channels; ++c) {
+                avg_vals[c] += _image_data_ptr[index + c];
+            }
+        }
+    }
+
+    if (total > 0.0f) {
+        for (int c = 0; c < _channels; ++c) {
+            avg_vals[c] /= total;
+        }
+    }
+    return avg_vals;
+}
+
 float ImageData::interpolate_bilinear(const float x, const float y, const int channel) const {
 	int x0 = static_cast<int>(std::floor(x));
 	int x1 = x0 + 1;
@@ -635,4 +673,34 @@ void ImageData::clear() {
 	_height = 0;
 	_channels = 0;
 	_image_data_ptr.reset();
+}
+
+void ImageData::flip() {
+	int row_size = _width * _channels;
+	
+	std::vector<float> temp_row(row_size);
+
+	for (int y = 0; y < _height / 2; ++y) {
+		float* top_row    = _image_data_ptr.get() + y * row_size;
+		float* bottom_row = _image_data_ptr.get() + (_height - 1 - y) * row_size;
+
+		std::copy(top_row, top_row + row_size, temp_row.data());
+		std::copy(bottom_row, bottom_row + row_size, top_row);
+		std::copy(temp_row.data(), temp_row.data() + row_size, bottom_row);
+	}
+}
+
+void ImageData::gl_draw_pixels() const {
+	if (_channels == 4){
+		glDrawPixels( _width, _height, GL_RGBA, GL_FLOAT, _image_data_ptr.get() );
+	}
+	else if (_channels == 3){
+		glDrawPixels( _width, _height, GL_RGB, GL_FLOAT, _image_data_ptr.get() );
+	}
+	else if (_channels == 1){
+		glDrawPixels( _width, _height, GL_LUMINANCE, GL_FLOAT, _image_data_ptr.get() );
+	} else {
+		// Default to RGB if channels are unexpected
+		glDrawPixels( _width, _height, GL_RGB, GL_FLOAT, _image_data_ptr.get() );
+	}
 }

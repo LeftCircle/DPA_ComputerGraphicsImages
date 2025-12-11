@@ -2,12 +2,12 @@
 #define IMAGE_EDITING_H
 
 #include <vector>
+#include <memory>
+#include <string>
 
-#include <image_data.h>
-#include <stencil.h>
-#include <IFSFunction.h>
-#include <lut.h>
-#include <stats.h>
+#include "image_data.h"
+#include "optical_flow.h"
+#include "image_data_modifier.h"
 
 class ImageEditor {
 public:
@@ -18,39 +18,16 @@ public:
 	const std::shared_ptr<ImageData> get_starting_image() const { return _starting_image; }
 	const std::shared_ptr<ImageData> get_edited_image() const { return _edited_image; }
 
+	void set_edited_image_to(const ImageData& new_image) {_edited_image = std::make_shared<ImageData>(new_image);}
+
 	void save_edited_image();
 	void save_edited_image(const std::string& file_extension);
 
-	// Image editing functions
-	void gamma_filter(float gamma);
-	void bounded_linear_convolution(const Stencil& stencil);
-	void bounded_linear_convolution(const Stencil& stencil, const ImageData& input_image, ImageData& output_image);
-	void wrapping_linear_convolution(const Stencil& stencil);
-	void wrapping_linear_convolution(const Stencil& stencil, const ImageData& input_image, ImageData& output_image);
-	void flip();
-	void clear();
-	
-	void julia_set(const Point& center, const double range, const IFSFunction& fract, const LUT<Color>& color_lut);
-	
-	void set_edited_image_to(const ImageData& other_image)  {*_edited_image = other_image; }
-	void convert_to_contrast_units();
-	void histogram_equalize(const int n_bins = 500, bool ignore_alpha = false);
-	ImageData greyscale(const ImageData& img);
-
-	void downscale(const int new_width, const int new_height, bool ignore_alpha_of_zero = false);
-	void palette_match(const std::vector<float>& colors);
-	void quantize(int levels);
-	ImageData ensemble_average(const ImageData& image, int half_width = 1);
-	void ensemble_average(const ImageData& img, int half_width, ImageData& output_img);
-	ImageData gaussian_average(const ImageData& image, int half_width = 1);
-	void blend_images(ImageData& img_to_blend, const ImageData& other_image, float weight);
-	
 	ImageData optical_flow(
 		const std::vector<std::string>& image_sequence,
 		const ImageData& img_to_flow,
 		std::string output_dir = "", 
-		int iterations_per_image = 1,
-		bool save_images = true
+		int iterations_per_image = 1
 	);
 
 	// Takes in a video, then applies n frames of optical flow to each frame.
@@ -63,64 +40,7 @@ public:
 		bool reverse_flow_direction = false
 	);
 
-	void bilinear_interpolate_each_channel();
-	
-	
 private:
-	using corr_comps = std::tuple<ImageData&, ImageData&, ImageData&>;
-
-	ImageData _optical_flow(
-		const std::vector<ImageData>& image_sequence,
-		std::vector<size_t>& indices_used,
-		const ImageData& img_to_flow,
-		std::string output_dir, 
-		int iterations_per_image,
-		bool save_images,
-		ImageData& flow_imga,
-		ImageData& flow_imgb,
-		ImageData& velocity_field,
-		ImageData& dIx,
-		ImageData& dIy,
-		ImageData& dIx_sq,
-		ImageData& dIy_sq,
-		ImageData& dIx_dIy,
-		ImageData& Qx,
-		ImageData& Qy,
-		ImageData& c00,
-		ImageData& c11,
-		ImageData& c_off_diag,
-		bool negative = false
-	);
-
-	void _build_ensemble_average_in_sequence(
-		const ImageData& next_image,
-		const ImageData& current_image,
-		const ImageData& image_gradient,
-		int ensemble_avg_half_width,
-		ImageData& output_image
-	);
-	void _compute_correlation_matrix_components(
-		const ImageData& dIx_sq,
-		const ImageData& dIy_sq,
-		const ImageData& dIx_dIy,
-		int ensemble_avg_half_width,
-		corr_comps& output_components
-	);
-	void _compute_velocity_field(
-		const ImageData& Qx,
-		const ImageData& Qy,
-		const ImageData& c00,
-		const ImageData& c11,
-		const ImageData& c_off_diag,
-		int w, int h, int channels,
-		ImageData& velocity_field
-	);
-	void _apply_velocity_field(
-		const ImageData& velocity_field,
-		const ImageData& input_image,
-		ImageData& output_image,
-		bool negative = false
-	);
 
 	std::shared_ptr<ImageData> _starting_image;
 	std::shared_ptr<ImageData> _edited_image;

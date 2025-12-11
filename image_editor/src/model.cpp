@@ -52,7 +52,8 @@ void Model::on_down_arrow_pressed() {
 
 
 void Model::convert_to_contrast_units() {
-	image_editor.convert_to_contrast_units();
+	
+	ImageDataModifier::convert_to_contrast_units(*image_editor.get_edited_image());
 }
 
 void Model::fractal_flames() {
@@ -202,5 +203,5 @@ void Model::apply_julia_set(const int iterations, const double range){
 		Color(0.0f, 1298.0f, 227.0f) / 255.0f
 		//Color(1.0f, 98.0f, 115.0f) / 255.0f
 	};
-	image_editor.julia_set(center, range, jul, color_lut);
+	ImageDataModifier::julia_set(*image_editor.get_edited_image(), center, range, jul, color_lut);
 }

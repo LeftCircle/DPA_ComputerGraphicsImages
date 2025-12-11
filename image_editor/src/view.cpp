@@ -44,19 +44,7 @@ void View::display()
 	glLoadIdentity();
 
 	const std::shared_ptr<ImageData> image_data = Model::instance()->get_modified_image_ptr();
-
-	if (image_data->get_channels() == 4){
-		glDrawPixels( image_data->get_width(), image_data->get_height(), GL_RGBA, GL_FLOAT, image_data->get_pixel_ptr() );
-	}
-	else if (image_data->get_channels() == 3){
-		glDrawPixels( image_data->get_width(), image_data->get_height(), GL_RGB, GL_FLOAT, image_data->get_pixel_ptr() );
-	}
-	else if (image_data->get_channels() == 1){
-		glDrawPixels( image_data->get_width(), image_data->get_height(), GL_LUMINANCE, GL_FLOAT, image_data->get_pixel_ptr() );
-	} else {
-		// Default to RGB if channels are unexpected
-		glDrawPixels( image_data->get_width(), image_data->get_height(), GL_RGB, GL_FLOAT, image_data->get_pixel_ptr() );
-	}
+	image_data->gl_draw_pixels();
 
 	glutSwapBuffers();
 	glutPostRedisplay();
