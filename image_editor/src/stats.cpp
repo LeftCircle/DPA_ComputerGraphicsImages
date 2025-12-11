@@ -1,6 +1,6 @@
 #include "stats.h"
 
-
+namespace stats {
 
 template<typename T>
 std::vector<T> average_ensemble2D(const T* data_ptr, int width, int height, int channels, int x, int y, int ensemble_size) {
@@ -73,8 +73,7 @@ std::vector<T> gaussian_ensemble2D(
     }
     return avg_vals;
 }
-
-
 // Template function definition
 template std::vector<float> average_ensemble2D<float>(const float* data_ptr, int width, int height, int channels, int x, int y, int ensemble_size);
 template std::vector<float> gaussian_ensemble2D<float>(const float* data_ptr, int width, int height, int channels, int x, int y, int ensemble_size);
+}
