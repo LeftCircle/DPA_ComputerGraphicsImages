@@ -22,8 +22,8 @@ inline float zero_or_pi() { return (drand48() < 0.5) ? 0.0 : PI; }
 inline float neg_one_or_one() { return (drand48() < 0.5) ? -1.0 : 1.0; }
 // Ψ
 inline float uniform_0_1() { return static_cast<float>(drand48()); }
-inline float trunc(float x) { return (x >= 0.0f) ? std::floor(x) : std::ceil(x); }
-inline float decimal_part(float x) { return x - trunc(x); }
+inline float ifs_trunc(float x) { return (x >= 0.0f) ? std::floor(x) : std::ceil(x); }
+inline float decimal_part(float x) { return x - ifs_trunc(x); }
 
 
 class IFSFunction {

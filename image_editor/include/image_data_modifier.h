@@ -3,11 +3,11 @@
 
 #include <vector>
 
-#include <image_data.h>
-#include <stencil.h>
-#include <IFSFunction.h>
-#include <lut.h>
-#include <stats.h>
+#include "image_data.h"
+#include "stencil.h"
+#include "IFSFunction.h"
+#include "lut.h"
+#include "stats.h"
 
 
 class ImageDataModifier {
@@ -33,7 +33,6 @@ public:
 	static void convert_to_contrast_units(ImageData& image);
 	static void histogram_equalize(ImageData& image, const int n_bins = 500, bool ignore_alpha = false);
 	static ImageData greyscale(const ImageData& img);
-	static void greyscale_this(ImageData& image);
 
 	static void downscale(ImageData& image, const int new_width, const int new_height, bool ignore_alpha_of_zero = false);
 	static void palette_match(ImageData& image, const std::vector<float>& colors);

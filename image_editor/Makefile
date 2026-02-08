@@ -56,3 +56,41 @@ test: tests
 
 clean: 
 	rm -rf $(OBJDIR) $(TARGET) $(TEST_TARGET)
+
+# ==================== SWIG Python Bindings ====================
+# Python configuration - adjust for your Python version
+PYTHON_VERSION = 3.12
+PYTHON_INCLUDE = $(shell python$(PYTHON_VERSION)-config --includes)
+PYTHON_LDFLAGS = $(shell python$(PYTHON_VERSION)-config --ldflags --embed)
+
+SWIG = swig
+SWIG_FLAGS = -c++ -python
+
+SWIG_INTERFACE = image_editor.i
+SWIG_WRAP = image_editor_wrap.cxx
+SWIG_MODULE = _image_editor.so
+
+# Source files for the shared library (exclude main.cpp and tests.cpp)
+LIB_SRC = $(filter-out src/tests.cpp, $(SRC))
+LIB_OBJS = $(patsubst src/%.cpp,$(OBJDIR)/%.o,$(LIB_SRC))
+
+# Generate the SWIG wrapper
+$(SWIG_WRAP): $(SWIG_INTERFACE)
+	$(SWIG) $(SWIG_FLAGS) -I./include $(SWIG_INTERFACE)
+
+# Build the Python module
+$(SWIG_MODULE): $(SWIG_WRAP) $(LIB_OBJS)
+	$(CC) -shared -fPIC $(CFLAGS) $(PYTHON_INCLUDE) \
+		$(SWIG_WRAP) $(LIB_OBJS) \
+		$(LDFLAGS) $(PYTHON_LDFLAGS) \
+		-o $(SWIG_MODULE)
+
+# Target to build Python bindings
+python: $(OBJDIR) $(SWIG_MODULE)
+	@echo "Python module built: $(SWIG_MODULE)"
+	@echo "You can now import image_editor in Python"
+
+clean-python:
+	rm -f $(SWIG_WRAP) image_editor.py $(SWIG_MODULE) *.pyc
+
+clean-all: clean clean-python
