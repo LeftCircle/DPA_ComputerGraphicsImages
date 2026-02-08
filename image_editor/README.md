@@ -1,23 +1,164 @@
-# Applications of Optical Flow
+# Image Editor
 
-Optical Flow is a powerful tool for determining how values within an image sequence change over time. At a very high level a basic implementation of optical flow:
-1. Determines local characterstics of a given frame
-2. Determines the local differences between a given image and the next one in the sequence
-3. Uses these differences to create a velocity field for each pixel and each channel within that pixel
-4. Updates the target image by applying that velocity field to its pixels
+A C++ image processing library with an interactive OpenGL viewer and Python bindings via SWIG. Built on top of [OpenImageIO](https://github.com/AcademySoftwareFoundation/OpenImageIO) for broad format support (EXR, PNG, JPEG, etc.).
 
-One way to improve optical flow calculations is to take an iterative approach in determining the velocity field by determining the velocity, applying it to the targeted image, determining velocity again, and repeating until convergence. This approach was utalized to achieve a few different results. Some of these explorations with optical flow are described below. 
+---
 
-## Sequence Retiming
-Perhaps the most practical application of optical flow is retiming a sequence. Say you have a shot that is a second long, but you need to extend this shot to last for a second and a half. Simply changing the frame rate for the given sequence results in a choppy image. This problem can be solved by using optical flow to determine in between frames, which slows down the shot without causing as many visual stutters. 
-One limitation to this approach is that it does not behave well with fast moving objects. A basic limitation of optical flow is limited to only local changes within an image. 
+## Features
 
-Some results from this can be seen in `OpticalFlowVideos/retiming`. There are currently some subtle artifacts in the retimed video, but this could potentially be solved by using more iterations in the velocity calculation. 
+### Image I/O
+- Read and write images in any format supported by OpenImageIO (EXR, PNG, JPEG, TIFF, etc.)
+- Per-pixel and bulk access to floating-point image data
 
-## Artistic Applications
-Some more artistic applications of optical flow can be found in `OpticalFlowVideos/stylized`. There were a few approaches attempted in generating these sequences. In general, the images were obtained by determining the velocity by either looking at the next n images, or the previous n images. Looking at the next n images tended to result in the character appearing to jerk ahead, while looking at the previous n images tended to result in more of a motion blurred result. Another interesting result was obtained by reversing the direction of the velocity, then using this newly distorted image to recalculate the velocty again. It resulted in the most distorted image, and could potentially result in some interesting shots if cleaned up.
-One thing to note with each of these is how the sequence converges and all artifacts dissapear when there are no longer moving objects in the scene. If this tool were to be used to create a stylized look, some type of subtle motion should likely be added to still shots in order to maintain the stylized look. 
+### Image Processing
+- **Gamma correction**
+- **Convolution** — bounded and wrapping modes with configurable stencils
+- **Histogram equalization**
+- **Greyscale conversion**
+- **Downscaling** with alpha-aware filtering
+- **Palette matching** and **quantization**
+- **Ensemble averaging** (box and Gaussian kernels)
+- **Image blending**
+- **Bilinear interpolation** per channel
+- **Contrast unit conversion**
 
-## Proof of concept
-Finally, there's the proof of concept shots. These can be found in `OpticalFlowVideos/proof_of_concept`. These were tests I used by applying the flow over the entire sequence to the starting image. This showed how increasing the number of iterations allows for much more accurate predictions of the velocity between frames, allowing a single image to be driven to mimic the entire video. 
+### Fractal Generation
+- **Julia sets** with configurable center, range, iteration count, and color LUT
+- **Fractal flames** using an extensible IFS (Iterated Function System) framework with many built-in variations (Sinusoidal, Spherical, and more)
+
+### Optical Flow
+- Compute dense optical flow between image sequences
+- **Sequence retiming** — extend video duration by generating interpolated in-between frames
+- **Stylized video** — artistic applications by manipulating flow direction and iteration count
+- Per-frame and multi-frame iterative velocity field refinement
+
+### Interactive Viewer
+- OpenGL/GLUT-based viewer with keyboard controls
+- MVC architecture (Model / View / Controller singletons)
+- Real-time stencil application, Julia set exploration, and image export from the viewer
+
+### Python Bindings (SWIG)
+- Access `ImageData`, `ImageDataModifier`, `Stencil`, `LUT`, `IFSFunction`, and statistics utilities from Python
+
+---
+
+## Dependencies
+
+| Dependency | Purpose |
+|---|---|
+| **OpenImageIO** | Image I/O (read/write EXR, PNG, JPEG, etc.) |
+| **OpenGL / GLU / GLUT** | Interactive image viewer |
+| **OpenMP** | Parallel pixel processing |
+| **SWIG** | Python binding generation (optional) |
+| **Python 3.12+** | Python bindings (optional) |
+
+---
+
+## Building
+
+### C++ Viewer
+
+```bash
+make            # builds the 'imgviewer' executable
+```
+
+### Python Bindings
+
+```bash
+make python     # generates _image_editor.so and image_editor.py
+```
+
+> **Note:** Update `OPEN_IMG_IO_AND_EXR_INCLUDE_PATH` and `OPEN_IMG_IO_AND_EXR_LIB_PATH` in the Makefile to point to your local OpenImageIO / OpenEXR installations.
+
+### Tests
+
+```bash
+make test       # builds and runs the test suite
+```
+
+### Clean
+
+```bash
+make clean          # remove C++ build artifacts
+make clean-python   # remove SWIG-generated files
+make clean-all      # both
+```
+
+---
+
+## Usage
+
+### C++ Viewer
+
+```bash
+./imgviewer -image <path_to_image>
+```
+
+### Python
+
+```python
+from image_editor import ImageData, ImageDataModifier
+
+# Load an image
+img = ImageData("test_images/walk_colored.exr")
+print(f"{img.get_width()} x {img.get_height()}, {img.get_channels()} channels")
+
+# Apply gamma correction
+ImageDataModifier.gamma_filter(img, 2.2)
+
+# Convert to greyscale
+grey = ImageDataModifier.greyscale(img)
+
+# Scale all pixel values
+img.scale_values(0.5)
+```
+
+---
+
+## Project Structure
+
+```
+image_editor/
+├── main.cpp                  # Entry point for the OpenGL viewer
+├── Makefile                  # Build system (C++, tests, SWIG bindings)
+├── image_editor.i            # SWIG interface definition
+├── include/
+│   ├── image_data.h          # Core image container (read/write, pixel access, math ops)
+│   ├── image_data_modifier.h # Static image processing functions
+│   ├── image_editing.h       # High-level editor (optical flow, video retiming)
+│   ├── optical_flow.h        # Dense optical flow computation
+│   ├── stencil.h             # Convolution kernel
+│   ├── lut.h                 # Generic look-up table with lerp
+│   ├── IFSFunction.h         # IFS / fractal flame function hierarchy
+│   ├── stats.h               # Ensemble statistics (average, Gaussian)
+│   ├── color.h               # Color type for LUT
+│   ├── point.h               # 2D point type
+│   ├── file_utils.h          # Directory listing and filename parsing
+│   ├── string_funcs.h        # String utilities
+│   ├── model.h               # MVC Model singleton
+│   ├── view.h                # MVC View singleton (OpenGL/GLUT)
+│   ├── controller.h          # MVC Controller singleton (keyboard input)
+│   ├── command_line_parser.h # CLI flag parser
+│   └── tests.h               # Test declarations
+├── src/                      # Corresponding .cpp implementations
+├── test_images/              # Sample images for testing
+└── example_usage.py          # Python binding demo
+```
+
+---
+
+## Optical Flow — Background
+
+Optical flow estimates per-pixel motion between consecutive frames. This implementation:
+
+1. Computes spatial gradients ($\frac{\partial I}{\partial x}$, $\frac{\partial I}{\partial y}$) of the current frame
+2. Computes temporal differences between consecutive frames
+3. Builds a correlation matrix from ensemble-averaged gradient products
+4. Solves for a per-pixel, per-channel velocity field
+5. Warps the target image using bilinear interpolation of the velocity field
+
+An **iterative refinement** loop re-estimates the velocity after each warp, converging to smoother results. Applications include:
+
+- **Retiming** — extending a video's duration by synthesizing intermediate frames
+- **Stylization** — reversing or exaggerating flow to produce artistic motion effects
 
