@@ -32,6 +32,7 @@ int main(int argc, char** argv)
 	img.oiio_read(file_name.c_str());
 	
 	view->init(argc, argv, img.get_width(), img.get_height());
+	view->display();
 
 	view->main_loop();
 	return 0;

@@ -1,9 +1,12 @@
 CC = g++
 CFLAGS = -Wall -g -O2 -fPIC -fopenmp -Wextra -std=c++17 \
 -Iinclude \
+-I$(HOME)/local/include \
 -isystem /home/leftcircle/programming/include/ 
 
-LDFLAGS = -lOpenImageIO -lOpenImageIO_Util -lGL -lGLU -lglut
+
+LDFLAGS  := -L$(HOME)/local/lib64 -Wl,-rpath,$(HOME)/local/lib64
+LDLIBS = -lOpenImageIO -lOpenImageIO_Util -lGL -lGLU -lglut
 
 
 SRC = $(wildcard src/*.cpp)
@@ -19,7 +22,7 @@ $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 $(OBJDIR)/%.o: src/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@

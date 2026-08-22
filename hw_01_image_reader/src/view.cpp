@@ -6,6 +6,8 @@ View* View::pView = nullptr;
 View::View() {
 	width = 0;
 	height = 0;
+	img_width = 0;
+	img_height = 0;
 }
 
 
@@ -17,6 +19,8 @@ void View::init( int argc, char** argv, int _width, int _height)
 {
 	width = _width;
 	height = _height;
+	img_width = _width;
+	img_height = _height;
 
 	glutInit( &argc, argv );
 	glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH );
@@ -39,16 +43,16 @@ void View::display()
 	glLoadIdentity();
 
 	if (_image_proc->get_channels() == 4){
-		glDrawPixels( width, height, GL_RGBA, GL_FLOAT, _image_proc->get_pixel_ptr() );
+		glDrawPixels( img_width, img_height, GL_RGBA, GL_FLOAT, _image_proc->get_pixel_ptr() );
 	}
 	else if (_image_proc->get_channels() == 3){
-		glDrawPixels( width, height, GL_RGB, GL_FLOAT, _image_proc->get_pixel_ptr() );
+		glDrawPixels( img_width, img_height, GL_RGB, GL_FLOAT, _image_proc->get_pixel_ptr() );
 	}
 	else if (_image_proc->get_channels() == 1){
-		glDrawPixels( width, height, GL_LUMINANCE, GL_FLOAT, _image_proc->get_pixel_ptr() );
+		glDrawPixels( img_width, img_height, GL_LUMINANCE, GL_FLOAT, _image_proc->get_pixel_ptr() );
 	} else {
 		// Default to RGB if channels are unexpected
-		glDrawPixels( width, height, GL_RGB, GL_FLOAT, _image_proc->get_pixel_ptr() );
+		glDrawPixels( img_width, img_height, GL_RGB, GL_FLOAT, _image_proc->get_pixel_ptr() );
 	}
 
 	glutSwapBuffers();

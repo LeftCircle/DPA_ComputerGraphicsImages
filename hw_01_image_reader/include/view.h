@@ -38,6 +38,7 @@ private:
     
     //float* pixels;
     int width, height;
+    int img_width, img_height;
 };
 
 View* create_view();
